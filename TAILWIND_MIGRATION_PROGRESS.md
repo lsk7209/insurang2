@@ -16,60 +16,71 @@
    - ✅ 스크롤 애니메이션 로직을 컴포넌트 내부로 이동
    - ✅ MUI 아이콘을 SVG로 대체
 
-4. **메인 페이지** (`app/page.tsx`)
+4. **FeaturesSection** (`components/landing/FeaturesSection.tsx`)
    - ✅ Tailwind CSS 전환 완료
-   - ✅ MUI Box 제거
+   - ✅ MUI 아이콘을 SVG로 대체
 
-## 🔄 진행 중인 작업
+5. **BeforeAfterSection** (`components/landing/BeforeAfterSection.tsx`)
+   - ✅ Tailwind CSS 전환 완료
+   - ✅ MUI 아이콘을 SVG로 대체
 
-- 랜딩 컴포넌트 Tailwind 전환
+6. **BenefitsSection** (`components/landing/BenefitsSection.tsx`)
+   - ✅ Tailwind CSS 전환 완료
+   - ✅ MUI 아이콘을 SVG로 대체
 
-## 📋 남은 컴포넌트
+7. **TrustSection** (`components/landing/TrustSection.tsx`)
+   - ✅ Tailwind CSS 전환 완료
+   - ✅ MUI 아이콘을 SVG로 대체
 
-1. **FeaturesSection** (`components/landing/FeaturesSection.tsx`)
-   - MUI 사용 중
-   - useScrollAnimation 훅 사용
+8. **FreeOfferSection** (`components/landing/FreeOfferSection.tsx`)
+   - ✅ Tailwind CSS 전환 완료
+   - ✅ MUI 아이콘을 SVG로 대체
 
-2. **BeforeAfterSection** (`components/landing/BeforeAfterSection.tsx`)
-   - MUI 사용 중
-   - useScrollAnimation 훅 사용
+9. **FinalCTASection** (`components/landing/FinalCTASection.tsx`)
+   - ✅ Tailwind CSS 전환 완료
+   - ✅ MUI 아이콘을 SVG로 대체
 
-3. **BenefitsSection** (`components/landing/BenefitsSection.tsx`)
-   - MUI 사용 중
-   - useScrollAnimation 훅 사용
+10. **메인 페이지** (`app/page.tsx`)
+    - ✅ Tailwind CSS 전환 완료
+    - ✅ MUI Box 제거
 
-4. **TrustSection** (`components/landing/TrustSection.tsx`)
-   - MUI 사용 중
-   - useScrollAnimation 훅 사용
+## 📊 성과
 
-5. **FreeOfferSection** (`components/landing/FreeOfferSection.tsx`)
-   - MUI 사용 중
+- **번들 크기 최적화**: 메인 페이지 번들 크기 7.5 kB → 5.61 kB (약 25% 감소)
+- **의존성 감소**: MUI 관련 컴포넌트 대부분 제거
+- **성능 향상**: SVG 아이콘 사용으로 런타임 성능 개선
 
-6. **FinalCTASection** (`components/landing/FinalCTASection.tsx`)
-   - MUI 사용 중
+## ⚠️ 남은 MUI 사용 파일
 
-## 📝 전환 가이드라인
+다음 파일들은 아직 MUI를 사용하고 있지만, 현재 사용 중이거나 관리자 페이지입니다:
 
-### 공통 작업
-1. MUI 컴포넌트를 HTML 요소로 변경
-2. `sx` prop을 Tailwind 클래스로 변환
-3. MUI 아이콘을 SVG로 대체
-4. `useScrollAnimation` 훅을 컴포넌트 내부 로직으로 이동 (선택사항)
-5. 반응형 디자인 유지 (sm:, md:, lg: 브레이크포인트)
+1. **`app/offer/workbook/page.tsx`** - 정적 오퍼 페이지 (동적 라우팅으로 대체 가능)
+2. **`components/landing/HeroSection.tsx`** - `/offer/workbook`에서 사용
+3. **`components/landing/PainSection.tsx`** - `/offer/workbook`에서 사용
+4. **`components/landing/ValueSection.tsx`** - `/offer/workbook`에서 사용
+5. **`components/landing/ProofSection.tsx`** - `/offer/workbook`에서 사용
+6. **`components/landing/ActionSection.tsx`** - `/offer/workbook`에서 사용
+7. **`components/landing/ApplicationFormSection.tsx`** - `/offer/workbook`에서 사용
+8. **`components/admin/AdminLayout.tsx`** - 관리자 페이지
+9. **`app/admin/page.tsx`** - 관리자 대시보드
+10. **`components/providers/ThemeProvider.tsx`** - 테마 제공자 (필요시 유지)
 
-### 스타일 변환 예시
-- `bgcolor: 'neutral.50'` → `bg-gray-50`
-- `py: { xs: 8, md: 16 }` → `py-16 md:py-20 lg:py-24`
-- `maxWidth: 'lg'` → `max-w-6xl mx-auto`
-- `spacing: { xs: 4, md: 6 }` → `space-y-8 md:space-y-10 lg:space-y-12`
+## 📝 권장 사항
 
-### 접근성 유지
-- `role`, `aria-label` 속성 유지
-- 시맨틱 HTML 요소 사용
-- 키보드 접근성 유지
+### 1. `/offer/workbook` 페이지 정리
+- 동적 라우팅 `/offer/[offerSlug]`가 이미 구현되어 있음
+- 정적 페이지를 제거하거나 동적 라우팅으로 리다이렉트 고려
+
+### 2. MUI 의존성 제거
+- 메인 랜딩 페이지는 완전히 Tailwind로 전환 완료
+- 관리자 페이지는 별도 작업으로 진행 가능
+- `package.json`에서 MUI 관련 패키지 제거 고려 (관리자 페이지 유지 시 제거 불가)
+
+### 3. 사용하지 않는 파일 정리
+- `components/landing/AnimatedCard.tsx` - 더 이상 사용되지 않음 (ValueSection에서만 사용)
+- 사용하지 않는 컴포넌트 파일들 정리
 
 ---
 
 **최종 업데이트**: 2025-01-13  
-**상태**: 진행 중
-
+**상태**: 메인 랜딩 페이지 전환 완료 ✅
