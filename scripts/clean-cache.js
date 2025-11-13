@@ -8,66 +8,107 @@ const path = require('path');
 
 const nextDir = path.join(process.cwd(), '.next');
 const cacheDir = path.join(nextDir, 'cache');
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MiB
 
-// .next/cache 디렉토리 삭제
+console.log('🧹 Starting cache cleanup...');
+
+// .next/cache 디렉토리 완전 삭제
 if (fs.existsSync(cacheDir)) {
-  console.log('Cleaning .next/cache directory...');
+  console.log('  Removing .next/cache directory...');
   try {
     fs.rmSync(cacheDir, { recursive: true, force: true });
-    console.log('✓ Cache directory cleaned successfully');
+    console.log('  ✓ Cache directory removed');
   } catch (error) {
-    console.error('Error cleaning cache directory:', error);
-    process.exit(1);
+    console.error('  ✗ Error removing cache directory:', error.message);
+    // 계속 진행 (다른 방법 시도)
   }
 } else {
-  console.log('Cache directory does not exist, skipping...');
+  console.log('  ✓ Cache directory does not exist');
 }
 
-// .next/cache/webpack 디렉토리도 확인 및 삭제
-const webpackCacheDir = path.join(cacheDir, 'webpack');
-if (fs.existsSync(webpackCacheDir)) {
-  console.log('Cleaning .next/cache/webpack directory...');
+// .next 디렉토리 내의 모든 cache 관련 파일/디렉토리 검색 및 삭제
+function removeCacheFiles(dir, basePath = '') {
+  if (!fs.existsSync(dir)) return;
+  
   try {
-    fs.rmSync(webpackCacheDir, { recursive: true, force: true });
-    console.log('✓ Webpack cache directory cleaned successfully');
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relativePath = path.join(basePath, entry.name);
+      
+      // cache 관련 이름이면 삭제
+      if (entry.name.includes('cache') || entry.name.includes('.pack')) {
+        try {
+          if (entry.isDirectory()) {
+            fs.rmSync(fullPath, { recursive: true, force: true });
+            console.log(`  ✓ Removed cache directory: ${relativePath}`);
+          } else {
+            fs.unlinkSync(fullPath);
+            console.log(`  ✓ Removed cache file: ${relativePath}`);
+          }
+        } catch (error) {
+          console.warn(`  ⚠ Could not remove: ${relativePath} - ${error.message}`);
+        }
+      } else if (entry.isDirectory() && entry.name !== 'cache') {
+        // 재귀적으로 검사 (cache 디렉토리는 이미 처리)
+        removeCacheFiles(fullPath, relativePath);
+      }
+    }
   } catch (error) {
-    console.error('Error cleaning webpack cache directory:', error);
+    // 디렉토리 읽기 실패는 무시
   }
+}
+
+// .next 디렉토리 전체에서 cache 파일 검색 및 삭제
+if (fs.existsSync(nextDir)) {
+  console.log('  Scanning for cache files...');
+  removeCacheFiles(nextDir, '.next');
 }
 
 // 큰 파일 검사 및 제거
-if (fs.existsSync(nextDir)) {
-  console.log('Checking for large files in .next directory...');
-  const checkAndRemoveLargeFiles = (dir, maxSize = 25 * 1024 * 1024) => {
-    // 25 MiB = 25 * 1024 * 1024 bytes
-    try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          // cache 디렉토리는 이미 삭제했으므로 스킵
-          if (entry.name !== 'cache') {
-            checkAndRemoveLargeFiles(fullPath, maxSize);
-          }
-        } else {
+function removeLargeFiles(dir, basePath = '') {
+  if (!fs.existsSync(dir)) return;
+  
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relativePath = path.join(basePath, entry.name);
+      
+      if (entry.isDirectory()) {
+        // cache 디렉토리는 이미 처리했으므로 스킵
+        if (entry.name !== 'cache') {
+          removeLargeFiles(fullPath, relativePath);
+        }
+      } else {
+        try {
           const stats = fs.statSync(fullPath);
-          if (stats.size > maxSize) {
-            console.warn(`⚠ Large file found: ${fullPath} (${(stats.size / 1024 / 1024).toFixed(2)} MiB)`);
+          if (stats.size > MAX_FILE_SIZE) {
+            const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
+            console.warn(`  ⚠ Large file found: ${relativePath} (${sizeMB} MiB)`);
+            
             // cache 관련 파일이면 삭제
             if (fullPath.includes('cache') || fullPath.includes('.pack')) {
-              console.log(`Removing large cache file: ${fullPath}`);
               fs.unlinkSync(fullPath);
+              console.log(`  ✓ Removed large cache file: ${relativePath}`);
             }
           }
+        } catch (error) {
+          // 파일 접근 실패는 무시
         }
       }
-    } catch (error) {
-      // 디렉토리 읽기 실패는 무시 (이미 삭제된 경우 등)
     }
-  };
-  
-  checkAndRemoveLargeFiles(nextDir);
+  } catch (error) {
+    // 디렉토리 읽기 실패는 무시
+  }
 }
 
-console.log('✓ Build cleanup completed');
+if (fs.existsSync(nextDir)) {
+  console.log('  Checking for oversized files...');
+  removeLargeFiles(nextDir, '.next');
+}
+
+console.log('✅ Cache cleanup completed\n');
 

@@ -68,7 +68,7 @@ function checkFileSizes(dir, basePath = '') {
 
 // 검사 실행
 if (fs.existsSync(nextDir)) {
-  console.log('Checking .next directory for file size compliance...');
+  console.log('🔍 Checking .next directory for file size compliance...');
   const issues = checkFileSizes(nextDir, '.next');
   
   const errors = issues.filter(i => i.type === 'error');
@@ -86,13 +86,15 @@ if (fs.existsSync(nextDir)) {
     errors.forEach(e => {
       console.error(`  - ${e.path}: ${e.message}`);
     });
-    console.error('\nBuild validation failed. Please fix the issues above.');
+    console.error('\n❌ Build validation failed. Please fix the issues above.');
+    console.error('💡 Tip: Ensure cache files are removed before deployment.');
     process.exit(1);
   } else {
-    console.log('✓ All files are within size limits');
+    console.log('✅ All files are within size limits');
+    console.log(`   Total files checked: ${issues.length}`);
   }
 } else {
-  console.log('⚠ .next directory not found. Build may have failed.');
+  console.error('❌ .next directory not found. Build may have failed.');
   process.exit(1);
 }
 

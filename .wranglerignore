@@ -1,0 +1,19 @@
+# Cloudflare Pages 배포 시 제외할 파일/디렉토리
+# wrangler.toml의 pages_build_output_dir에 지정된 디렉토리 내의 파일을 제외합니다.
+
+# 캐시 디렉토리 완전 제외
+.next/cache/
+.next/cache/**
+**/cache/
+**/cache/**
+
+# 큰 파일 제외
+**/*.pack
+**/*.cache
+**/.cache/
+
+# 개발 파일 제외
+**/*.map
+**/*.log
+**/.DS_Store
+
