@@ -7,6 +7,15 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Footer from '@/components/layout/Footer';
 
 /**
+ * 정적 생성용 파라미터 생성
+ * Cloudflare Pages 정적 빌드를 위해 필수
+ */
+export function generateStaticParams() {
+  // 기본 오퍼 슬러그 반환
+  return [{ offerSlug: 'workbook' }];
+}
+
+/**
  * Thank You Page
  * 신청 완료 감사 페이지
  * @example /offer/workbook/thanks
