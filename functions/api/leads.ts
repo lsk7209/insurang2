@@ -109,7 +109,7 @@ export async function onRequestPost(context: {
     } catch (dbError: any) {
       console.error('Database error:', {
         error: dbError.message,
-        offerSlug,
+        offer_slug: offer_slug,
         email: email.substring(0, 5) + '***', // 개인정보 마스킹
       });
       return new Response(
