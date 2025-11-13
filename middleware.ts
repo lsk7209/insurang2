@@ -27,8 +27,16 @@ export function middleware(request: NextRequest) {
     const [username, password] = credentials.split(':');
 
     // 환경 변수에서 인증 정보 확인
-    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminUsername = process.env.ADMIN_USERNAME;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    // 프로덕션 환경에서는 환경 변수 필수
+    if (!adminUsername || !adminPassword) {
+      console.error('ADMIN_USERNAME and ADMIN_PASSWORD must be set');
+      return new NextResponse('Server configuration error', {
+        status: 500,
+      });
+    }
 
     if (username !== adminUsername || password !== adminPassword) {
       return new NextResponse('Invalid credentials', {

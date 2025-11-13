@@ -93,7 +93,7 @@ export default memo(function ThankYouPage() {
                 variant="outlined"
                 color="primary"
                 size="large"
-                href="https://pf.kakao.com/_example" // TODO: 실제 카카오 채널 링크로 변경
+                href={process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{

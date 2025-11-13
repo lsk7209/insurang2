@@ -40,6 +40,21 @@ export async function onRequestPost(context: {
       );
     }
 
+    // 입력 길이 검증
+    if (name.length > 100) {
+      return new Response(
+        JSON.stringify({ success: false, error: '이름은 100자 이하여야 합니다.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (email.length > 255) {
+      return new Response(
+        JSON.stringify({ success: false, error: '이메일은 255자 이하여야 합니다.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // 이메일 형식 검증
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return new Response(
@@ -74,21 +89,34 @@ export async function onRequestPost(context: {
     }
 
     // 리드 저장
-    const leadResult = await context.env.DB.prepare(
-      'INSERT INTO leads (offer_slug, name, email, phone, organization, consent_privacy, consent_marketing) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    )
-      .bind(
-        offer_slug,
-        name,
-        email,
-        phoneNumbers,
-        organization || null,
-        consent_privacy ? 1 : 0,
-        consent_marketing ? 1 : 0
+    let leadId: number;
+    try {
+      const leadResult = await context.env.DB.prepare(
+        'INSERT INTO leads (offer_slug, name, email, phone, organization, consent_privacy, consent_marketing) VALUES (?, ?, ?, ?, ?, ?, ?)'
       )
-      .run();
+        .bind(
+          offer_slug,
+          name,
+          email,
+          phoneNumbers,
+          organization || null,
+          consent_privacy ? 1 : 0,
+          consent_marketing ? 1 : 0
+        )
+        .run();
 
-    const leadId = leadResult.meta.last_row_id;
+      leadId = leadResult.meta.last_row_id;
+    } catch (dbError: any) {
+      console.error('Database error:', {
+        error: dbError.message,
+        offerSlug,
+        email: email.substring(0, 5) + '***', // 개인정보 마스킹
+      });
+      return new Response(
+        JSON.stringify({ success: false, error: '데이터베이스 오류가 발생했습니다.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     // 이메일 발송 (비동기, 실패해도 계속)
     sendEmailAsync(context.env, email, name, offer.download_link || 'https://example.com/workbook.pdf', leadId, context.env.DB).catch(
@@ -96,9 +124,19 @@ export async function onRequestPost(context: {
     );
 
     // SMS 발송 (비동기, 실패해도 계속)
-    sendSMSAsync(context.env, phoneNumbers, offer.download_link, leadId, context.env.DB).catch(
-      (err) => console.error('SMS send error:', err)
-    );
+    // 환경 변수 확인 후 발송
+    if (env.SOLAPI_API_KEY && env.SOLAPI_API_SECRET && env.SOLAPI_SENDER_PHONE) {
+      sendSMSAsync(context.env, phoneNumbers, offer.download_link, leadId, context.env.DB).catch(
+        (err) => console.error('SMS send error:', err)
+      );
+    } else {
+      console.warn('Solapi API configuration missing. SMS will not be sent.');
+      // SMS 발송 실패 로그 기록
+      context.env.DB.prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
+        .bind(leadId, 'sms', 'failed', 'Solapi API configuration missing')
+        .run()
+        .catch((err) => console.error('Failed to log SMS error:', err));
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -190,8 +228,23 @@ async function sendEmailAsync(
   }
 }
 
+// HTML 이스케이프 함수 (XSS 방지)
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
 // 이메일 템플릿 생성
 function generateEmailTemplate(name: string, downloadLink: string): string {
+  const escapedName = escapeHtml(name);
+  const escapedLink = escapeHtml(downloadLink);
+  
   return `
 <!DOCTYPE html>
 <html>
@@ -201,14 +254,14 @@ function generateEmailTemplate(name: string, downloadLink: string): string {
 </head>
 <body style="font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; color: #1A202C; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="background-color: #F7FAFC; padding: 30px; border-radius: 8px;">
-    <h1 style="color: #002C5F; margin-top: 0;">안녕하세요, ${name}님.</h1>
+    <h1 style="color: #002C5F; margin-top: 0;">안녕하세요, ${escapedName}님.</h1>
     
     <p>AI 상담 워크북 신청이 완료되었습니다.</p>
     
     <p>자료는 아래 링크에서 확인하실 수 있습니다:</p>
     
     <div style="margin: 30px 0; text-align: center;">
-      <a href="${downloadLink}" 
+      <a href="${escapedLink}" 
          style="display: inline-block; background-color: #FF9F4A; color: #FFFFFF; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600;">
         워크북 다운로드
       </a>
