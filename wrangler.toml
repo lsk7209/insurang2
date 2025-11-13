@@ -1,7 +1,8 @@
 # Cloudflare Workers/Pages 설정
 name = "insurang-landing"
 compatibility_date = "2024-01-01"
-pages_build_output_dir = ".next"
+# Next.js output: 'export' 사용 시 빌드 출력 디렉토리는 'out'
+pages_build_output_dir = "out"
 
 # D1 데이터베이스 바인딩
 [[d1_databases]]
