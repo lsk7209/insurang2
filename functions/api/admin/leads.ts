@@ -51,61 +51,121 @@ export async function onRequestGet(context: {
 }
 
 // Helper functions
+interface LeadRow {
+  id: number;
+  offer_slug: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization: string | null;
+  consent_privacy: number;
+  consent_marketing: number;
+  created_at: string;
+  email_status: string | null;
+  sms_status: string | null;
+}
+
 async function getLeadsWithLogs(
   db: D1Database,
   limit: number,
   offset: number
-): Promise<Array<any>> {
-  const leads = await db
-    .prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT ? OFFSET ?')
-    .bind(limit, offset)
-    .all();
+): Promise<Array<{
+  id: number;
+  offer_slug: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization: string | null;
+  consent_privacy: boolean;
+  consent_marketing: boolean;
+  created_at: string;
+  email_status: string;
+  sms_status: string;
+}>> {
+  // N+1 쿼리 문제 해결: JOIN을 사용하여 한 번의 쿼리로 해결
+  // SQLite는 LEFT JOIN LATERAL을 지원하지 않으므로 서브쿼리 사용
+  const query = `
+    SELECT 
+      l.*,
+      (SELECT status FROM message_logs 
+       WHERE lead_id = l.id AND channel = 'email' 
+       ORDER BY sent_at DESC LIMIT 1) as email_status,
+      (SELECT status FROM message_logs 
+       WHERE lead_id = l.id AND channel = 'sms' 
+       ORDER BY sent_at DESC LIMIT 1) as sms_status
+    FROM leads l
+    ORDER BY l.created_at DESC
+    LIMIT ? OFFSET ?
+  `;
 
-  if (!leads.results) {
+  const result = await db
+    .prepare(query)
+    .bind(limit, offset)
+    .all<LeadRow>();
+
+  if (!result.results) {
     return [];
   }
 
-  const leadsWithLogs = await Promise.all(
-    leads.results.map(async (lead: any) => {
-      const emailLog = await db
-        .prepare('SELECT status FROM message_logs WHERE lead_id = ? AND channel = ? ORDER BY sent_at DESC LIMIT 1')
-        .bind(lead.id, 'email')
-        .first<{ status: string }>();
-
-      const smsLog = await db
-        .prepare('SELECT status FROM message_logs WHERE lead_id = ? AND channel = ? ORDER BY sent_at DESC LIMIT 1')
-        .bind(lead.id, 'sms')
-        .first<{ status: string }>();
-
-      return {
-        ...lead,
-        // D1에서 INTEGER로 저장된 boolean 값을 변환
-        consent_privacy: Boolean(lead.consent_privacy),
-        consent_marketing: Boolean(lead.consent_marketing),
-        email_status: emailLog?.status || 'pending',
-        sms_status: smsLog?.status || 'pending',
-      };
-    })
-  );
-
-  return leadsWithLogs;
+  return result.results.map((lead) => ({
+    id: lead.id,
+    offer_slug: lead.offer_slug,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    organization: lead.organization,
+    consent_privacy: Boolean(lead.consent_privacy),
+    consent_marketing: Boolean(lead.consent_marketing),
+    created_at: lead.created_at,
+    email_status: lead.email_status || 'pending',
+    sms_status: lead.sms_status || 'pending',
+  }));
 }
 
-async function getLeadById(db: D1Database, leadId: number): Promise<any | null> {
+interface LeadDetailRow {
+  id: number;
+  offer_slug: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization: string | null;
+  consent_privacy: number;
+  consent_marketing: number;
+  created_at: string;
+}
+
+interface MessageLogRow {
+  id: number;
+  lead_id: number;
+  channel: string;
+  status: string;
+  error_message: string | null;
+  sent_at: string;
+}
+
+async function getLeadById(db: D1Database, leadId: number): Promise<{
+  id: number;
+  offer_slug: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization: string | null;
+  consent_privacy: boolean;
+  consent_marketing: boolean;
+  created_at: string;
+  logs: Array<{
+    id: number;
+    lead_id: number;
+    channel: string;
+    status: string;
+    error_message: string | null;
+    sent_at: string;
+  }>;
+} | null> {
   const lead = await db
     .prepare('SELECT * FROM leads WHERE id = ?')
     .bind(leadId)
-    .first<{
-      id: number;
-      offer_slug: string;
-      name: string;
-      email: string;
-      phone: string;
-      organization: string | null;
-      consent_privacy: number;
-      consent_marketing: number;
-      created_at: string;
-    }>();
+    .first<LeadDetailRow>();
 
   if (!lead) {
     return null;
@@ -114,20 +174,18 @@ async function getLeadById(db: D1Database, leadId: number): Promise<any | null> 
   const logs = await db
     .prepare('SELECT * FROM message_logs WHERE lead_id = ? ORDER BY sent_at DESC')
     .bind(leadId)
-    .all<{
-      id: number;
-      lead_id: number;
-      channel: string;
-      status: string;
-      error_message: string | null;
-      sent_at: string;
-    }>();
+    .all<MessageLogRow>();
 
   return {
-    ...lead,
-    // D1에서 INTEGER로 저장된 boolean 값을 변환
+    id: lead.id,
+    offer_slug: lead.offer_slug,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    organization: lead.organization,
     consent_privacy: Boolean(lead.consent_privacy),
     consent_marketing: Boolean(lead.consent_marketing),
+    created_at: lead.created_at,
     logs: logs.results || [],
   };
 }

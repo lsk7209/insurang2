@@ -33,8 +33,10 @@ export async function onRequestPost(context: {
     }
 
     if (username === adminUsername && password === adminPassword) {
-      // 인증 성공 - 토큰 생성 (간단한 예시, 실제로는 더 안전한 방법 사용)
-      const token = Buffer.from(`${username}:${password}`).toString('base64');
+      // 인증 성공 - 토큰 생성 (Cloudflare Workers 호환)
+      // Base64 인코딩은 btoa 사용 (Cloudflare Workers에서 지원)
+      const credentials = `${username}:${password}`;
+      const token = btoa(credentials);
       
       return new Response(
         JSON.stringify({ success: true, token }),

@@ -19,7 +19,7 @@ import { useScrollAnimation } from '@/hooks/use-scroll-animation';
  * @example <ApplicationFormSection onSubmit={() => console.log('submitted')} />
  */
 interface Props {
-  onSubmit?: (data: FormData) => void;
+  onSubmit?: (data: FormData) => Promise<void> | void;
 }
 
 interface FormData {
@@ -122,21 +122,26 @@ export default memo(function ApplicationFormSection({ onSubmit }: Props) {
 
       try {
         if (onSubmit) {
-          onSubmit(formData);
+          await onSubmit(formData);
+          // onSubmit이 성공적으로 완료되면 페이지 이동이 일어나므로
+          // 여기서는 아무것도 하지 않음 (페이지 이동으로 컴포넌트가 언마운트됨)
+        } else {
+          // onSubmit이 없으면 기본 성공 처리
+          setSubmitSuccess(true);
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            consent_privacy: false,
+            consent_marketing: false,
+          });
+          setIsSubmitting(false);
         }
-
-        setSubmitSuccess(true);
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          consent_privacy: false,
-          consent_marketing: false,
-        });
       } catch (error) {
         console.error('Form submission error:', error);
-      } finally {
+        // 에러 발생 시 폼 상태 유지
         setIsSubmitting(false);
+        // 에러는 onSubmit에서 이미 alert로 표시했으므로 여기서는 상태만 리셋
       }
     },
     [formData, validateForm, onSubmit]

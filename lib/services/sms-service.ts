@@ -1,9 +1,7 @@
-import axios from 'axios';
-import crypto from 'crypto';
-
 /**
  * SMS Service
  * 솔라피 API를 통한 SMS 발송 서비스
+ * Cloudflare Workers 호환 버전 (Web Crypto API 사용)
  */
 
 interface SendSMSParams {
@@ -13,19 +11,36 @@ interface SendSMSParams {
 }
 
 /**
- * Generate Solapi API signature
+ * Generate Solapi API signature using Web Crypto API (Cloudflare Workers 호환)
  */
-function generateSignature(apiKey: string, apiSecret: string): {
+async function generateSignature(apiSecret: string): Promise<{
   date: string;
   salt: string;
   signature: string;
-} {
+}> {
   const date = new Date().toISOString();
-  const salt = crypto.randomBytes(32).toString('hex');
-  const signature = crypto
-    .createHmac('sha256', apiSecret)
-    .update(date + salt)
-    .digest('hex');
+  // Cloudflare Workers에서 crypto.randomUUID() 사용
+  const salt = crypto.randomUUID().replace(/-/g, '');
+  
+  // Web Crypto API를 사용한 HMAC-SHA256
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(apiSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  const signatureBuffer = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    encoder.encode(date + salt)
+  );
+  
+  const signature = Array.from(new Uint8Array(signatureBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 
   return { date, salt, signature };
 }
@@ -44,41 +59,61 @@ function generateMessage(shortLink?: string): string {
 }
 
 /**
- * Send SMS via Solapi API
+ * Send SMS via Solapi API (Cloudflare Workers 호환)
+ * @param params SMS 발송 파라미터
+ * @param env 환경 변수 객체 (Cloudflare Workers env)
  */
-export async function sendSMS(params: SendSMSParams): Promise<{ success: boolean; error?: string }> {
+export async function sendSMS(
+  params: SendSMSParams,
+  env: {
+    SOLAPI_API_KEY?: string;
+    SOLAPI_API_SECRET?: string;
+    SOLAPI_SENDER_PHONE?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const apiKey = process.env.SOLAPI_API_KEY;
-    const apiSecret = process.env.SOLAPI_API_SECRET;
-    const senderPhone = process.env.SOLAPI_SENDER_PHONE;
+    const apiKey = env.SOLAPI_API_KEY;
+    const apiSecret = env.SOLAPI_API_SECRET;
+    const senderPhone = env.SOLAPI_SENDER_PHONE;
 
     if (!apiKey || !apiSecret || !senderPhone) {
       throw new Error('Solapi configuration is missing');
     }
 
-    const { date, salt, signature } = generateSignature(apiKey, apiSecret);
+    const { date, salt, signature } = await generateSignature(apiSecret);
     const message = generateMessage(params.shortLink);
 
     // 솔라피 API 엔드포인트
     const url = 'https://api.solapi.com/messages/v4/send';
 
     const requestBody = {
-      message: {
-        to: params.to,
-        from: senderPhone,
-        text: message,
-      },
+      messages: [
+        {
+          to: params.to,
+          from: senderPhone,
+          text: message,
+        },
+      ],
     };
 
-    const response = await axios.post(url, requestBody, {
+    // Cloudflare Workers에서 fetch API 사용 (axios 대신)
+    const response = await fetch(url, {
+      method: 'POST',
       headers: {
         Authorization: `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${signature}`,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify(requestBody),
     });
 
-    if (response.data && response.data.messageId) {
-      console.log('SMS sent:', response.data.messageId);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`SMS API error: ${errorText}`);
+    }
+
+    const result = await response.json();
+    if (result.messageId) {
+      console.log('SMS sent:', result.messageId);
       return { success: true };
     }
 

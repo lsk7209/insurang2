@@ -54,18 +54,22 @@ export default function WorkbookOfferPage() {
 
         if (result.success) {
           // 감사 페이지로 이동
+          // 약간의 지연을 두어 사용자에게 성공 피드백 제공
+          await new Promise((resolve) => setTimeout(resolve, 500));
           router.push(`/offer/workbook/thanks`);
         } else {
           // 에러 메시지 표시
           const errorMessage = result.error || '신청 처리 중 오류가 발생했습니다.';
           alert(errorMessage);
           setIsSubmitting(false);
+          throw new Error(errorMessage); // ApplicationFormSection에서 에러 처리하도록
         }
       } catch (error) {
         console.error('Form submission error:', error);
         const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
         alert(`신청 처리 중 오류가 발생했습니다: ${errorMessage}\n\n잠시 후 다시 시도해주세요.`);
         setIsSubmitting(false);
+        throw error; // ApplicationFormSection에서 에러 상태를 유지하도록
       }
     },
     [offerSlug, router]

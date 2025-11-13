@@ -5,6 +5,7 @@
  */
 
 import type { D1Database } from '@/types/cloudflare';
+import { generateEmailTemplate } from '@/lib/utils/email-template';
 
 interface Env {
   DB: D1Database;
@@ -73,20 +74,23 @@ export async function onRequestPost(context: {
     }
 
     // 오퍼 확인
+    interface Offer {
+      slug: string;
+      name: string;
+      download_link: string | null;
+    }
+
     const offerResult = await context.env.DB.prepare(
-      'SELECT * FROM offers WHERE slug = ? AND status = ?'
+      'SELECT slug, name, download_link FROM offers WHERE slug = ? AND status = ?'
     )
       .bind(offer_slug, 'active')
-      .first();
+      .first<Offer>();
 
-    let offer = offerResult as any;
-    if (!offer) {
-      offer = {
-        slug: offer_slug,
-        name: 'AI 상담 워크북',
-        download_link: 'https://example.com/workbook.pdf',
-      };
-    }
+    const offer: Offer = offerResult || {
+      slug: offer_slug,
+      name: 'AI 상담 워크북',
+      download_link: 'https://example.com/workbook.pdf',
+    };
 
     // 리드 저장
     let leadId: number;
@@ -96,19 +100,24 @@ export async function onRequestPost(context: {
       )
         .bind(
           offer_slug,
-          name,
-          email,
+          name.trim(),
+          email.trim().toLowerCase(),
           phoneNumbers,
-          organization || null,
+          organization?.trim() || null,
           consent_privacy ? 1 : 0,
           consent_marketing ? 1 : 0
         )
         .run();
 
+      if (!leadResult.meta.last_row_id) {
+        throw new Error('Failed to insert lead');
+      }
+
       leadId = leadResult.meta.last_row_id;
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
+      const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown database error';
       console.error('Database error:', {
-        error: dbError.message,
+        error: errorMessage,
         offer_slug: offer_slug,
         email: email.substring(0, 5) + '***', // 개인정보 마스킹
       });
@@ -126,7 +135,7 @@ export async function onRequestPost(context: {
     // SMS 발송 (비동기, 실패해도 계속)
     // 환경 변수 확인 후 발송
     if (context.env.SOLAPI_API_KEY && context.env.SOLAPI_API_SECRET && context.env.SOLAPI_SENDER_PHONE) {
-      sendSMSAsync(context.env, phoneNumbers, offer.download_link, leadId, context.env.DB).catch(
+      sendSMSAsync(context.env, phoneNumbers, offer.download_link || undefined, leadId, context.env.DB).catch(
         (err) => console.error('SMS send error:', err)
       );
     } else {
@@ -142,8 +151,9 @@ export async function onRequestPost(context: {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
-    console.error('Lead creation error:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Lead creation error:', errorMessage);
     return new Response(
       JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -219,66 +229,17 @@ async function sendEmailAsync(
       .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
       .bind(leadId, 'email', success ? 'success' : 'failed', errorMessage)
       .run();
-  } catch (error: any) {
-    console.error('Email send error:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Email send error:', errorMessage);
     await db
       .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-      .bind(leadId, 'email', 'failed', error?.message || 'Unknown error')
-      .run();
+      .bind(leadId, 'email', 'failed', errorMessage)
+      .run()
+      .catch((logError) => console.error('Failed to log email error:', logError));
   }
 }
 
-// HTML 이스케이프 함수 (XSS 방지)
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
-}
-
-// 이메일 템플릿 생성
-function generateEmailTemplate(name: string, downloadLink: string): string {
-  const escapedName = escapeHtml(name);
-  const escapedLink = escapeHtml(downloadLink);
-  
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; color: #1A202C; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background-color: #F7FAFC; padding: 30px; border-radius: 8px;">
-    <h1 style="color: #002C5F; margin-top: 0;">안녕하세요, ${escapedName}님.</h1>
-    
-    <p>AI 상담 워크북 신청이 완료되었습니다.</p>
-    
-    <p>자료는 아래 링크에서 확인하실 수 있습니다:</p>
-    
-    <div style="margin: 30px 0; text-align: center;">
-      <a href="${escapedLink}" 
-         style="display: inline-block; background-color: #FF9F4A; color: #FFFFFF; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600;">
-        워크북 다운로드
-      </a>
-    </div>
-    
-    <p>문의가 필요하시면 회신 주세요.</p>
-    
-    <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 30px 0;">
-    
-    <p style="font-size: 12px; color: #718096;">
-      ※ 본 내용은 AI가 생성한 예시를 포함하며, 실제 약관·상품 내용은 반드시 확인 바랍니다.
-    </p>
-  </div>
-</body>
-</html>
-  `.trim();
-}
 
 // SMS 발송
 async function sendSMSAsync(
@@ -322,11 +283,13 @@ async function sendSMSAsync(
       .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
       .bind(leadId, 'sms', success ? 'success' : 'failed', success ? null : JSON.stringify(result))
       .run();
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     await db
       .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-      .bind(leadId, 'sms', 'failed', error?.message || 'Unknown error')
-      .run();
+      .bind(leadId, 'sms', 'failed', errorMessage)
+      .run()
+      .catch((logError) => console.error('Failed to log SMS error:', logError));
   }
 }
 
