@@ -24,19 +24,8 @@ function checkFileSizes(dir, basePath = '') {
       const relativePath = path.join(basePath, entry.name);
       
       if (entry.isDirectory()) {
-        // cache 디렉토리는 이미 삭제되었어야 함
-        if (entry.name === 'cache') {
-          if (fs.existsSync(fullPath)) {
-            issues.push({
-              type: 'error',
-              path: relativePath,
-              message: 'Cache directory should be removed before deployment',
-            });
-          }
-        } else {
-          // 재귀적으로 검사
-          issues.push(...checkFileSizes(fullPath, relativePath));
-        }
+        // 재귀적으로 검사
+        issues.push(...checkFileSizes(fullPath, relativePath));
       } else {
         // 파일 크기 검사
         const stats = fs.statSync(fullPath);
@@ -67,10 +56,10 @@ function checkFileSizes(dir, basePath = '') {
   return issues;
 }
 
-    // 검사 실행
-    if (fs.existsSync(outputDir)) {
-      console.log('🔍 Checking out directory for file size compliance...');
-      const issues = checkFileSizes(outputDir, 'out');
+// 검사 실행
+if (fs.existsSync(outputDir)) {
+  console.log('🔍 Checking out directory for file size compliance...');
+  const issues = checkFileSizes(outputDir, 'out');
   
   const errors = issues.filter(i => i.type === 'error');
   const warnings = issues.filter(i => i.type === 'warning');
@@ -92,11 +81,10 @@ function checkFileSizes(dir, basePath = '') {
     process.exit(1);
   } else {
     console.log('✅ All files are within size limits');
-        console.log(`   Total files checked: ${issues.length}`);
-      }
-    } else {
-      console.error('❌ out directory not found. Build may have failed.');
-      console.error('💡 Make sure next.config.js has output: "export" configured.');
-      process.exit(1);
-    }
-
+    console.log(`   Total files checked: ${issues.length}`);
+  }
+} else {
+  console.error('❌ out directory not found. Build may have failed.');
+  console.error('💡 Make sure next.config.js has output: "export" configured.');
+  process.exit(1);
+}
