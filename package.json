@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/clean-cache.js && node scripts/post-build.js",
+    "prebuild": "node scripts/pre-build.js",
+    "build": "next build",
+    "postbuild": "node scripts/clean-cache.js && node scripts/post-build.js",
     "build:local": "next build",
     "start": "next start",
     "lint": "next lint",

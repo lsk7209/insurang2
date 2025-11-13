@@ -23,12 +23,21 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
-  // Webpack 캐시 비활성화 (Cloudflare Pages 25 MiB 제한 준수)
+  // Webpack 캐시 완전 비활성화 (Cloudflare Pages 25 MiB 제한 준수)
   webpack: (config, { isServer, dev }) => {
-    // 프로덕션 빌드에서 캐시 비활성화
-    if (!dev && process.env.NODE_ENV === 'production') {
-      config.cache = false;
+    // 모든 빌드에서 캐시 비활성화
+    config.cache = false;
+    
+    // 추가 최적화: 불필요한 파일 생성 방지
+    if (!dev) {
+      // 프로덕션 빌드에서만 추가 최적화
+      config.optimization = {
+        ...config.optimization,
+        // 소스맵 생성 비활성화 (선택사항)
+        // minimize: true,
+      };
     }
+    
     return config;
   },
 }
