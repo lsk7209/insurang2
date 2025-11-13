@@ -92,7 +92,20 @@ async function getLeadsWithLogs(
 }
 
 async function getLeadById(db: D1Database, leadId: number): Promise<any | null> {
-  const lead = await db.prepare('SELECT * FROM leads WHERE id = ?').bind(leadId).first();
+  const lead = await db
+    .prepare('SELECT * FROM leads WHERE id = ?')
+    .bind(leadId)
+    .first<{
+      id: number;
+      offer_slug: string;
+      name: string;
+      email: string;
+      phone: string;
+      organization: string | null;
+      consent_privacy: number;
+      consent_marketing: number;
+      created_at: string;
+    }>();
 
   if (!lead) {
     return null;
@@ -101,7 +114,14 @@ async function getLeadById(db: D1Database, leadId: number): Promise<any | null> 
   const logs = await db
     .prepare('SELECT * FROM message_logs WHERE lead_id = ? ORDER BY sent_at DESC')
     .bind(leadId)
-    .all();
+    .all<{
+      id: number;
+      lead_id: number;
+      channel: string;
+      status: string;
+      error_message: string | null;
+      sent_at: string;
+    }>();
 
   return {
     ...lead,
