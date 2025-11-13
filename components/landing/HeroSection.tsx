@@ -127,8 +127,8 @@ export default memo(function HeroSection({ onCtaClick }: Props) {
                 color="primary"
                 size="large"
                 onClick={onCtaClick}
-                fullWidth={{ xs: true, md: false }}
                 sx={{
+                  width: { xs: '100%', md: 'auto' },
                   px: { xs: 4, md: 6 },
                   py: { xs: 2.5, md: 2 },
                   fontSize: { xs: '1rem', md: '1.125rem' },
