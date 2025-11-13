@@ -134,7 +134,7 @@ export default memo(function ValueSection() {
           >
             AI가 만든 초안에 당신의 경험을 더하세요.
             <br />
-            그게 'AI 영업 자동화'의 시작입니다.
+            그게 &apos;AI 영업 자동화&apos;의 시작입니다.
           </Typography>
         </Stack>
       </Container>

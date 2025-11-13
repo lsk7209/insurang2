@@ -49,7 +49,7 @@ export default memo(function ProofSection() {
                     lineHeight: { xs: 2.1, md: 2 },
                   }}
                 >
-                  "{testimonial}"
+                  &quot;{testimonial}&quot;
                 </Typography>
               </Stack>
             </CardContent>

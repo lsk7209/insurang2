@@ -44,7 +44,7 @@ export default memo(function HeroSection({ onCtaClick }: Props) {
               >
                 상담 준비, 하루가 아닌{' '}
                 <Box component="span" sx={{ color: 'warning.main' }}>
-                  '1분'
+                  &apos;1분&apos;
                 </Box>
                 이면 충분합니다.
               </Typography>
@@ -63,7 +63,7 @@ export default memo(function HeroSection({ onCtaClick }: Props) {
               >
                 AI가 상담문안·약관요약·DM 초안을 대신 만듭니다.
                 <br />
-                이제 당신은 '고객과의 대화'에만 집중하세요.
+                이제 당신은 &apos;고객과의 대화&apos;에만 집중하세요.
               </Typography>
 
               {/* 보조포인트 */}
