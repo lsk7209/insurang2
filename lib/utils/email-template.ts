@@ -19,6 +19,9 @@ export function escapeHtml(text: string): string {
 
 /**
  * 이메일 템플릿 생성
+ * 요구사항에 맞는 템플릿:
+ * - 제목: "[AI 상담 워크북] 신청해 주셔서 감사합니다."
+ * - 본문: 요구사항 템플릿에 맞게 구성
  * @param name 사용자 이름
  * @param downloadLink 다운로드 링크
  * @returns HTML 이메일 템플릿
@@ -40,16 +43,14 @@ export function generateEmailTemplate(name: string, downloadLink: string): strin
     
     <p>AI 상담 워크북 신청이 완료되었습니다.</p>
     
-    <p>자료는 아래 링크에서 확인하실 수 있습니다:</p>
+    <p>아래 링크에서 자료를 확인하실 수 있습니다:</p>
     
     <div style="margin: 30px 0; text-align: center;">
       <a href="${escapedLink}" 
          style="display: inline-block; background-color: #FF9F4A; color: #FFFFFF; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600;">
-        워크북 다운로드
+        ${escapedLink}
       </a>
     </div>
-    
-    <p>문의가 필요하시면 회신 주세요.</p>
     
     <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 30px 0;">
     

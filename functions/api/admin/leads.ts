@@ -7,12 +7,44 @@ import type { D1Database } from '@/types/cloudflare';
 
 interface Env {
   DB: D1Database;
+  ADMIN_USERNAME?: string;
+  ADMIN_PASSWORD?: string;
+}
+
+function checkBasicAuth(request: Request, env: Env): boolean {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Basic ')) {
+    return false;
+  }
+
+  const base64Credentials = authHeader.substring(6);
+  const credentials = atob(base64Credentials);
+  const [username, password] = credentials.split(':');
+
+  const adminUsername = env.ADMIN_USERNAME || 'admin';
+  const adminPassword = env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    return false;
+  }
+
+  return username === adminUsername && password === adminPassword;
 }
 
 export async function onRequestGet(context: {
   request: Request;
   env: Env;
 }): Promise<Response> {
+  // Basic Auth 확인
+  if (!checkBasicAuth(context.request, context.env)) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: {
+        'WWW-Authenticate': 'Basic realm="Admin Area"',
+      },
+    });
+  }
+
   try {
     const url = new URL(context.request.url);
     const limit = parseInt(url.searchParams.get('limit') || '100');

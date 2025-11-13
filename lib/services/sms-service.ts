@@ -47,10 +47,12 @@ async function generateSignature(apiSecret: string): Promise<{
 
 /**
  * Generate SMS message template
+ * 요구사항: "[인슈랑] 신청 완료되었습니다. 자료 안내는 이메일로 발송되었습니다. 확인 부탁드립니다."
  */
 function generateMessage(shortLink?: string): string {
-  const baseMessage = '[인슈랑] 신청 완료되었습니다. 안내 메일을 확인해 주세요.';
+  const baseMessage = '[인슈랑] 신청 완료되었습니다. 자료 안내는 이메일로 발송되었습니다. 확인 부탁드립니다.';
   
+  // shortLink가 있으면 추가 (선택사항)
   if (shortLink) {
     return `${baseMessage} 자료: ${shortLink}`;
   }

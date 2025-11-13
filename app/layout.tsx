@@ -1,4 +1,3 @@
-import ThemeProvider from '@/components/providers/ThemeProvider';
 import type { Metadata } from 'next';
 import './globals.css';
 
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 
 /**
  * Root Layout
- * 전역 테마 및 스타일 설정
+ * Tailwind CSS 기반
  */
 export default function RootLayout({
   children,
@@ -18,8 +17,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
+      <body className="font-sans antialiased">
+        {children}
       </body>
     </html>
   );

@@ -6,6 +6,7 @@
 
 import type { D1Database } from '@/types/cloudflare';
 import { generateEmailTemplate } from '@/lib/utils/email-template';
+import { checkRateLimit, getClientIdentifier } from '@/lib/utils/rate-limit';
 
 interface Env {
   DB: D1Database;
@@ -22,6 +23,29 @@ export async function onRequestPost(context: {
   env: Env;
 }): Promise<Response> {
   try {
+    // Rate Limiting 체크 (MVP: 간단한 IP 기반)
+    const clientId = getClientIdentifier(context.request);
+    const rateLimit = await checkRateLimit(context.env.DB, clientId, {
+      maxRequests: 10, // 10 requests
+      windowMs: 60 * 1000, // per minute
+    });
+
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': '60',
+          },
+        }
+      );
+    }
+
     const body = await context.request.json();
     const {
       offer_slug,
