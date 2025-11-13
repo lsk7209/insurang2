@@ -58,10 +58,12 @@ export default memo(function WhyNeededSection() {
               color: 'text.primary',
               textAlign: 'center',
               fontWeight: 700,
-              lineHeight: { xs: 1.5, md: 1.4 },
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-              maxWidth: { xs: '100%', md: '900px' },
+              lineHeight: { xs: 1.6, md: 1.5 },
+              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
+              maxWidth: { xs: '100%', md: '1000px' },
               px: { xs: 1, md: 0 },
+              mb: { xs: 2, md: 3 },
+              letterSpacing: '-0.01em',
             }}
           >
             보험영업, 더 이상 혼자서 모든 걸 할 필요는 없습니다
@@ -73,12 +75,18 @@ export default memo(function WhyNeededSection() {
               <Grid item xs={12} sm={6} key={index}>
                 <Box
                   sx={{
-                    p: { xs: 2.5, md: 3 },
+                    p: { xs: 3, md: 3.5 },
                     bgcolor: 'neutral.50',
-                    borderRadius: 2,
+                    borderRadius: 3,
                     height: '100%',
                     border: '1px solid',
                     borderColor: 'divider',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      boxShadow: 3,
+                      borderColor: 'primary.light',
+                      transform: 'translateY(-2px)',
+                    },
                   }}
                 >
                   <Stack direction="row" spacing={2} alignItems="flex-start">
@@ -88,6 +96,10 @@ export default memo(function WhyNeededSection() {
                         display: 'flex',
                         alignItems: 'center',
                         flexShrink: 0,
+                        fontSize: { xs: '2rem', md: '2.5rem' },
+                        '& svg': {
+                          fontSize: { xs: '2rem', md: '2.5rem' },
+                        },
                       }}
                     >
                       {point.icon}
@@ -95,8 +107,8 @@ export default memo(function WhyNeededSection() {
                     <Typography
                       variant="body1"
                       sx={{
-                        fontSize: { xs: '0.9375rem', md: '1.0625rem' },
-                        lineHeight: { xs: 1.7, md: 1.6 },
+                        fontSize: { xs: '1rem', md: '1.125rem' },
+                        lineHeight: { xs: 1.8, md: 1.7 },
                         color: 'text.primary',
                         fontWeight: 500,
                       }}
@@ -132,8 +144,8 @@ export default memo(function WhyNeededSection() {
                 variant="h6"
                 sx={{
                   color: 'background.default',
-                  fontSize: { xs: '1rem', md: '1.25rem' },
-                  lineHeight: { xs: 1.7, md: 1.6 },
+                  fontSize: { xs: '1.125rem', md: '1.375rem' },
+                  lineHeight: { xs: 1.8, md: 1.7 },
                   fontWeight: 600,
                 }}
               >

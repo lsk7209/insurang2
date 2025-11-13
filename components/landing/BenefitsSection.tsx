@@ -62,10 +62,12 @@ export default memo(function BenefitsSection() {
               color: 'text.primary',
               textAlign: 'center',
               fontWeight: 700,
-              lineHeight: { xs: 1.5, md: 1.4 },
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-              maxWidth: { xs: '100%', md: '900px' },
+              lineHeight: { xs: 1.6, md: 1.5 },
+              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
+              maxWidth: { xs: '100%', md: '1000px' },
               px: { xs: 1, md: 0 },
+              mb: { xs: 2, md: 3 },
+              letterSpacing: '-0.01em',
             }}
           >
             AI가 가져오는 실질적 변화
@@ -91,13 +93,18 @@ export default memo(function BenefitsSection() {
                       },
                     }}
                   >
-                    <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                      <Stack spacing={2} alignItems="center" textAlign="center">
+                    <CardContent sx={{ p: { xs: 3.5, md: 4.5 } }}>
+                      <Stack spacing={2.5} alignItems="center" textAlign="center">
                         <Box
                           sx={{
                             color: `${benefit.color}.main`,
                             display: 'flex',
                             alignItems: 'center',
+                            mb: 0.5,
+                            fontSize: { xs: '2.5rem', md: '3rem' },
+                            '& svg': {
+                              fontSize: { xs: '2.5rem', md: '3rem' },
+                            },
                           }}
                         >
                           {benefit.icon}
@@ -107,9 +114,9 @@ export default memo(function BenefitsSection() {
                           component="h3"
                           sx={{
                             fontWeight: 600,
-                            fontSize: { xs: '1rem', md: '1.125rem' },
+                            fontSize: { xs: '1.0625rem', md: '1.1875rem' },
                             color: 'text.primary',
-                            lineHeight: { xs: 1.6, md: 1.5 },
+                            lineHeight: { xs: 1.7, md: 1.6 },
                           }}
                         >
                           {benefit.title}

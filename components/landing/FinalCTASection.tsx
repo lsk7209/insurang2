@@ -39,9 +39,11 @@ export default memo(function FinalCTASection({ onCtaClick }: Props) {
             sx={{
               color: 'text.primary',
               fontWeight: 700,
-              lineHeight: { xs: 1.5, md: 1.4 },
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-              maxWidth: { xs: '100%', md: '900px' },
+              lineHeight: { xs: 1.6, md: 1.5 },
+              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
+              maxWidth: { xs: '100%', md: '1000px' },
+              mb: { xs: 2, md: 3 },
+              letterSpacing: '-0.01em',
             }}
           >
             이제 AI로 영업 효율을 높이세요
@@ -52,9 +54,10 @@ export default memo(function FinalCTASection({ onCtaClick }: Props) {
             variant="body1"
             sx={{
               color: 'text.secondary',
-              fontSize: { xs: '1rem', md: '1.125rem' },
-              lineHeight: { xs: 1.8, md: 1.7 },
-              maxWidth: { xs: '100%', md: '700px' },
+              fontSize: { xs: '1.125rem', md: '1.25rem' },
+              lineHeight: { xs: 1.9, md: 1.8 },
+              maxWidth: { xs: '100%', md: '800px' },
+              mb: { xs: 2, md: 3 },
             }}
           >
             설계사의 시간은 고객에게 쓰여야 합니다.

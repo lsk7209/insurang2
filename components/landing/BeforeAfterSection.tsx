@@ -56,10 +56,12 @@ export default memo(function BeforeAfterSection() {
               color: 'text.primary',
               textAlign: 'center',
               fontWeight: 700,
-              lineHeight: { xs: 1.5, md: 1.4 },
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-              maxWidth: { xs: '100%', md: '900px' },
+              lineHeight: { xs: 1.6, md: 1.5 },
+              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
+              maxWidth: { xs: '100%', md: '1000px' },
               px: { xs: 1, md: 0 },
+              mb: { xs: 2, md: 3 },
+              letterSpacing: '-0.01em',
             }}
           >
             현장에서 바로 체감하는 변화
@@ -90,6 +92,11 @@ export default memo(function BeforeAfterSection() {
                           color: 'primary.main',
                           display: 'flex',
                           alignItems: 'center',
+                          fontSize: { xs: '2.5rem', md: '3rem' },
+                          mb: 1,
+                          '& svg': {
+                            fontSize: { xs: '2.5rem', md: '3rem' },
+                          },
                         }}
                       >
                         {example.icon}
@@ -122,7 +129,8 @@ export default memo(function BeforeAfterSection() {
                           sx={{
                             color: 'error.dark',
                             fontWeight: 600,
-                            fontSize: { xs: '0.9375rem', md: '1rem' },
+                            fontSize: { xs: '1rem', md: '1.0625rem' },
+                            lineHeight: { xs: 1.7, md: 1.6 },
                           }}
                         >
                           {example.before}
@@ -166,7 +174,8 @@ export default memo(function BeforeAfterSection() {
                           sx={{
                             color: 'success.dark',
                             fontWeight: 600,
-                            fontSize: { xs: '0.9375rem', md: '1rem' },
+                            fontSize: { xs: '1rem', md: '1.0625rem' },
+                            lineHeight: { xs: 1.7, md: 1.6 },
                           }}
                         >
                           {example.after}

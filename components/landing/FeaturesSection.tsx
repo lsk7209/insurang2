@@ -62,10 +62,12 @@ export default memo(function FeaturesSection() {
               color: 'text.primary',
               textAlign: 'center',
               fontWeight: 700,
-              lineHeight: { xs: 1.5, md: 1.4 },
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-              maxWidth: { xs: '100%', md: '900px' },
+              lineHeight: { xs: 1.6, md: 1.5 },
+              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
+              maxWidth: { xs: '100%', md: '1000px' },
               px: { xs: 1, md: 0 },
+              mb: { xs: 2, md: 3 },
+              letterSpacing: '-0.01em',
             }}
           >
             설계사의 시간을 돌려주는 실무 중심 기능
@@ -91,13 +93,18 @@ export default memo(function FeaturesSection() {
                       },
                     }}
                   >
-                    <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                      <Stack spacing={{ xs: 2, md: 2.5 }} alignItems="flex-start">
+                    <CardContent sx={{ p: { xs: 3.5, md: 4.5 } }}>
+                      <Stack spacing={{ xs: 2.5, md: 3 }} alignItems="flex-start">
                         <Box
                           sx={{
                             color: 'primary.main',
                             display: 'flex',
                             alignItems: 'center',
+                            mb: 0.5,
+                            fontSize: { xs: '2.5rem', md: '3rem' },
+                            '& svg': {
+                              fontSize: { xs: '2.5rem', md: '3rem' },
+                            },
                           }}
                         >
                           {feature.icon}
@@ -107,8 +114,10 @@ export default memo(function FeaturesSection() {
                           component="h3"
                           sx={{
                             fontWeight: 700,
-                            fontSize: { xs: '1.125rem', md: '1.25rem' },
+                            fontSize: { xs: '1.1875rem', md: '1.3125rem' },
                             color: 'text.primary',
+                            lineHeight: { xs: 1.6, md: 1.5 },
+                            mb: 0.5,
                           }}
                         >
                           {feature.title}
@@ -116,8 +125,8 @@ export default memo(function FeaturesSection() {
                         <Typography
                           variant="body1"
                           sx={{
-                            fontSize: { xs: '0.9375rem', md: '1rem' },
-                            lineHeight: { xs: 1.7, md: 1.6 },
+                            fontSize: { xs: '1rem', md: '1.0625rem' },
+                            lineHeight: { xs: 1.8, md: 1.7 },
                             color: 'text.secondary',
                           }}
                         >

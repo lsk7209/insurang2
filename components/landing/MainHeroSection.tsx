@@ -35,14 +35,16 @@ export default memo(function MainHeroSection({ onCtaClick }: Props) {
             sx={{
               color: 'text.primary',
               fontWeight: 700,
-              lineHeight: { xs: 1.4, md: 1.3 },
-              fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' },
-              maxWidth: { xs: '100%', md: '900px' },
+              lineHeight: { xs: 1.5, md: 1.4 },
+              fontSize: { xs: '2.25rem', sm: '2.75rem', md: '3.75rem' },
+              maxWidth: { xs: '100%', md: '1000px' },
               px: { xs: 1, md: 0 },
+              mb: { xs: 3, md: 4 },
+              letterSpacing: '-0.02em',
             }}
           >
             당신의 영업 시간을{' '}
-            <Box component="span" sx={{ color: 'warning.main' }}>
+            <Box component="span" sx={{ color: 'warning.main', display: 'inline-block' }}>
               절반으로 줄이는
             </Box>
             <br />
@@ -54,16 +56,17 @@ export default memo(function MainHeroSection({ onCtaClick }: Props) {
             variant="h5"
             component="p"
             sx={{
-              color: 'text.secondary',
-              fontWeight: 400,
-              lineHeight: { xs: 1.9, md: 1.8 },
-              fontSize: { xs: '1rem', sm: '1.125rem', md: '1.375rem' },
-              maxWidth: { xs: '100%', md: '800px' },
+              color: 'text.primary',
+              fontWeight: 500,
+              lineHeight: { xs: 2, md: 1.9 },
+              fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.5rem' },
+              maxWidth: { xs: '100%', md: '900px' },
               px: { xs: 1, md: 0 },
+              mb: { xs: 2, md: 3 },
             }}
           >
             상담 준비, DM 작성, 제안서 초안을{' '}
-            <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>
+            <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>
               3분 안에 완성
             </Box>
             하는 새로운 업무 방식
@@ -74,10 +77,11 @@ export default memo(function MainHeroSection({ onCtaClick }: Props) {
             variant="body1"
             sx={{
               color: 'text.secondary',
-              fontSize: { xs: '0.9375rem', md: '1.125rem' },
-              maxWidth: { xs: '100%', md: '700px' },
-              lineHeight: { xs: 1.8, md: 1.7 },
+              fontSize: { xs: '1rem', md: '1.25rem' },
+              maxWidth: { xs: '100%', md: '800px' },
+              lineHeight: { xs: 1.9, md: 1.8 },
               px: { xs: 1, md: 0 },
+              mb: { xs: 3, md: 4 },
             }}
           >
             복잡한 입력 없이, 현장에서 바로 쓰는 보험설계사 전용 ChatGPT 자동화 도구.
