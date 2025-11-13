@@ -5,6 +5,17 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { validateEmail, validatePhone, normalizePhone } from '@/lib/utils/validation';
 
+interface OfferData {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  status: string;
+  download_link: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Offer Landing Page
  * 동적 라우팅: /offer/[offerSlug]
@@ -14,6 +25,8 @@ export default function OfferLandingPage() {
   const router = useRouter();
   const params = useParams();
   const offerSlug = params?.offerSlug as string;
+  const [offerData, setOfferData] = useState<OfferData | null>(null);
+  const [isLoadingOffer, setIsLoadingOffer] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -130,6 +143,36 @@ export default function OfferLandingPage() {
     }
   };
 
+  // 오퍼 데이터 로드
+  useEffect(() => {
+    const fetchOffer = async () => {
+      try {
+        setIsLoadingOffer(true);
+        const response = await fetch(`/api/offers?slug=${encodeURIComponent(offerSlug)}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          setOfferData(result.data);
+        } else {
+          // 오퍼를 찾을 수 없으면 기본값 사용
+          console.warn('Offer not found, using default values');
+        }
+      } catch (error) {
+        console.error('Failed to fetch offer:', error);
+        // 에러 발생 시 기본값 사용
+      } finally {
+        setIsLoadingOffer(false);
+      }
+    };
+
+    if (offerSlug) {
+      fetchOffer();
+    }
+
+    // 페이지 로드 시 스크롤 위치 초기화
+    window.scrollTo(0, 0);
+  }, [offerSlug]);
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Loading Overlay */}
@@ -145,20 +188,26 @@ export default function OfferLandingPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-gray-50 to-white py-16 md:py-24 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            당신의 영업 시간을{' '}
-            <span className="text-warning">절반으로 줄이는</span>
-            <br />
-            AI 보조설계 플랫폼
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
-            상담 준비, DM 작성, 제안서 초안을{' '}
-            <span className="text-primary font-semibold">3분 안에 완성</span>
-            하는 새로운 업무 방식
-          </p>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            복잡한 입력 없이, 현장에서 바로 쓰는 보험설계사 전용 ChatGPT 자동화 도구.
-          </p>
+          {isLoadingOffer ? (
+            <div className="py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" aria-label="로딩 중"></div>
+              <p className="text-gray-600" aria-live="polite">로딩 중...</p>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                {offerData?.name || 'AI 상담 워크북'}
+              </h1>
+              {offerData?.description && (
+                <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
+                  {offerData.description}
+                </p>
+              )}
+              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                복잡한 입력 없이, 현장에서 바로 쓰는 보험설계사 전용 ChatGPT 자동화 도구.
+              </p>
+            </>
+          )}
           <button
             onClick={handleCtaClick}
             aria-label="신청 폼으로 이동"
