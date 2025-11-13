@@ -62,36 +62,36 @@ export const customTheme = createTheme({
       'sans-serif',
     ].join(','),
     h1: {
-      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+      fontSize: '3rem',
       fontWeight: 700,
-      lineHeight: { xs: 1.3, md: 1.2 },
+      lineHeight: 1.2,
       letterSpacing: '-0.02em',
     },
     h2: {
-      fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
+      fontSize: '2.5rem',
       fontWeight: 700,
-      lineHeight: { xs: 1.4, md: 1.3 },
+      lineHeight: 1.3,
       letterSpacing: '-0.01em',
     },
     h3: {
-      fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+      fontSize: '2rem',
       fontWeight: 600,
-      lineHeight: { xs: 1.5, md: 1.4 },
+      lineHeight: 1.4,
     },
     h4: {
-      fontSize: { xs: '1.25rem', sm: '1.375rem', md: '1.5rem' },
+      fontSize: '1.5rem',
       fontWeight: 600,
-      lineHeight: { xs: 1.5, md: 1.4 },
+      lineHeight: 1.4,
     },
     h5: {
-      fontSize: { xs: '1.125rem', sm: '1.1875rem', md: '1.25rem' },
+      fontSize: '1.25rem',
       fontWeight: 600,
-      lineHeight: { xs: 1.6, md: 1.5 },
+      lineHeight: 1.5,
     },
     h6: {
-      fontSize: { xs: '1rem', md: '1rem' },
+      fontSize: '1rem',
       fontWeight: 600,
-      lineHeight: { xs: 1.6, md: 1.5 },
+      lineHeight: 1.5,
     },
     subtitle1: {
       fontSize: '1rem',
@@ -104,14 +104,14 @@ export const customTheme = createTheme({
       lineHeight: 1.6,
     },
     body1: {
-      fontSize: { xs: '0.9375rem', md: '1rem' },
+      fontSize: '1rem',
       fontWeight: 400,
-      lineHeight: { xs: 1.7, md: 1.6 },
+      lineHeight: 1.6,
     },
     body2: {
-      fontSize: { xs: '0.8125rem', md: '0.875rem' },
+      fontSize: '0.875rem',
       fontWeight: 400,
-      lineHeight: { xs: 1.7, md: 1.6 },
+      lineHeight: 1.6,
     },
     button: {
       fontSize: '1rem',
@@ -210,5 +210,6 @@ declare module '@mui/material/styles' {
       900: string;
     };
   }
+
 }
 
