@@ -1,12 +1,9 @@
-import { Box, Container, Typography, Button, Stack, Card, CardContent } from '@mui/material';
-import { memo } from 'react';
-import { useScrollAnimation } from '@/hooks/use-scroll-animation';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { memo, useRef, useEffect, useState } from 'react';
 
 /**
  * Component: FreeOfferSection
  * 무료 오퍼 안내 섹션
+ * Tailwind CSS 기반
  * @param {() => void} onCtaClick - CTA 버튼 클릭 핸들러 [Required]
  */
 interface Props {
@@ -20,136 +17,107 @@ const offerItems = [
 ];
 
 export default memo(function FreeOfferSection({ onCtaClick }: Props) {
-  const [ref, isVisible] = useScrollAnimation();
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
 
   return (
-    <Box
+    <section
       ref={ref}
-      component="section"
       role="region"
       aria-label="무료 오퍼 안내 섹션"
-      sx={{
-        bgcolor: 'primary.main',
-        py: { xs: 8, sm: 10, md: 14 },
-        px: { xs: 2, sm: 3, md: 0 },
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
-      }}
+      className={`bg-primary py-16 md:py-20 lg:py-24 px-4 transition-opacity duration-600 ease-out transition-transform duration-600 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
     >
-      <Container maxWidth="md">
-        <Stack spacing={{ xs: 4, sm: 5, md: 6 }} alignItems="center" textAlign="center">
+      <div className="max-w-3xl mx-auto">
+        <div className="flex flex-col items-center text-center space-y-8 md:space-y-10 lg:space-y-12">
           {/* 제목 */}
-          <Typography
-            variant="h2"
-            component="h2"
-            sx={{
-              color: 'background.default',
-              fontWeight: 700,
-              lineHeight: { xs: 1.6, md: 1.5 },
-              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
-              maxWidth: { xs: '100%', md: '1000px' },
-              mb: { xs: 2, md: 3 },
-              letterSpacing: '-0.01em',
-            }}
-          >
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight max-w-5xl px-2 md:px-0 mb-4 md:mb-6 tracking-tight">
             지금 가입하면 AI 상담·DM 워크북 무료 제공
-          </Typography>
+          </h2>
 
           {/* 설명 */}
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'background.default',
-              fontSize: { xs: '1.125rem', md: '1.25rem' },
-              lineHeight: { xs: 1.9, md: 1.8 },
-              maxWidth: { xs: '100%', md: '800px' },
-              mb: { xs: 2, md: 3 },
-              opacity: 0.95,
-            }}
-          >
+          <p className="text-lg md:text-xl text-white leading-relaxed max-w-3xl opacity-95 mb-4 md:mb-6">
             실제 영업 현장에서 바로 쓸 수 있는 보험설계사 전용 워크북 제공.
-          </Typography>
+          </p>
 
           {/* 포함 항목 카드 */}
-          <Card
-            sx={{
-              width: '100%',
-              maxWidth: { xs: '100%', md: '600px' },
-              bgcolor: 'background.paper',
-              borderRadius: 3,
-              boxShadow: 6,
-            }}
-          >
-            <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-              <Stack spacing={2}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    color: 'text.primary',
-                    mb: 1,
-                    fontSize: { xs: '1rem', md: '1.125rem' },
-                  }}
-                >
-                  포함 내용:
-                </Typography>
-                <Stack spacing={1.5}>
-                  {offerItems.map((item, index) => (
-                    <Stack key={index} direction="row" spacing={1.5} alignItems="center">
-                      <CheckCircleIcon
-                        sx={{
-                          color: 'success.main',
-                          fontSize: { xs: '1.25rem', md: '1.5rem' },
-                          flexShrink: 0,
-                        }}
+          <div className="w-full max-w-2xl bg-white rounded-xl shadow-xl p-6 md:p-8">
+            <div className="flex flex-col space-y-4">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2 text-left">
+                포함 내용:
+              </h3>
+              <div className="flex flex-col space-y-3">
+                {offerItems.map((item, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6 text-green-600 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          fontSize: { xs: '1rem', md: '1.0625rem' },
-                          color: 'text.primary',
-                          lineHeight: { xs: 1.7, md: 1.6 },
-                        }}
-                      >
-                        {item}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
+                    </svg>
+                    <p className="text-base md:text-lg text-gray-900 leading-relaxed">
+                      {item}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
           {/* CTA 버튼 */}
-          <Button
-            variant="contained"
-            color="warning"
-            size="large"
+          <button
             onClick={onCtaClick}
-            startIcon={<AutoAwesomeIcon />}
-            sx={{
-              px: { xs: 4, md: 6 },
-              py: { xs: 2.5, md: 2.5 },
-              fontSize: { xs: '1rem', md: '1.125rem' },
-              minHeight: { xs: '48px', md: '56px' },
-              fontWeight: 700,
-              borderRadius: 2,
-              boxShadow: 4,
-              bgcolor: 'warning.main',
-              color: 'text.primary',
-              '&:hover': {
-                boxShadow: 6,
-                bgcolor: 'warning.dark',
-              },
-            }}
             aria-label="무료 오퍼 받기"
+            className="bg-warning hover:bg-warning-dark text-gray-900 font-bold py-3 md:py-4 px-6 md:px-8 rounded-lg text-base md:text-lg shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary min-h-[48px] md:min-h-[56px] flex items-center gap-2"
           >
+            <svg
+              className="w-5 h-5 md:w-6 md:h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
             무료 오퍼 받기
-          </Button>
-        </Stack>
-      </Container>
-    </Box>
+          </button>
+        </div>
+      </div>
+    </section>
   );
 });
-

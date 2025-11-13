@@ -1,141 +1,105 @@
-import { Box, Container, Typography, Stack, Grid, Card, CardContent } from '@mui/material';
-import { memo } from 'react';
-import { useScrollAnimation } from '@/hooks/use-scroll-animation';
-import AnimatedCard from './AnimatedCard';
-import SecurityIcon from '@mui/icons-material/Security';
-import SchoolIcon from '@mui/icons-material/School';
-import BuildIcon from '@mui/icons-material/Build';
+import { memo, useRef, useEffect, useState } from 'react';
 
 /**
  * Component: TrustSection
  * 신뢰 섹션
+ * Tailwind CSS 기반
  */
 const trustPoints = [
   {
-    icon: <BuildIcon />,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
     title: '퍼널 기반 AI 실무 자동화 프레임',
     description: '보험영업 프로세스에 최적화된 AI 워크플로우',
   },
   {
-    icon: <SecurityIcon />,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    ),
     title: '보험업 전용 가드레일',
     description: '광고심의 부적합 표현 자동 차단',
   },
   {
-    icon: <SchoolIcon />,
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+    ),
     title: '실무자 중심 교육·컨설팅 기반 성장',
     description: '현장 경험을 바탕으로 한 실전 가이드',
   },
 ];
 
 export default memo(function TrustSection() {
-  const [ref, isVisible] = useScrollAnimation();
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
 
   return (
-    <Box
+    <section
       ref={ref}
-      component="section"
       role="region"
       aria-label="신뢰 섹션"
-      sx={{
-        bgcolor: 'background.default',
-        py: { xs: 8, sm: 10, md: 14 },
-        px: { xs: 2, sm: 3, md: 0 },
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
-      }}
+      className={`bg-white py-16 md:py-20 lg:py-24 px-4 transition-opacity duration-600 ease-out transition-transform duration-600 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
     >
-      <Container maxWidth="lg">
-        <Stack spacing={{ xs: 5, sm: 6, md: 8 }} alignItems="center">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col items-center space-y-10 md:space-y-12 lg:space-y-16">
           {/* 제목 */}
-          <Typography
-            variant="h2"
-            component="h2"
-            sx={{
-              color: 'text.primary',
-              textAlign: 'center',
-              fontWeight: 700,
-              lineHeight: { xs: 1.6, md: 1.5 },
-              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
-              maxWidth: { xs: '100%', md: '1000px' },
-              px: { xs: 1, md: 0 },
-              mb: { xs: 2, md: 3 },
-              letterSpacing: '-0.01em',
-            }}
-          >
-            보험 설계사를 위해 설계된 전문 프레임
-          </Typography>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center leading-tight max-w-5xl px-2 md:px-0 mb-4 md:mb-6 tracking-tight">
+            왜 INSURANG을 선택해야 할까요?
+          </h2>
 
-          {/* 신뢰 포인트 카드 */}
-          <Grid container spacing={{ xs: 3, sm: 4, md: 4 }} sx={{ mt: { xs: 2, md: 4 } }}>
+          {/* 신뢰 포인트 카드 그리드 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full mt-4 md:mt-8">
             {trustPoints.map((point, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <AnimatedCard delay={index * 100}>
-                  <Card
-                    sx={{
-                      height: '100%',
-                      boxShadow: 3,
-                      borderRadius: 3,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        boxShadow: 6,
-                        transform: 'translateY(-4px)',
-                        borderColor: 'primary.main',
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ p: { xs: 3.5, md: 4.5 } }}>
-                      <Stack spacing={2.5} alignItems="flex-start">
-                        <Box
-                          sx={{
-                            color: 'primary.main',
-                            display: 'flex',
-                            alignItems: 'center',
-                            mb: 0.5,
-                            fontSize: { xs: '2.5rem', md: '3rem' },
-                            '& svg': {
-                              fontSize: { xs: '2.5rem', md: '3rem' },
-                            },
-                          }}
-                        >
-                          {point.icon}
-                        </Box>
-                        <Typography
-                          variant="h6"
-                          component="h3"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.125rem', md: '1.25rem' },
-                            color: 'text.primary',
-                            lineHeight: { xs: 1.7, md: 1.6 },
-                            mb: 0.5,
-                          }}
-                        >
-                          {point.title}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontSize: { xs: '1rem', md: '1.0625rem' },
-                            lineHeight: { xs: 1.8, md: 1.7 },
-                            color: 'text.secondary',
-                          }}
-                        >
-                          {point.description}
-                        </Typography>
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                </AnimatedCard>
-              </Grid>
+              <div
+                key={index}
+                className="p-6 md:p-8 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 h-full flex flex-col"
+              >
+                <div className="flex flex-col items-start space-y-4">
+                  <div className="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-2">
+                    {point.icon}
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+                    {point.title}
+                  </h3>
+                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                    {point.description}
+                  </p>
+                </div>
+              </div>
             ))}
-          </Grid>
-        </Stack>
-      </Container>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 });
-
