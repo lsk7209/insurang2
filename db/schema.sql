@@ -1,14 +1,14 @@
 -- InsuranceGPT Offer Funnel MVP Database Schema
--- Cloudflare D1 또는 Supabase Postgres용
+-- Cloudflare D1 전용 (SQLite 기반)
 
 -- Offers 테이블
 CREATE TABLE IF NOT EXISTS offers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  slug VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
   description TEXT,
-  status VARCHAR(50) DEFAULT 'active',
-  download_link VARCHAR(500),
+  status TEXT DEFAULT 'active',
+  download_link TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -16,13 +16,13 @@ CREATE TABLE IF NOT EXISTS offers (
 -- Leads 테이블
 CREATE TABLE IF NOT EXISTS leads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  offer_slug VARCHAR(255) NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  phone VARCHAR(50) NOT NULL,
-  organization VARCHAR(255),
-  consent_privacy BOOLEAN NOT NULL DEFAULT 0,
-  consent_marketing BOOLEAN DEFAULT 0,
+  offer_slug TEXT NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  organization TEXT,
+  consent_privacy INTEGER NOT NULL DEFAULT 0, -- 0 = false, 1 = true
+  consent_marketing INTEGER DEFAULT 0, -- 0 = false, 1 = true
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (offer_slug) REFERENCES offers(slug)
 );
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS leads (
 CREATE TABLE IF NOT EXISTS message_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   lead_id INTEGER NOT NULL,
-  channel VARCHAR(50) NOT NULL, -- 'email' or 'sms'
-  status VARCHAR(50) NOT NULL, -- 'success' or 'failed'
+  channel TEXT NOT NULL, -- 'email' or 'sms'
+  status TEXT NOT NULL, -- 'success' or 'failed'
   error_message TEXT,
   sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (lead_id) REFERENCES leads(id)

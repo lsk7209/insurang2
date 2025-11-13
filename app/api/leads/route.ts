@@ -1,13 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createLead, createMessageLog, getOfferBySlug } from '@/lib/db';
-import { sendEmail } from '@/lib/services/email-service';
-import { sendSMS } from '@/lib/services/sms-service';
 
 /**
  * POST /api/leads
  * 리드 생성 및 이메일/SMS 발송
+ * 
+ * 주의: 이 파일은 Next.js API Routes입니다.
+ * Cloudflare Pages에서는 functions/api/leads.ts가 자동으로 사용됩니다.
+ * 
+ * 로컬 개발 환경에서만 이 파일이 사용됩니다.
+ * Cloudflare 배포 시에는 functions/api/leads.ts가 우선적으로 처리됩니다.
  */
 export async function POST(request: NextRequest) {
+  // Cloudflare Pages Functions가 우선적으로 처리
+  return NextResponse.json(
+    {
+      success: false,
+      error: '이 엔드포인트는 Cloudflare Pages Functions에서만 사용 가능합니다. functions/api/leads.ts를 확인하세요.',
+    },
+    { status: 501 }
+  );
+}
+
+/**
+ * 아래 코드는 참고용입니다. 실제로는 functions/api/leads.ts가 사용됩니다.
+ */
+/*
+import { createLead, createMessageLog, getOfferBySlug } from '@/lib/db';
+import { sendEmailCloudflare } from '@/lib/services/email-service-cloudflare';
+import { sendSMS } from '@/lib/services/sms-service';
+
+export async function POST_LEGACY(request: NextRequest) {
   try {
     const body = await request.json();
     const {
@@ -168,4 +190,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+*/
 

@@ -1,24 +1,39 @@
 # Cloudflare Workers/Pages 설정
 name = "insurang-landing"
 compatibility_date = "2024-01-01"
+pages_build_output_dir = ".next"
 
 # D1 데이터베이스 바인딩
 [[d1_databases]]
 binding = "DB"
 database_name = "insurang-db"
-database_id = "your-database-id-here"
+database_id = "62f0fdda-f6db-4627-91ce-49825760998b"
+
+# Cron Triggers (일일 리포트)
+# Cloudflare Dashboard에서도 설정 가능
+# Pages Functions의 Cron은 별도 Worker로 배포하거나
+# Cloudflare Dashboard > Workers & Pages > Cron Triggers에서 설정
+# 
+# 참고: Pages Functions의 Cron은 functions/_worker.ts에 통합하거나
+# 별도 Worker로 배포해야 합니다.
+# 
+# [[triggers.crons]]
+# cron = "0 9 * * *"  # 매일 오전 9시 (UTC)
 
 # 환경 변수 (로컬 개발용)
+# .dev.vars 파일에 설정하거나 여기에 직접 입력
 [env.development]
-SMTP_HOST = "smtp.example.com"
-SMTP_PORT = "587"
-SMTP_SECURE = "false"
-SMTP_USER = "your-email@example.com"
-SMTP_PASS = "your-password"
+# 이메일 서비스 (Resend 또는 SendGrid 중 하나 선택)
+RESEND_API_KEY = "your-resend-api-key"
+# 또는
+# SENDGRID_API_KEY = "your-sendgrid-api-key"
 SMTP_FROM = "noreply@example.com"
+
+# 솔라피 API
 SOLAPI_API_KEY = "your-api-key"
 SOLAPI_API_SECRET = "your-api-secret"
 SOLAPI_SENDER_PHONE = "01012345678"
 
 # 프로덕션 환경 변수는 Cloudflare Dashboard에서 설정
+# Pages > Settings > Environment Variables
 

@@ -1,10 +1,10 @@
 /**
  * Database Client
- * Cloudflare D1 또는 Supabase 클라이언트 설정
- * 환경 변수 DB_TYPE으로 선택: 'd1' 또는 'supabase'
+ * Cloudflare D1 전용 클라이언트
+ * Cloudflare Pages Functions에서만 사용 가능
  */
 import type { D1Database } from '@/types/cloudflare';
-import * as supabaseDb from './db-supabase';
+import * as cloudflareDb from './db-cloudflare';
 
 // 타입 정의
 export interface Offer {
@@ -40,179 +40,99 @@ export interface MessageLog {
 }
 
 /**
- * Get database type
+ * Get D1 database instance
+ * 
+ * 주의: 이 함수는 Cloudflare Pages Functions에서만 작동합니다.
+ * Next.js API Routes에서는 사용할 수 없습니다.
+ * functions/api/*.ts에서 env.DB를 직접 전달받아 사용하세요.
  */
-function getDbType(): 'd1' | 'supabase' {
-  return (process.env.DB_TYPE || 'supabase') as 'd1' | 'supabase';
+function getDb(): D1Database {
+  // Cloudflare Workers/Pages Functions 환경
+  if (typeof process !== 'undefined' && process.env?.DB) {
+    return process.env.DB as unknown as D1Database;
+  }
+  
+  throw new Error(
+    'D1 Database not configured. ' +
+    'Cloudflare Pages Functions에서 env.DB를 전달받아 사용하세요.'
+  );
 }
 
 /**
  * Get offer by slug
+ * 
+ * 주의: 이 함수는 Cloudflare Pages Functions에서만 사용 가능합니다.
+ * Next.js API Routes에서는 functions/api/*.ts를 사용하세요.
  */
-export async function getOfferBySlug(slug: string): Promise<Offer | null> {
-  if (getDbType() === 'supabase') {
-    return supabaseDb.getOfferBySlug(slug);
-  }
-
-  // D1 사용 시
-  const db = getDb();
-  const result = await db
-    .prepare('SELECT * FROM offers WHERE slug = ? AND status = ?')
-    .bind(slug, 'active')
-    .first<Offer>();
-  
-  return result;
-}
-
-/**
- * Get D1 database instance (Cloudflare Workers 환경)
- */
-function getDb(): D1Database {
-  if (typeof process !== 'undefined' && process.env?.DB) {
-    return process.env.DB as unknown as D1Database;
-  }
-  throw new Error('D1 Database not configured');
+export async function getOfferBySlug(slug: string, db?: D1Database): Promise<Offer | null> {
+  const d1 = db || getDb();
+  return cloudflareDb.getOfferBySlug(d1, slug);
 }
 
 /**
  * Create lead
+ * 
+ * 주의: 이 함수는 Cloudflare Pages Functions에서만 사용 가능합니다.
+ * Next.js API Routes에서는 functions/api/*.ts를 사용하세요.
  */
-export async function createLead(data: {
-  offer_slug: string;
-  name: string;
-  email: string;
-  phone: string;
-  organization?: string;
-  consent_privacy: boolean;
-  consent_marketing: boolean;
-}): Promise<number> {
-  if (getDbType() === 'supabase') {
-    return supabaseDb.createLead(data);
-  }
-
-  // D1 사용 시
-  const db = getDb();
-  const result = await db
-    .prepare(
-      'INSERT INTO leads (offer_slug, name, email, phone, organization, consent_privacy, consent_marketing) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    )
-    .bind(
-      data.offer_slug,
-      data.name,
-      data.email,
-      data.phone,
-      data.organization || null,
-      data.consent_privacy ? 1 : 0,
-      data.consent_marketing ? 1 : 0
-    )
-    .run();
-  
-  return result.meta.last_row_id;
+export async function createLead(
+  data: {
+    offer_slug: string;
+    name: string;
+    email: string;
+    phone: string;
+    organization?: string;
+    consent_privacy: boolean;
+    consent_marketing: boolean;
+  },
+  db?: D1Database
+): Promise<number> {
+  const d1 = db || getDb();
+  return cloudflareDb.createLead(d1, data);
 }
 
 /**
  * Create message log
+ * 
+ * 주의: 이 함수는 Cloudflare Pages Functions에서만 사용 가능합니다.
  */
-export async function createMessageLog(data: {
-  lead_id: number;
-  channel: 'email' | 'sms';
-  status: 'success' | 'failed';
-  error_message?: string;
-}): Promise<number> {
-  if (getDbType() === 'supabase') {
-    return supabaseDb.createMessageLog(data);
-  }
-
-  // D1 사용 시
-  const db = getDb();
-  const result = await db
-    .prepare(
-      'INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)'
-    )
-    .bind(
-      data.lead_id,
-      data.channel,
-      data.status,
-      data.error_message || null
-    )
-    .run();
-  
-  return result.meta.last_row_id;
+export async function createMessageLog(
+  data: {
+    lead_id: number;
+    channel: 'email' | 'sms';
+    status: 'success' | 'failed';
+    error_message?: string;
+  },
+  db?: D1Database
+): Promise<number> {
+  const d1 = db || getDb();
+  return cloudflareDb.createMessageLog(d1, data);
 }
 
 /**
  * Get leads with message logs
+ * 
+ * 주의: 이 함수는 Cloudflare Pages Functions에서만 사용 가능합니다.
  */
-export async function getLeadsWithLogs(limit: number = 100, offset: number = 0): Promise<Array<Lead & { email_status: string; sms_status: string }>> {
-  if (getDbType() === 'supabase') {
-    return supabaseDb.getLeadsWithLogs(limit, offset);
-  }
-
-  // D1 사용 시
-  const db = getDb();
-  
-  // leads 조회
-  const leads = await db
-    .prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT ? OFFSET ?')
-    .bind(limit, offset)
-    .all<Lead>();
-  
-  if (!leads.results) {
-    return [];
-  }
-  
-  // 각 lead의 메시지 로그 조회
-  const leadsWithLogs = await Promise.all(
-    leads.results.map(async (lead) => {
-      const emailLog = await db
-        .prepare('SELECT status FROM message_logs WHERE lead_id = ? AND channel = ? ORDER BY sent_at DESC LIMIT 1')
-        .bind(lead.id, 'email')
-        .first<{ status: string }>();
-      
-      const smsLog = await db
-        .prepare('SELECT status FROM message_logs WHERE lead_id = ? AND channel = ? ORDER BY sent_at DESC LIMIT 1')
-        .bind(lead.id, 'sms')
-        .first<{ status: string }>();
-      
-      return {
-        ...lead,
-        email_status: emailLog?.status || 'pending',
-        sms_status: smsLog?.status || 'pending',
-      };
-    })
-  );
-  
-  return leadsWithLogs;
+export async function getLeadsWithLogs(
+  limit: number = 100,
+  offset: number = 0,
+  db?: D1Database
+): Promise<Array<Lead & { email_status: string; sms_status: string }>> {
+  const d1 = db || getDb();
+  return cloudflareDb.getLeadsWithLogs(d1, limit, offset);
 }
 
 /**
  * Get lead by ID with logs
+ * 
+ * 주의: 이 함수는 Cloudflare Pages Functions에서만 사용 가능합니다.
  */
-export async function getLeadById(leadId: number): Promise<(Lead & { logs: MessageLog[] }) | null> {
-  if (getDbType() === 'supabase') {
-    return supabaseDb.getLeadById(leadId);
-  }
-
-  // D1 사용 시
-  const db = getDb();
-  
-  const lead = await db
-    .prepare('SELECT * FROM leads WHERE id = ?')
-    .bind(leadId)
-    .first<Lead>();
-  
-  if (!lead) {
-    return null;
-  }
-  
-  const logs = await db
-    .prepare('SELECT * FROM message_logs WHERE lead_id = ? ORDER BY sent_at DESC')
-    .bind(leadId)
-    .all<MessageLog>();
-  
-  return {
-    ...lead,
-    logs: logs.results || [],
-  };
+export async function getLeadById(
+  leadId: number,
+  db?: D1Database
+): Promise<(Lead & { logs: MessageLog[] }) | null> {
+  const d1 = db || getDb();
+  return cloudflareDb.getLeadById(d1, leadId);
 }
 

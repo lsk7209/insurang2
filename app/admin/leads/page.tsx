@@ -97,7 +97,8 @@ export default function AdminLeadsPage() {
   }
 
   return (
-    <Container maxWidth="xl">
+    <>
+      <Container maxWidth="xl">
         <Stack spacing={4}>
           {/* 헤더 */}
           <Box>
@@ -231,7 +232,7 @@ export default function AdminLeadsPage() {
           <Button onClick={() => setDetailOpen(false)}>닫기</Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </>
   );
 }
 
