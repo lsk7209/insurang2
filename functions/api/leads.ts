@@ -4,6 +4,8 @@
  * Cloudflare Pages Functions는 자동으로 /api/* 경로를 처리합니다.
  */
 
+import type { D1Database } from '@/types/cloudflare';
+
 interface Env {
   DB: D1Database;
   RESEND_API_KEY?: string;

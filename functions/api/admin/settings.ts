@@ -3,6 +3,8 @@
  * /api/admin/settings 엔드포인트
  */
 
+import type { D1Database } from '@/types/cloudflare';
+
 interface Env {
   RESEND_API_KEY?: string;
   SENDGRID_API_KEY?: string;

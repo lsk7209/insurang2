@@ -3,6 +3,8 @@
  * /api/admin/leads 엔드포인트
  */
 
+import type { D1Database } from '@/types/cloudflare';
+
 interface Env {
   DB: D1Database;
 }
