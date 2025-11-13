@@ -1,13 +1,14 @@
 /**
  * Cloudflare Pages 배포 후 검증 스크립트
- * .next 디렉토리의 파일 크기를 검사하고 25 MiB 제한을 준수하는지 확인합니다.
+ * output: 'export'를 사용하면 빌드 출력이 'out' 디렉토리에 생성됩니다.
+ * 'out' 디렉토리의 파일 크기를 검사하고 25 MiB 제한을 준수하는지 확인합니다.
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MiB
-const nextDir = path.join(process.cwd(), '.next');
+const outputDir = path.join(process.cwd(), 'out');
 
 /**
  * 디렉토리 내의 모든 파일을 재귀적으로 검사
@@ -66,10 +67,10 @@ function checkFileSizes(dir, basePath = '') {
   return issues;
 }
 
-// 검사 실행
-if (fs.existsSync(nextDir)) {
-  console.log('🔍 Checking .next directory for file size compliance...');
-  const issues = checkFileSizes(nextDir, '.next');
+    // 검사 실행
+    if (fs.existsSync(outputDir)) {
+      console.log('🔍 Checking out directory for file size compliance...');
+      const issues = checkFileSizes(outputDir, 'out');
   
   const errors = issues.filter(i => i.type === 'error');
   const warnings = issues.filter(i => i.type === 'warning');
@@ -91,10 +92,11 @@ if (fs.existsSync(nextDir)) {
     process.exit(1);
   } else {
     console.log('✅ All files are within size limits');
-    console.log(`   Total files checked: ${issues.length}`);
-  }
-} else {
-  console.error('❌ .next directory not found. Build may have failed.');
-  process.exit(1);
-}
+        console.log(`   Total files checked: ${issues.length}`);
+      }
+    } else {
+      console.error('❌ out directory not found. Build may have failed.');
+      console.error('💡 Make sure next.config.js has output: "export" configured.');
+      process.exit(1);
+    }
 
