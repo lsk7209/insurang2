@@ -20,20 +20,18 @@ database_id = "62f0fdda-f6db-4627-91ce-49825760998b"
 # [[triggers.crons]]
 # cron = "0 9 * * *"  # 매일 오전 9시 (UTC)
 
-# 환경 변수 (로컬 개발용)
-# .dev.vars 파일에 설정하거나 여기에 직접 입력
-[env.development]
-# 이메일 서비스 (Resend 또는 SendGrid 중 하나 선택)
-RESEND_API_KEY = "your-resend-api-key"
-# 또는
-# SENDGRID_API_KEY = "your-sendgrid-api-key"
-SMTP_FROM = "noreply@example.com"
-
-# 솔라피 API
-SOLAPI_API_KEY = "your-api-key"
-SOLAPI_API_SECRET = "your-api-secret"
-SOLAPI_SENDER_PHONE = "01012345678"
-
-# 프로덕션 환경 변수는 Cloudflare Dashboard에서 설정
-# Pages > Settings > Environment Variables
+# 환경 변수 설정
+# 
+# 로컬 개발용: .dev.vars 파일에 설정
+# 프로덕션/프리뷰: Cloudflare Dashboard > Pages > Settings > Environment Variables에서 설정
+#
+# 참고: Cloudflare Pages는 [env.development]를 지원하지 않습니다.
+# 로컬 개발 시에는 .dev.vars 파일을 사용하세요.
+#
+# 예시 .dev.vars 파일 내용:
+# RESEND_API_KEY=your-resend-api-key
+# SMTP_FROM=noreply@example.com
+# SOLAPI_API_KEY=your-api-key
+# SOLAPI_API_SECRET=your-api-secret
+# SOLAPI_SENDER_PHONE=01012345678
 
