@@ -1,0 +1,7 @@
+# Cloudflare Pages 리다이렉트 규칙
+# 루트 경로를 기본 오퍼로 리다이렉트
+/ /offer/workbook 301
+
+# 모든 경로를 Next.js로 전달 (SPA 라우팅)
+/* /index.html 200
+
