@@ -7,7 +7,7 @@
  * 이 파일을 사용하거나 별도 Worker로 배포하세요.
  */
 
-import type { D1Database } from '@/types/cloudflare';
+import type { D1Database, ScheduledEvent, ExecutionContext } from '@/types/cloudflare';
 
 interface Env {
   DB: D1Database;

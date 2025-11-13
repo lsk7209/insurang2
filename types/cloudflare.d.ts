@@ -33,6 +33,19 @@ export interface D1ExecResult {
   duration: number;
 }
 
+// Cloudflare Workers Cron Trigger 타입
+export interface ScheduledEvent {
+  type: 'scheduled';
+  scheduledTime: number;
+  cron: string;
+  noRetry: () => void;
+}
+
+export interface ExecutionContext {
+  waitUntil(promise: Promise<any>): void;
+  passThroughOnException(): void;
+}
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
