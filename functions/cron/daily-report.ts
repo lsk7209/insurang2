@@ -4,6 +4,8 @@
  * wrangler.toml에서 cron 설정 필요
  */
 
+import type { D1Database } from '@/types/cloudflare';
+
 interface Env {
   DB: D1Database;
   // 기타 환경 변수
