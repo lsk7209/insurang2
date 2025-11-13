@@ -161,7 +161,8 @@ export default function OfferLandingPage() {
           </p>
           <button
             onClick={handleCtaClick}
-            className="bg-warning hover:bg-warning-dark text-white font-bold py-4 px-8 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all"
+            aria-label="신청 폼으로 이동"
+            className="bg-warning hover:bg-warning-dark text-white font-bold py-4 px-8 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             무료로 시작하기
           </button>
@@ -203,75 +204,112 @@ export default function OfferLandingPage() {
             아래 정보를 입력하시면 AI 상담 워크북을 무료로 받으실 수 있습니다.
           </p>
 
-          <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg">
+          <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg" noValidate>
+            {/* 에러 메시지 영역 (ARIA live) */}
+            {Object.keys(errors).length > 0 && (
+              <div
+                role="alert"
+                aria-live="polite"
+                aria-atomic="true"
+                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+              >
+                <p className="text-sm font-medium text-red-800 mb-2">입력 오류가 있습니다. 아래 항목을 확인해주세요.</p>
+                <ul className="list-disc list-inside text-sm text-red-700">
+                  {Object.values(errors).map((error, idx) => (
+                    <li key={idx}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="space-y-6">
               {/* Name */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  이름 <span className="text-red-500">*</span>
+                  이름 <span className="text-red-500" aria-label="필수 항목">*</span>
                 </label>
                 <input
                   type="text"
                   id="name"
+                  name="name"
                   value={formData.name}
                   onChange={handleChange('name')}
+                  aria-invalid={errors.name ? 'true' : 'false'}
+                  aria-describedby={errors.name ? 'name-error' : undefined}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
                     errors.name ? 'border-red-500' : 'border-gray-300'
                   }`}
                   required
                 />
-                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                {errors.name && (
+                  <p id="name-error" className="mt-1 text-sm text-red-500" role="alert">
+                    {errors.name}
+                  </p>
+                )}
               </div>
 
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  이메일 <span className="text-red-500">*</span>
+                  이메일 <span className="text-red-500" aria-label="필수 항목">*</span>
                 </label>
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   value={formData.email}
                   onChange={handleChange('email')}
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
                     errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
                   required
                 />
-                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                {errors.email && (
+                  <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
               {/* Phone */}
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  휴대폰 번호 <span className="text-red-500">*</span>
+                  휴대폰 번호 <span className="text-red-500" aria-label="필수 항목">*</span>
                 </label>
                 <input
                   type="tel"
                   id="phone"
+                  name="phone"
                   value={formData.phone}
                   onChange={handleChange('phone')}
                   placeholder="010-1234-5678"
+                  aria-invalid={errors.phone ? 'true' : 'false'}
+                  aria-describedby={errors.phone ? 'phone-error' : 'phone-hint'}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
                     errors.phone ? 'border-red-500' : 'border-gray-300'
                   }`}
                   required
                 />
                 {errors.phone ? (
-                  <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+                  <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">
+                    {errors.phone}
+                  </p>
                 ) : (
-                  <p className="mt-1 text-sm text-gray-500">예: 010-1234-5678</p>
+                  <p id="phone-hint" className="mt-1 text-sm text-gray-500">예: 010-1234-5678</p>
                 )}
               </div>
 
               {/* Organization */}
               <div>
                 <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
-                  소속 (선택)
+                  소속 <span className="text-gray-500 text-xs">(선택)</span>
                 </label>
                 <input
                   type="text"
                   id="organization"
+                  name="organization"
                   value={formData.organization}
                   onChange={handleChange('organization')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -279,46 +317,68 @@ export default function OfferLandingPage() {
               </div>
 
               {/* Consent Checkboxes */}
-              <div className="space-y-3">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.consent_privacy}
-                    onChange={handleChange('consent_privacy')}
-                    className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
-                  />
-                  <span className={`text-sm ${errors.consent_privacy ? 'text-red-500' : 'text-gray-700'}`}>
-                    개인정보 수집 및 이용에 동의합니다. <span className="text-red-500">(필수)</span>
-                  </span>
-                </label>
-                {errors.consent_privacy && (
-                  <p className="ml-8 text-sm text-red-500">{errors.consent_privacy}</p>
-                )}
+              <fieldset className="space-y-3">
+                <legend className="sr-only">동의 항목</legend>
+                <div>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="consent_privacy"
+                      name="consent_privacy"
+                      checked={formData.consent_privacy}
+                      onChange={handleChange('consent_privacy')}
+                      aria-invalid={errors.consent_privacy ? 'true' : 'false'}
+                      aria-describedby={errors.consent_privacy ? 'consent_privacy-error' : undefined}
+                      className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <span className={`text-sm ${errors.consent_privacy ? 'text-red-500' : 'text-gray-700'}`}>
+                      개인정보 수집 및 이용에 동의합니다. <span className="text-red-500" aria-label="필수 항목">(필수)</span>
+                    </span>
+                  </label>
+                  {errors.consent_privacy && (
+                    <p id="consent_privacy-error" className="ml-8 mt-1 text-sm text-red-500" role="alert">
+                      {errors.consent_privacy}
+                    </p>
+                  )}
+                </div>
 
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.consent_marketing}
-                    onChange={handleChange('consent_marketing')}
-                    className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
-                  />
-                  <span className="text-sm text-gray-700">
-                    마케팅 정보 수신에 동의합니다. <span className="text-gray-500">(선택)</span>
-                  </span>
-                </label>
+                <div>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="consent_marketing"
+                      name="consent_marketing"
+                      checked={formData.consent_marketing}
+                      onChange={handleChange('consent_marketing')}
+                      className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <span className="text-sm text-gray-700">
+                      마케팅 정보 수신에 동의합니다. <span className="text-gray-500 text-xs">(선택)</span>
+                    </span>
+                  </label>
+                </div>
 
                 <p className="ml-8 text-xs text-gray-500">
                   ※ 수집된 정보는 워크북 제공 및 서비스 안내 목적으로만 사용됩니다.
                 </p>
-              </div>
+              </fieldset>
 
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-warning hover:bg-warning-dark text-white font-bold py-4 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-busy={isSubmitting}
+                aria-disabled={isSubmitting}
+                className="w-full bg-warning hover:bg-warning-dark text-white font-bold py-4 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               >
-                {isSubmitting ? '제출 중...' : 'AI 상담워크북 무료로 받기'}
+                {isSubmitting ? (
+                  <>
+                    <span className="sr-only">제출 중입니다</span>
+                    <span aria-hidden="true">제출 중...</span>
+                  </>
+                ) : (
+                  'AI 상담워크북 무료로 받기'
+                )}
               </button>
             </div>
           </form>

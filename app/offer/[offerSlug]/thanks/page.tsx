@@ -18,13 +18,14 @@ export default function ThankYouPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-16">
         <div className="max-w-2xl mx-auto text-center">
           {/* Success Icon */}
-          <div className="mb-8">
+          <div className="mb-8" role="img" aria-label="성공 아이콘">
             <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
               <svg
                 className="w-12 h-12 text-green-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -55,7 +56,7 @@ export default function ThankYouPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href={`/offer/${offerSlug}`}
-              className="bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+              className="bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               다시 보기
             </Link>
@@ -63,7 +64,8 @@ export default function ThankYouPage() {
               href={process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+              aria-label="카카오 채널로 새 창에서 열기"
+              className="border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               카카오 채널 문의
             </a>

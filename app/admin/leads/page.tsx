@@ -1,56 +1,45 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import type { LeadListItem, LeadDetail } from '@/types/api';
 
 /**
  * Admin Leads Page
  * 관리자 리드 목록 조회 페이지
  * Tailwind CSS 기반
  */
-interface Lead {
-  id: number;
-  offer_slug: string;
-  name: string;
-  email: string;
-  phone: string;
-  organization: string | null;
-  consent_privacy: boolean;
-  consent_marketing: boolean;
-  created_at: string;
-  email_status: string;
-  sms_status: string;
-}
-
-interface LeadDetail extends Lead {
-  logs: Array<{
-    id: number;
-    channel: string;
-    status: string;
-    error_message: string | null;
-    sent_at: string;
-  }>;
-}
 
 export default function AdminLeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>([]);
+  const [leads, setLeads] = useState<LeadListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedLead, setSelectedLead] = useState<LeadDetail | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const fetchLeads = useCallback(async () => {
     try {
+      setError(null);
       const response = await fetch('/api/admin/leads');
+      
+      if (response.status === 401) {
+        setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        return;
+      }
+
       const result = await response.json();
 
-      if (result.success) {
+      if (result.success && Array.isArray(result.data)) {
         setLeads(result.data);
       } else {
-        console.error('Failed to fetch leads:', result.error);
-        alert('리드를 불러오는데 실패했습니다: ' + result.error);
+        const errorMessage = result.error || '리드를 불러오는데 실패했습니다.';
+        setError(errorMessage);
+        console.error('Failed to fetch leads:', errorMessage);
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '리드를 불러오는데 실패했습니다.';
+      setError(errorMessage);
       console.error('Error fetching leads:', error);
-      alert('리드를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -58,15 +47,29 @@ export default function AdminLeadsPage() {
 
   const fetchLeadDetail = useCallback(async (leadId: number) => {
     try {
+      setDetailLoading(true);
       const response = await fetch(`/api/admin/leads?id=${leadId}`);
+      
+      if (response.status === 401) {
+        setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        return;
+      }
+
       const result = await response.json();
 
-      if (result.success) {
-        setSelectedLead(result.data);
+      if (result.success && result.data) {
+        setSelectedLead(result.data as LeadDetail);
         setDetailOpen(true);
+      } else {
+        console.error('Failed to fetch lead detail:', result.error);
+        alert('리드 상세 정보를 불러오는데 실패했습니다: ' + (result.error || '알 수 없는 오류'));
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
       console.error('Error fetching lead detail:', error);
+      alert('리드 상세 정보를 불러오는데 실패했습니다: ' + errorMessage);
+    } finally {
+      setDetailLoading(false);
     }
   }, []);
 
@@ -98,8 +101,31 @@ export default function AdminLeadsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" aria-label="로딩 중"></div>
+          <p className="text-gray-600" aria-live="polite">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md mx-auto px-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">오류 발생</h2>
+            <p className="text-red-700 mb-4" role="alert">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+                fetchLeads();
+              }}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              다시 시도
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -109,15 +135,17 @@ export default function AdminLeadsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">리드 관리</h1>
-          <p className="text-gray-600">총 {leads.length}건의 리드가 등록되었습니다.</p>
-        </div>
+          <p className="text-gray-600">
+            총 <span className="font-semibold">{leads.length}</span>건의 리드가 등록되었습니다.
+          </p>
+        </header>
 
         {/* Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200" role="table" aria-label="리드 목록">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -155,7 +183,7 @@ export default function AdminLeadsPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {leads.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={10} className="px-6 py-8 text-center text-gray-500" role="status" aria-live="polite">
                       등록된 리드가 없습니다.
                     </td>
                   </tr>
@@ -182,9 +210,11 @@ export default function AdminLeadsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => fetchLeadDetail(lead.id)}
-                          className="text-primary hover:text-primary-dark font-medium"
+                          disabled={detailLoading}
+                          aria-label={`리드 ${lead.id} 상세 정보 보기`}
+                          className="text-primary hover:text-primary-dark font-medium disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                         >
-                          보기
+                          {detailLoading ? '로딩...' : '보기'}
                         </button>
                       </td>
                     </tr>
@@ -198,16 +228,29 @@ export default function AdminLeadsPage() {
 
       {/* Detail Modal */}
       {detailOpen && selectedLead && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setDetailOpen(false);
+            }
+          }}
+        >
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">리드 상세 정보</h2>
+                <h2 id="modal-title" className="text-2xl font-bold text-gray-900">
+                  리드 상세 정보
+                </h2>
                 <button
                   onClick={() => setDetailOpen(false)}
-                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                  aria-label="모달 닫기"
+                  className="text-gray-400 hover:text-gray-600 text-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                 >
-                  ×
+                  <span aria-hidden="true">×</span>
                 </button>
               </div>
 
@@ -288,7 +331,8 @@ export default function AdminLeadsPage() {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setDetailOpen(false)}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+                  aria-label="모달 닫기"
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
                   닫기
                 </button>
