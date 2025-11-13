@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "next build && node scripts/clean-cache.js",
     "start": "next start",
     "lint": "next lint",
     "cf:dev": "wrangler pages dev .next",
