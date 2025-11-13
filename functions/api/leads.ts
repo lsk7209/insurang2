@@ -125,7 +125,7 @@ export async function onRequestPost(context: {
 
     // SMS 발송 (비동기, 실패해도 계속)
     // 환경 변수 확인 후 발송
-    if (env.SOLAPI_API_KEY && env.SOLAPI_API_SECRET && env.SOLAPI_SENDER_PHONE) {
+    if (context.env.SOLAPI_API_KEY && context.env.SOLAPI_API_SECRET && context.env.SOLAPI_SENDER_PHONE) {
       sendSMSAsync(context.env, phoneNumbers, offer.download_link, leadId, context.env.DB).catch(
         (err) => console.error('SMS send error:', err)
       );
