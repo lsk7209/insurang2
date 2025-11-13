@@ -5,6 +5,8 @@ const nextConfig = {
   // output: 'standalone', // 제거
   // Cloudflare Pages 호환: 정적 빌드 출력 사용
   output: 'export',
+  // 동적 라우팅을 위한 trailingSlash 설정
+  trailingSlash: true,
   // 클라우드플레어 Pages 호환을 위한 설정
   images: {
     unoptimized: true,

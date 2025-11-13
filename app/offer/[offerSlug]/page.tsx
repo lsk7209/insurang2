@@ -12,18 +12,11 @@ import Footer from '@/components/layout/Footer';
 import { Box, CircularProgress } from '@mui/material';
 
 /**
- * 정적 생성용 파라미터 생성
- * Cloudflare Pages 정적 빌드를 위해 필수
- */
-export function generateStaticParams() {
-  // 기본 오퍼 슬러그 반환
-  return [{ offerSlug: 'workbook' }];
-}
-
-/**
  * Offer Landing Page
  * 동적 라우팅: /offer/[offerSlug]
  * Steps: 1) offerSlug 확인 → 2) 폼 제출 → 3) API 호출 → 4) 감사 페이지 이동
+ * 
+ * Note: output: 'export'를 사용하므로 동적 라우팅은 클라이언트 사이드에서 처리됩니다.
  */
 export default function OfferLandingPage() {
   const params = useParams();
