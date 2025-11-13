@@ -70,12 +70,12 @@ async function getLeadsWithLogs(
       const emailLog = await db
         .prepare('SELECT status FROM message_logs WHERE lead_id = ? AND channel = ? ORDER BY sent_at DESC LIMIT 1')
         .bind(lead.id, 'email')
-        .first();
+        .first<{ status: string }>();
 
       const smsLog = await db
         .prepare('SELECT status FROM message_logs WHERE lead_id = ? AND channel = ? ORDER BY sent_at DESC LIMIT 1')
         .bind(lead.id, 'sms')
-        .first();
+        .first<{ status: string }>();
 
       return {
         ...lead,
