@@ -11,6 +11,18 @@ const nextConfig = {
   experimental: {
     // 필요시 추가 설정
   },
+  // 빌드 최적화: 불필요한 파일 생성 방지
+  generateBuildId: async () => {
+    // 빌드 ID를 고정하여 캐시 최소화
+    return 'build-' + Date.now();
+  },
+  // Cloudflare Pages 배포 최적화
+  distDir: '.next',
+  // 캐시 디렉토리 설정 (배포 시 제외됨)
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 }
 
 module.exports = nextConfig
