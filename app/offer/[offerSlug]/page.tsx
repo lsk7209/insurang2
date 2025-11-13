@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { validateEmail, validatePhone, normalizePhone } from '@/lib/utils/validation';
 
 /**
  * Offer Landing Page
@@ -62,7 +63,7 @@ export default function OfferLandingPage() {
   };
 
   const formatPhoneNumber = (value: string): string => {
-    const numbers = value.replace(/[^\d]/g, '');
+    const numbers = normalizePhone(value);
     if (numbers.length <= 3) return numbers;
     if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
@@ -94,7 +95,7 @@ export default function OfferLandingPage() {
     setIsSubmitting(true);
 
     try {
-      const phoneNumbers = formData.phone.replace(/[^\d]/g, '');
+      const phoneNumbers = normalizePhone(formData.phone);
       const response = await fetch('/api/leads', {
         method: 'POST',
         headers: {

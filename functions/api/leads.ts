@@ -7,6 +7,10 @@
 import type { D1Database } from '@/types/cloudflare';
 import { generateEmailTemplate } from '@/lib/utils/email-template';
 import { checkRateLimit, getClientIdentifier } from '@/lib/utils/rate-limit';
+import { validateLeadForm, normalizeLeadData } from '@/lib/utils/validation';
+import { logError } from '@/lib/utils/error-logger';
+import { sendSMS } from '@/lib/services/sms-service';
+import type { LeadCreateRequest, LeadCreateResponse } from '@/types/api';
 
 interface Env {
   DB: D1Database;
@@ -46,56 +50,22 @@ export async function onRequestPost(context: {
       );
     }
 
-    const body = await context.request.json();
-    const {
-      offer_slug,
-      name,
-      email,
-      phone,
-      organization,
-      consent_privacy,
-      consent_marketing,
-    } = body;
+    const body = await context.request.json() as LeadCreateRequest;
 
-    // 필수 필드 검증
-    if (!offer_slug || !name || !email || !phone || consent_privacy === undefined) {
+    // 중앙화된 Validation 사용
+    const validation = validateLeadForm(body);
+    if (!validation.valid) {
+      // 첫 번째 에러 메시지 반환
+      const firstError = Object.values(validation.errors)[0];
       return new Response(
-        JSON.stringify({ success: false, error: '필수 필드가 누락되었습니다.' }),
+        JSON.stringify({ success: false, error: firstError } as LeadCreateResponse),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // 입력 길이 검증
-    if (name.length > 100) {
-      return new Response(
-        JSON.stringify({ success: false, error: '이름은 100자 이하여야 합니다.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (email.length > 255) {
-      return new Response(
-        JSON.stringify({ success: false, error: '이메일은 255자 이하여야 합니다.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // 이메일 형식 검증
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return new Response(
-        JSON.stringify({ success: false, error: '올바른 이메일 형식이 아닙니다.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // 휴대폰 번호 검증
-    const phoneNumbers = phone.replace(/[^\d]/g, '');
-    if (phoneNumbers.length < 10 || phoneNumbers.length > 11) {
-      return new Response(
-        JSON.stringify({ success: false, error: '올바른 휴대폰 번호 형식이 아닙니다.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    // 데이터 정규화
+    const normalizedData = normalizeLeadData(body);
+    const { offer_slug, name, email, phone, organization, consent_privacy, consent_marketing } = normalizedData;
 
     // 오퍼 확인
     interface Offer {
@@ -124,10 +94,10 @@ export async function onRequestPost(context: {
       )
         .bind(
           offer_slug,
-          name.trim(),
-          email.trim().toLowerCase(),
-          phoneNumbers,
-          organization?.trim() || null,
+          name,
+          email,
+          phone,
+          organization || null,
           consent_privacy ? 1 : 0,
           consent_marketing ? 1 : 0
         )
@@ -139,47 +109,72 @@ export async function onRequestPost(context: {
 
       leadId = leadResult.meta.last_row_id;
     } catch (dbError: unknown) {
-      const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown database error';
-      console.error('Database error:', {
-        error: errorMessage,
+      const error = dbError instanceof Error ? dbError : new Error('Unknown database error');
+      // 에러 로깅 (console + DB)
+      await logError(context.env.DB, error, {
+        operation: 'lead_insert',
         offer_slug: offer_slug,
-        email: email.substring(0, 5) + '***', // 개인정보 마스킹
+        email_prefix: email.substring(0, 5) + '***', // 개인정보 마스킹
       });
       return new Response(
-        JSON.stringify({ success: false, error: '데이터베이스 오류가 발생했습니다.' }),
+        JSON.stringify({ success: false, error: '데이터베이스 오류가 발생했습니다.' } as LeadCreateResponse),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     // 이메일 발송 (비동기, 실패해도 계속)
     sendEmailAsync(context.env, email, name, offer.download_link || 'https://example.com/workbook.pdf', leadId, context.env.DB).catch(
-      (err) => console.error('Email send error:', err)
+      async (err) => {
+        const error = err instanceof Error ? err : new Error(String(err));
+        await logError(context.env.DB, error, {
+          operation: 'email_send',
+          lead_id: leadId,
+        });
+      }
     );
 
     // SMS 발송 (비동기, 실패해도 계속)
     // 환경 변수 확인 후 발송
     if (context.env.SOLAPI_API_KEY && context.env.SOLAPI_API_SECRET && context.env.SOLAPI_SENDER_PHONE) {
-      sendSMSAsync(context.env, phoneNumbers, offer.download_link || undefined, leadId, context.env.DB).catch(
-        (err) => console.error('SMS send error:', err)
+      sendSMSAsync(context.env, phone, offer.download_link || undefined, leadId, context.env.DB).catch(
+        async (err) => {
+          const error = err instanceof Error ? err : new Error(String(err));
+          await logError(context.env.DB, error, {
+            operation: 'sms_send',
+            lead_id: leadId,
+          });
+        }
       );
     } else {
-      console.warn('Solapi API configuration missing. SMS will not be sent.');
       // SMS 발송 실패 로그 기록
+      await logError(context.env.DB, new Error('Solapi API configuration missing'), {
+        operation: 'sms_send',
+        lead_id: leadId,
+      });
       context.env.DB.prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
         .bind(leadId, 'sms', 'failed', 'Solapi API configuration missing')
         .run()
-        .catch((err) => console.error('Failed to log SMS error:', err));
+        .catch(async (err) => {
+          const error = err instanceof Error ? err : new Error(String(err));
+          await logError(context.env.DB, error, {
+            operation: 'message_log_insert',
+            lead_id: leadId,
+          });
+        });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true } as LeadCreateResponse), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Lead creation error:', errorMessage);
+    const err = error instanceof Error ? error : new Error('Unknown error');
+    // 에러 로깅 (console + DB)
+    await logError(context.env.DB, err, {
+      operation: 'lead_creation',
+    });
     return new Response(
-      JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' }),
+      JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' } as LeadCreateResponse),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -253,19 +248,30 @@ async function sendEmailAsync(
       .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
       .bind(leadId, 'email', success ? 'success' : 'failed', errorMessage)
       .run();
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Email send error:', errorMessage);
-    await db
-      .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-      .bind(leadId, 'email', 'failed', errorMessage)
-      .run()
-      .catch((logError) => console.error('Failed to log email error:', logError));
-  }
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Unknown email error');
+      const errorMessage = err.message;
+      // 에러 로깅 (console + DB)
+      await logError(db, err, {
+        operation: 'email_send_async',
+        lead_id: leadId,
+      });
+      await db
+        .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
+        .bind(leadId, 'email', 'failed', errorMessage)
+        .run()
+      .catch(async (logErr) => {
+        const err = logErr instanceof Error ? logErr : new Error(String(logErr));
+        await logError(db, err, {
+          operation: 'message_log_insert_email',
+          lead_id: leadId,
+        });
+      });
+    }
 }
 
 
-// SMS 발송
+// SMS 발송 (lib/services/sms-service.ts 사용)
 async function sendSMSAsync(
   env: Env,
   to: string,
@@ -274,63 +280,42 @@ async function sendSMSAsync(
   db: D1Database
 ) {
   try {
-    const message = shortLink
-      ? `[인슈랑] 신청 완료되었습니다. 안내 메일을 확인해 주세요. 자료: ${shortLink}`
-      : '[인슈랑] 신청 완료되었습니다. 안내 메일을 확인해 주세요.';
-
-    // 솔라피 API 호출
-    const date = new Date().toISOString();
-    const salt = crypto.randomUUID();
-    const signature = await generateSignature(env.SOLAPI_API_SECRET, date, salt);
-
-    const response = await fetch('https://api.solapi.com/messages/v4/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `HMAC-SHA256 apiKey=${env.SOLAPI_API_KEY}, date=${date}, salt=${salt}, signature=${signature}`,
-        'Content-Type': 'application/json',
+    const result = await sendSMS(
+      {
+        to,
+        message: '', // generateMessage 함수가 요구사항에 맞는 메시지를 생성
+        shortLink,
       },
-      body: JSON.stringify({
-        messages: [
-          {
-            to,
-            from: env.SOLAPI_SENDER_PHONE,
-            text: message,
-          },
-        ],
-      }),
-    });
-
-    const result = await response.json();
-    const success = result.messageId ? true : false;
+      {
+        SOLAPI_API_KEY: env.SOLAPI_API_KEY,
+        SOLAPI_API_SECRET: env.SOLAPI_API_SECRET,
+        SOLAPI_SENDER_PHONE: env.SOLAPI_SENDER_PHONE,
+      }
+    );
 
     await db
       .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-      .bind(leadId, 'sms', success ? 'success' : 'failed', success ? null : JSON.stringify(result))
+      .bind(leadId, 'sms', result.success ? 'success' : 'failed', result.error || null)
       .run();
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const err = error instanceof Error ? error : new Error('Unknown SMS error');
+    const errorMessage = err.message;
+    // 에러 로깅 (console + DB)
+    await logError(db, err, {
+      operation: 'sms_send_async',
+      lead_id: leadId,
+    });
     await db
       .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
       .bind(leadId, 'sms', 'failed', errorMessage)
       .run()
-      .catch((logError) => console.error('Failed to log SMS error:', logError));
+      .catch(async (logErr) => {
+        const err = logErr instanceof Error ? logErr : new Error(String(logErr));
+        await logError(db, err, {
+          operation: 'message_log_insert_sms',
+          lead_id: leadId,
+        });
+      });
   }
-}
-
-async function generateSignature(secret: string, date: string, salt: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const key = encoder.encode(secret);
-  const data = encoder.encode(date + salt);
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    key,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const signature = await crypto.subtle.sign('HMAC', cryptoKey, data);
-  return Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
 }
 

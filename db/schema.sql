@@ -45,6 +45,16 @@ CREATE TABLE IF NOT EXISTS rate_limit_logs (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Error Logs 테이블 (에러 로깅용)
+CREATE TABLE IF NOT EXISTS error_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  level TEXT NOT NULL, -- 'error', 'warn', 'info'
+  message TEXT NOT NULL,
+  context TEXT, -- JSON 형식의 추가 컨텍스트
+  stack TEXT, -- 에러 스택 트레이스
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_leads_offer_slug ON leads(offer_slug);
 CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at);
@@ -52,6 +62,8 @@ CREATE INDEX IF NOT EXISTS idx_message_logs_lead_id ON message_logs(lead_id);
 CREATE INDEX IF NOT EXISTS idx_message_logs_channel ON message_logs(channel);
 CREATE INDEX IF NOT EXISTS idx_rate_limit_logs_identifier ON rate_limit_logs(identifier);
 CREATE INDEX IF NOT EXISTS idx_rate_limit_logs_created_at ON rate_limit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_error_logs_level ON error_logs(level);
+CREATE INDEX IF NOT EXISTS idx_error_logs_created_at ON error_logs(created_at);
 
 -- 초기 오퍼 데이터 (예시)
 INSERT OR IGNORE INTO offers (slug, name, description, status, download_link) 

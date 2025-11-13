@@ -4,6 +4,8 @@
  */
 
 import type { D1Database } from '@/types/cloudflare';
+import type { AdminLeadsResponse, LeadListItem, LeadDetail } from '@/types/api';
+import { logError } from '@/lib/utils/error-logger';
 
 interface Env {
   DB: D1Database;
@@ -55,28 +57,32 @@ export async function onRequestGet(context: {
     if (leadId) {
       const lead = await getLeadById(context.env.DB, parseInt(leadId));
       if (!lead) {
-        return new Response(
-          JSON.stringify({ success: false, error: '리드를 찾을 수 없습니다.' }),
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-      return new Response(JSON.stringify({ success: true, data: lead }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ success: false, error: '리드를 찾을 수 없습니다.' } as AdminLeadsResponse),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    return new Response(JSON.stringify({ success: true, data: lead } as AdminLeadsResponse), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
     }
 
     // 리드 목록 조회
     const leads = await getLeadsWithLogs(context.env.DB, limit, offset);
 
-    return new Response(JSON.stringify({ success: true, data: leads }), {
+    return new Response(JSON.stringify({ success: true, data: leads } as AdminLeadsResponse), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Leads fetch error:', error);
+    const err = error instanceof Error ? error : new Error('Unknown error');
+    // 에러 로깅 (console + DB)
+    await logError(context.env.DB, err, {
+      operation: 'admin_leads_fetch',
+    });
     return new Response(
-      JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' }),
+      JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' } as AdminLeadsResponse),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -101,19 +107,7 @@ async function getLeadsWithLogs(
   db: D1Database,
   limit: number,
   offset: number
-): Promise<Array<{
-  id: number;
-  offer_slug: string;
-  name: string;
-  email: string;
-  phone: string;
-  organization: string | null;
-  consent_privacy: boolean;
-  consent_marketing: boolean;
-  created_at: string;
-  email_status: string;
-  sms_status: string;
-}>> {
+): Promise<LeadListItem[]> {
   // N+1 쿼리 문제 해결: JOIN을 사용하여 한 번의 쿼리로 해결
   // SQLite는 LEFT JOIN LATERAL을 지원하지 않으므로 서브쿼리 사용
   const query = `
@@ -175,25 +169,7 @@ interface MessageLogRow {
   sent_at: string;
 }
 
-async function getLeadById(db: D1Database, leadId: number): Promise<{
-  id: number;
-  offer_slug: string;
-  name: string;
-  email: string;
-  phone: string;
-  organization: string | null;
-  consent_privacy: boolean;
-  consent_marketing: boolean;
-  created_at: string;
-  logs: Array<{
-    id: number;
-    lead_id: number;
-    channel: string;
-    status: string;
-    error_message: string | null;
-    sent_at: string;
-  }>;
-} | null> {
+async function getLeadById(db: D1Database, leadId: number): Promise<LeadDetail | null> {
   const lead = await db
     .prepare('SELECT * FROM leads WHERE id = ?')
     .bind(leadId)
@@ -218,7 +194,16 @@ async function getLeadById(db: D1Database, leadId: number): Promise<{
     consent_privacy: Boolean(lead.consent_privacy),
     consent_marketing: Boolean(lead.consent_marketing),
     created_at: lead.created_at,
-    logs: logs.results || [],
+    email_status: 'pending',
+    sms_status: 'pending',
+    logs: (logs.results || []).map((log) => ({
+      id: log.id,
+      lead_id: log.lead_id,
+      channel: log.channel as 'email' | 'sms',
+      status: log.status as 'success' | 'failed' | 'pending',
+      error_message: log.error_message,
+      sent_at: log.sent_at,
+    })),
   };
 }
 
