@@ -1,11 +1,9 @@
-import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { memo } from 'react';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 
 /**
  * Component: MainHeroSection
  * 메인페이지 히어로 섹션
+ * Tailwind CSS 기반
  * @param {() => void} onCtaClick - CTA 버튼 클릭 핸들러 [Required]
  */
 interface Props {
@@ -14,155 +12,94 @@ interface Props {
 
 export default memo(function MainHeroSection({ onCtaClick }: Props) {
   return (
-    <Box
-      component="section"
+    <section
       role="region"
       aria-label="Hero 섹션"
-      sx={{
-        bgcolor: 'neutral.50',
-        py: { xs: 8, sm: 10, md: 16 },
-        px: { xs: 2, sm: 3, md: 0 },
-        position: 'relative',
-        overflow: 'hidden',
-      }}
+      className="bg-gray-50 py-16 md:py-20 lg:py-24 px-4 relative overflow-hidden"
     >
-      <Container maxWidth="lg">
-        <Stack spacing={{ xs: 4, sm: 5, md: 6 }} alignItems="center" textAlign="center">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col items-center text-center space-y-8 md:space-y-10 lg:space-y-12">
           {/* 메인 제목 */}
-          <Typography
-            variant="h1"
-            component="h1"
-            sx={{
-              color: 'text.primary',
-              fontWeight: 700,
-              lineHeight: { xs: 1.5, md: 1.4 },
-              fontSize: { xs: '2.25rem', sm: '2.75rem', md: '3.75rem' },
-              maxWidth: { xs: '100%', md: '1000px' },
-              px: { xs: 1, md: 0 },
-              mb: { xs: 3, md: 4 },
-              letterSpacing: '-0.02em',
-            }}
-          >
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight max-w-5xl px-2 md:px-0 mb-6 md:mb-8 tracking-tight">
             당신의 영업 시간을{' '}
-            <Box component="span" sx={{ color: 'warning.main', display: 'inline-block' }}>
-              절반으로 줄이는
-            </Box>
+            <span className="text-warning inline-block">절반으로 줄이는</span>
             <br />
             AI 보조설계 플랫폼
-          </Typography>
+          </h1>
 
           {/* 부제 */}
-          <Typography
-            variant="h5"
-            component="p"
-            sx={{
-              color: 'text.primary',
-              fontWeight: 500,
-              lineHeight: { xs: 2, md: 1.9 },
-              fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.5rem' },
-              maxWidth: { xs: '100%', md: '900px' },
-              px: { xs: 1, md: 0 },
-              mb: { xs: 2, md: 3 },
-            }}
-          >
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-900 font-medium leading-relaxed max-w-4xl px-2 md:px-0 mb-4 md:mb-6">
             상담 준비, DM 작성, 제안서 초안을{' '}
-            <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>
-              3분 안에 완성
-            </Box>
+            <span className="text-primary font-bold">3분 안에 완성</span>
             하는 새로운 업무 방식
-          </Typography>
+          </p>
 
           {/* 주요 설명 */}
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'text.secondary',
-              fontSize: { xs: '1rem', md: '1.25rem' },
-              maxWidth: { xs: '100%', md: '800px' },
-              lineHeight: { xs: 1.9, md: 1.8 },
-              px: { xs: 1, md: 0 },
-              mb: { xs: 3, md: 4 },
-            }}
-          >
+          <p className="text-base md:text-xl text-gray-600 max-w-3xl leading-relaxed px-2 md:px-0 mb-6 md:mb-8">
             복잡한 입력 없이, 현장에서 바로 쓰는 보험설계사 전용 ChatGPT 자동화 도구.
-          </Typography>
+          </p>
 
           {/* CTA 버튼 */}
-          <Button
-            variant="contained"
-            color="warning"
-            size="large"
+          <button
             onClick={onCtaClick}
-            startIcon={<AutoAwesomeIcon />}
-            sx={{
-              px: { xs: 4, md: 6 },
-              py: { xs: 2.5, md: 2.5 },
-              fontSize: { xs: '1rem', md: '1.125rem' },
-              minHeight: { xs: '48px', md: '56px' },
-              fontWeight: 700,
-              borderRadius: 2,
-              boxShadow: 4,
-              '&:hover': {
-                boxShadow: 6,
-              },
-            }}
             aria-label="무료로 시작하기"
+            className="bg-warning hover:bg-warning-dark text-white font-bold py-3 md:py-4 px-6 md:px-8 rounded-lg text-base md:text-lg shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 min-h-[48px] md:min-h-[56px] flex items-center gap-2"
           >
+            <svg
+              className="w-5 h-5 md:w-6 md:h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
             무료로 시작하기
-          </Button>
+          </button>
 
           {/* 시각적 요소 */}
-          <Box
-            sx={{
-              width: '100%',
-              maxWidth: { xs: '100%', sm: '500px', md: '600px' },
-              height: { xs: '250px', sm: '300px', md: '350px' },
-              mt: { xs: 4, md: 6 },
-              position: 'relative',
-            }}
-          >
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                bgcolor: 'primary.main',
-                borderRadius: { xs: 3, md: 4 },
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: { xs: 2, md: 3 },
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: { xs: 4, md: 8 },
-              }}
-            >
-              <LaptopMacIcon
-                sx={{
-                  fontSize: { xs: '4rem', sm: '5rem', md: '6rem' },
-                  color: 'warning.main',
-                  opacity: 0.9,
-                }}
-              />
-              <AutoAwesomeIcon
-                sx={{
-                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-                  color: 'background.default',
-                  position: 'absolute',
-                  top: { xs: '15%', md: '20%' },
-                  right: { xs: '10%', md: '15%' },
-                  animation: 'pulse 2s ease-in-out infinite',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 0.8, transform: 'scale(1)' },
-                    '50%': { opacity: 1, transform: 'scale(1.1)' },
-                  },
-                }}
-              />
-            </Box>
-          </Box>
-        </Stack>
-      </Container>
-    </Box>
+          <div className="w-full max-w-full sm:max-w-[500px] md:max-w-[600px] h-[250px] sm:h-[300px] md:h-[350px] mt-8 md:mt-12 relative">
+            <div className="w-full h-full bg-primary rounded-xl md:rounded-2xl flex flex-col items-center justify-center gap-4 md:gap-6 relative overflow-hidden shadow-lg md:shadow-xl">
+              {/* 노트북 아이콘 */}
+              <svg
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-warning opacity-90"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+
+              {/* AI 아이콘 (애니메이션) */}
+              <svg
+                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white absolute top-[15%] md:top-[20%] right-[10%] md:right-[15%] animate-pulse"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 });
-

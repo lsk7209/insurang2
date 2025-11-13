@@ -249,9 +249,9 @@ export default function OfferLandingPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             지금 바로 시작하세요
           </h2>
-          <p className="text-center text-gray-600 mb-8 text-lg">
-            아래 정보를 입력하시면 AI 상담 워크북을 무료로 받으실 수 있습니다.
-          </p>
+              <p className="text-center text-gray-600 mb-8 text-lg">
+                아래 정보를 입력하시면 {offerData?.name || 'AI 상담 워크북'}을 무료로 받으실 수 있습니다.
+              </p>
 
           <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg" noValidate>
             {/* 에러 메시지 영역 (ARIA live) */}

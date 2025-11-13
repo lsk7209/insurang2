@@ -2,7 +2,6 @@
 
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box } from '@mui/material';
 import MainHeroSection from '@/components/landing/MainHeroSection';
 import WhyNeededSection from '@/components/landing/WhyNeededSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
@@ -16,6 +15,7 @@ import Footer from '@/components/layout/Footer';
 /**
  * Main Landing Page
  * 메인페이지 - 보험설계사 대상 AI 마케팅 플랫폼 소개
+ * Tailwind CSS 기반
  */
 export default function MainPage() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function MainPage() {
   }, [router]);
 
   return (
-    <Box component="main" role="main" position="relative">
+    <main role="main" className="relative min-h-screen">
       {/* 1. 히어로 섹션 */}
       <MainHeroSection onCtaClick={handleCtaClick} />
 
@@ -64,6 +64,6 @@ export default function MainPage() {
 
       {/* Footer */}
       <Footer />
-    </Box>
+    </main>
   );
 }
