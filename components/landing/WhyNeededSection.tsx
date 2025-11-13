@@ -1,163 +1,116 @@
-import { Box, Container, Typography, Stack, Grid } from '@mui/material';
-import { memo } from 'react';
-import { useScrollAnimation } from '@/hooks/use-scroll-animation';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import MessageIcon from '@mui/icons-material/Message';
-import DescriptionIcon from '@mui/icons-material/Description';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { memo, useRef, useEffect, useState } from 'react';
 
 /**
  * Component: WhyNeededSection
  * 왜 필요한가 섹션 (페인포인트 → 해결 제시)
+ * Tailwind CSS 기반
  */
 export default memo(function WhyNeededSection() {
-  const [ref, isVisible] = useScrollAnimation();
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
 
   const painPoints = [
     {
-      icon: <AccessTimeIcon />,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
       text: '상담 준비에 매번 1시간씩 걸린다',
     },
     {
-      icon: <MessageIcon />,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
       text: 'DM 문안이 매번 비슷하고 반응이 낮다',
     },
     {
-      icon: <DescriptionIcon />,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
       text: '약관·상품 설명을 고객 눈높이로 쉽게 바꾸기 어렵다',
     },
     {
-      icon: <CampaignIcon />,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+        </svg>
+      ),
       text: '콘텐츠·홍보가 필요하지만 시간 여유가 없다',
     },
   ];
 
   return (
-    <Box
+    <section
       ref={ref}
-      component="section"
       role="region"
       aria-label="왜 필요한가 섹션"
-      sx={{
-        bgcolor: 'background.default',
-        py: { xs: 8, sm: 10, md: 14 },
-        px: { xs: 2, sm: 3, md: 0 },
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
-      }}
+      className={`bg-white py-16 md:py-20 lg:py-24 px-4 transition-opacity duration-600 ease-out transition-transform duration-600 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
     >
-      <Container maxWidth="lg">
-        <Stack spacing={{ xs: 5, sm: 6, md: 8 }} alignItems="center">
-          {/* 제목 */}
-          <Typography
-            variant="h2"
-            component="h2"
-            sx={{
-              color: 'text.primary',
-              textAlign: 'center',
-              fontWeight: 700,
-              lineHeight: { xs: 1.6, md: 1.5 },
-              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
-              maxWidth: { xs: '100%', md: '1000px' },
-              px: { xs: 1, md: 0 },
-              mb: { xs: 2, md: 3 },
-              letterSpacing: '-0.01em',
-            }}
-          >
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6 md:mb-8 leading-tight">
             보험영업, 더 이상 혼자서 모든 걸 할 필요는 없습니다
-          </Typography>
+          </h2>
+        </div>
 
-          {/* 페인포인트 리스트 */}
-          <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ mt: { xs: 2, md: 4 } }}>
-            {painPoints.map((point, index) => (
-              <Grid item xs={12} sm={6} key={index}>
-                <Box
-                  sx={{
-                    p: { xs: 3, md: 3.5 },
-                    bgcolor: 'neutral.50',
-                    borderRadius: 3,
-                    height: '100%',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      boxShadow: 3,
-                      borderColor: 'primary.light',
-                      transform: 'translateY(-2px)',
-                    },
-                  }}
-                >
-                  <Stack direction="row" spacing={2} alignItems="flex-start">
-                    <Box
-                      sx={{
-                        color: 'warning.main',
-                        display: 'flex',
-                        alignItems: 'center',
-                        flexShrink: 0,
-                        fontSize: { xs: '2rem', md: '2.5rem' },
-                        '& svg': {
-                          fontSize: { xs: '2rem', md: '2.5rem' },
-                        },
-                      }}
-                    >
-                      {point.icon}
-                    </Box>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        fontSize: { xs: '1rem', md: '1.125rem' },
-                        lineHeight: { xs: 1.8, md: 1.7 },
-                        color: 'text.primary',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {point.text}
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+        {/* 페인포인트 그리드 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16">
+          {painPoints.map((point, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-4 p-6 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                {point.icon}
+              </div>
+              <p className="text-lg md:text-xl text-gray-900 font-medium leading-relaxed flex-1">
+                {point.text}
+              </p>
+            </div>
+          ))}
+        </div>
 
-          {/* 해결 메시지 */}
-          <Box
-            sx={{
-              mt: { xs: 4, md: 6 },
-              p: { xs: 3, md: 4 },
-              bgcolor: 'primary.main',
-              borderRadius: 3,
-              maxWidth: { xs: '100%', md: '800px' },
-              width: '100%',
-            }}
-          >
-            <Stack direction="row" spacing={2} alignItems="flex-start">
-              <CheckCircleIcon
-                sx={{
-                  color: 'warning.main',
-                  fontSize: { xs: '2rem', md: '2.5rem' },
-                  flexShrink: 0,
-                }}
-              />
-              <Typography
-                variant="h6"
-                sx={{
-                  color: 'background.default',
-                  fontSize: { xs: '1.125rem', md: '1.375rem' },
-                  lineHeight: { xs: 1.8, md: 1.7 },
-                  fontWeight: 600,
-                }}
-              >
-                이 모든 업무를 AI가 초안으로 만들어주면,
-                <br />
-                설계사는 핵심 대화·상담에만 집중할 수 있습니다.
-              </Typography>
-            </Stack>
-          </Box>
-        </Stack>
-      </Container>
-    </Box>
+        {/* 해결 메시지 */}
+        <div className="bg-gradient-to-r from-primary/10 to-warning/10 rounded-2xl p-8 md:p-12 text-center border border-primary/20">
+          <div className="flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 md:w-10 md:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-relaxed max-w-4xl mx-auto">
+            이 모든 업무를 AI가 초안으로 만들어주면, 설계사는{' '}
+            <span className="text-primary">핵심 대화·상담에만 집중</span>할 수 있습니다.
+          </p>
+        </div>
+      </div>
+    </section>
   );
 });
-
