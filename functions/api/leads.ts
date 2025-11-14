@@ -146,21 +146,17 @@ export async function onRequestPost(context: {
         }
       );
     } else {
-      // SMS 발송 실패 로그 기록
-      await logError(context.env.DB, new Error('Solapi API configuration missing'), {
-        operation: 'sms_send',
-        lead_id: leadId,
-      });
-      context.env.DB.prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-        .bind(leadId, 'sms', 'failed', 'Solapi API configuration missing')
-        .run()
-        .catch(async (err) => {
-          const error = err instanceof Error ? err : new Error(String(err));
-          await logError(context.env.DB, error, {
-            operation: 'message_log_insert',
-            lead_id: leadId,
-          });
-        });
+      // SMS 환경 변수가 없으면 경고만 로그 (에러 아님)
+      console.warn('[Leads API] SMS configuration missing - SMS will not be sent');
+      // 메시지 로그에 기록 (선택사항)
+      try {
+        await context.env.DB.prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
+          .bind(leadId, 'sms', 'skipped', 'SMS configuration not available')
+          .run();
+      } catch (logError) {
+        // 로그 실패는 무시 (비중요)
+        console.warn('[Leads API] Failed to log SMS skip:', logError);
+      }
     }
 
     return new Response(JSON.stringify({ success: true } as LeadCreateResponse), {
