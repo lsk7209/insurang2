@@ -226,7 +226,9 @@ export default function OfferLandingPage() {
                   </button>
                 </div>
                 <div className="absolute bottom-[-60px] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-text-light/70 dark:text-text-dark/70" aria-hidden="true">
-                  <span className="material-symbols-outlined animate-bounce">south</span>
+                  <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
                 </div>
               </>
             )}
@@ -258,7 +260,9 @@ export default function OfferLandingPage() {
               <div className="flex flex-col gap-4 text-left">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 text-accent">
-                    <span className="material-symbols-outlined text-3xl">psychology</span>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary dark:text-white">고객 유형별 심리 분석 및 접근법</h3>
@@ -269,7 +273,9 @@ export default function OfferLandingPage() {
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 text-accent">
-                    <span className="material-symbols-outlined text-3xl">checklist</span>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary dark:text-white">상담 단계별 필수 질문 체크리스트</h3>
@@ -280,7 +286,9 @@ export default function OfferLandingPage() {
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 text-accent">
-                    <span className="material-symbols-outlined text-3xl">gavel</span>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary dark:text-white">거절에 대응하는 반론 화법 5가지</h3>
@@ -308,17 +316,29 @@ export default function OfferLandingPage() {
             <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 {
-                  icon: 'timer',
+                  icon: (
+                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
                   title: '상담 시간 50% 단축',
                   desc: 'AI가 분석한 핵심 질문으로 불필요한 과정을 없애고 상담의 질을 높입니다.',
                 },
                 {
-                  icon: 'mood',
+                  icon: (
+                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
                   title: '고객 만족도 30% 상승',
                   desc: '고객 유형별 맞춤 응대 전략으로 모든 고객에게 최고의 경험을 선사합니다.',
                 },
                 {
-                  icon: 'trending_up',
+                  icon: (
+                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  ),
                   title: '계약 성공률 2배 증가',
                   desc: '데이터 기반의 설득 논리로 고객의 최종 결정을 이끌어내는 클로징 팁을 제공합니다.',
                 },
@@ -328,7 +348,7 @@ export default function OfferLandingPage() {
                   className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-background-dark/50 p-6 text-center transition-transform hover:scale-105 hover:shadow-xl"
                 >
                   <div className="mx-auto text-accent">
-                    <span className="material-symbols-outlined text-4xl">{item.icon}</span>
+                    {item.icon}
                   </div>
                   <h3 className="text-lg font-bold text-primary dark:text-white">{item.title}</h3>
                   <p className="text-sm text-text-light/80 dark:text-text-dark/80">{item.desc}</p>

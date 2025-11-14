@@ -70,19 +70,31 @@ export default function MainPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
-                icon: 'group_off',
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                ),
                 label: '어려움 #1',
                 title: '신규 고객 발굴의 한계',
                 description: '지인 영업은 끝났고, 새로운 잠재고객을 찾는 것은 막막하기만 합니다.',
               },
               {
-                icon: 'request_quote',
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                ),
                 label: '어려움 #2',
                 title: '과도한 행정 업무 부담',
                 description: '수많은 서류 작업과 고객 관리, 정작 중요한 영업에 집중할 시간이 부족합니다.',
               },
               {
-                icon: 'trending_down',
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                ),
                 label: '어려움 #3',
                 title: '낮아지는 계약 성공률',
                 description: '고객들은 더 많은 정보를 원하고, 기존의 상담 방식으로는 마음을 얻기 어렵습니다.',
@@ -93,7 +105,7 @@ export default function MainPage() {
                 className="flex flex-col items-start justify-start rounded-xl p-6 sm:p-8 bg-white dark:bg-background-dark border border-subtle-light dark:border-subtle-dark shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <span className="material-symbols-outlined text-2xl">{pain.icon}</span>
+                  {pain.icon}
                 </div>
                 <p className="text-primary text-sm font-bold leading-normal">{pain.label}</p>
                 <h3 className="text-lg font-bold leading-tight tracking-[-0.015em] mt-1 font-display">{pain.title}</h3>
@@ -142,19 +154,31 @@ export default function MainPage() {
           <div className="space-y-10 max-w-3xl mx-auto">
             {[
               {
-                icon: 'auto_awesome',
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                ),
                 title: 'AI 콘텐츠 자동 생성',
                 description:
                   '블로그 포스팅, 고객 맞춤형 정보, SNS 게시물을 AI가 순식간에 만들어 드립니다. 더 이상 콘텐츠 고민에 시간을 낭비하지 마세요.',
               },
               {
-                icon: 'manage_search',
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                ),
                 title: '잠재고객 발굴 및 분석',
                 description:
                   'AI를 활용해 온라인에서 당신의 가망 고객을 찾아내고, 고객의 니즈를 미리 파악하여 정확한 제안을 할 수 있도록 돕습니다.',
               },
               {
-                icon: 'task_alt',
+                icon: (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ),
                 title: '업무 자동화 및 효율 증대',
                 description:
                   '반복적인 행정 업무와 고객 응대를 AI에게 맡기고, 설계사님은 오직 고객과의 깊이 있는 상담에만 집중하세요.',
@@ -162,7 +186,7 @@ export default function MainPage() {
             ].map((solution, index) => (
               <div key={index} className="flex items-start gap-4 sm:gap-6">
                 <div className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white mt-1">
-                  <span className="material-symbols-outlined text-2xl">{solution.icon}</span>
+                  {solution.icon}
                 </div>
                 <div>
                   <h4 className="text-xl sm:text-2xl font-bold font-display">{solution.title}</h4>
