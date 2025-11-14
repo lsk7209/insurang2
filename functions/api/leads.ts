@@ -26,6 +26,7 @@ export async function onRequestPost(context: {
   request: Request;
   env: Env;
 }): Promise<Response> {
+  console.log('[Leads API] POST request received');
   try {
     // Rate Limiting 체크 (MVP: 간단한 IP 기반)
     const clientId = getClientIdentifier(context.request);
@@ -159,9 +160,17 @@ export async function onRequestPost(context: {
       }
     }
 
-    return new Response(JSON.stringify({ success: true } as LeadCreateResponse), {
+    const responseBody = { success: true } as LeadCreateResponse;
+    console.log('[Leads API] Success response:', { leadId, offer_slug: offer_slug });
+    
+    return new Response(JSON.stringify(responseBody), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
     });
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error('Unknown error');

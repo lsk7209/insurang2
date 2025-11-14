@@ -149,18 +149,21 @@ export default function MainPage() {
       let result;
       try {
         result = await response.json();
+        console.log('[Main Page] API Response:', result);
       } catch (parseError) {
-        console.error('JSON parse error:', parseError);
+        console.error('[Main Page] JSON parse error:', parseError);
         alert('응답 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         setIsSubmitting(false);
         return;
       }
 
       if (result.success) {
+        console.log('[Main Page] Form submission successful, redirecting to thanks page...');
         await new Promise((resolve) => setTimeout(resolve, 500));
         router.push('/offer/workbook/thanks');
       } else {
         const errorMessage = result.error || '신청 처리 중 오류가 발생했습니다.';
+        console.error('[Main Page] API returned success: false', { error: errorMessage, result });
         alert(errorMessage);
         setIsSubmitting(false);
       }

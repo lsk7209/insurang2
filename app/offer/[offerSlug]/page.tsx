@@ -126,19 +126,59 @@ export default function OfferLandingPage() {
         }),
       });
 
-      const result = await response.json();
+      // HTTP 상태 코드 확인
+      if (!response.ok) {
+        let errorMessage = '신청 처리 중 오류가 발생했습니다.';
+        try {
+          const errorResult = await response.json();
+          errorMessage = errorResult.error || errorMessage;
+        } catch {
+          // JSON 파싱 실패 시 상태 코드 기반 메시지
+          if (response.status === 400) {
+            errorMessage = '입력 정보를 확인해주세요.';
+          } else if (response.status === 429) {
+            errorMessage = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+          } else if (response.status >= 500) {
+            errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          }
+        }
+        alert(errorMessage);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 성공 응답 파싱
+      let result;
+      try {
+        result = await response.json();
+        console.log(`[Offer Page] API Response for ${offerSlug}:`, result);
+      } catch (parseError) {
+        console.error(`[Offer Page] JSON parse error for ${offerSlug}:`, parseError);
+        alert('응답 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        setIsSubmitting(false);
+        return;
+      }
 
       if (result.success) {
+        console.log(`[Offer Page] Form submission successful for ${offerSlug}, redirecting to thanks page...`);
         await new Promise((resolve) => setTimeout(resolve, 500));
         router.push(`/offer/${offerSlug}/thanks`);
       } else {
         const errorMessage = result.error || '신청 처리 중 오류가 발생했습니다.';
+        console.error(`[Offer Page] API returned success: false for ${offerSlug}`, { error: errorMessage, result });
         alert(errorMessage);
         setIsSubmitting(false);
       }
     } catch (error) {
       console.error('Form submission error:', error);
-      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      let errorMessage = '알 수 없는 오류가 발생했습니다.';
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       alert(`신청 처리 중 오류가 발생했습니다: ${errorMessage}\n\n잠시 후 다시 시도해주세요.`);
       setIsSubmitting(false);
     }
