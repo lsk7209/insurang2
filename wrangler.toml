@@ -2,6 +2,7 @@
 name = "insurang-landing"
 compatibility_date = "2024-01-01"
 # Next.js output: 'export' 사용 시 빌드 출력 디렉토리는 'out'
+# Cloudflare Pages는 자동으로 'out' 디렉토리를 인식합니다
 pages_build_output_dir = "out"
 
 # D1 데이터베이스 바인딩
@@ -11,15 +12,21 @@ database_name = "insurang-db"
 database_id = "62f0fdda-f6db-4627-91ce-49825760998b"
 
 # Cron Triggers (일일 리포트)
-# Cloudflare Dashboard에서도 설정 가능
-# Pages Functions의 Cron은 별도 Worker로 배포하거나
-# Cloudflare Dashboard > Workers & Pages > Cron Triggers에서 설정
 # 
-# 참고: Pages Functions의 Cron은 functions/_worker.ts에 통합하거나
-# 별도 Worker로 배포해야 합니다.
+# 방법 1: Cloudflare Dashboard에서 설정 (권장)
+# 1. Cloudflare Dashboard > Workers & Pages > Pages > insurang-landing
+# 2. Settings > Functions > Cron Triggers
+# 3. Add Cron Trigger 클릭
+# 4. Schedule: "0 9 * * *" (매일 오전 9시 UTC)
+# 5. Worker: functions/_worker.ts 선택
+#
+# 방법 2: 별도 Worker로 배포
+# wrangler deploy --name insurang-cron --compatibility-date 2024-01-01
+#
+# 참고: Pages Functions의 Cron은 functions/_worker.ts의 scheduled 핸들러를 사용합니다.
 # 
 # [[triggers.crons]]
-# cron = "0 9 * * *"  # 매일 오전 9시 (UTC)
+# cron = "0 9 * * *"  # 매일 오전 9시 (UTC) - 별도 Worker 배포 시 사용
 
 # 환경 변수 설정
 # 

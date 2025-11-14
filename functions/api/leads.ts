@@ -17,9 +17,9 @@ interface Env {
   RESEND_API_KEY?: string;
   SENDGRID_API_KEY?: string;
   SMTP_FROM?: string;
-  SOLAPI_API_KEY: string;
-  SOLAPI_API_SECRET: string;
-  SOLAPI_SENDER_PHONE: string;
+  SOLAPI_API_KEY?: string;
+  SOLAPI_API_SECRET?: string;
+  SOLAPI_SENDER_PHONE?: string;
 }
 
 export async function onRequestPost(context: {

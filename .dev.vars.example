@@ -1,0 +1,21 @@
+# Cloudflare Pages Functions 로컬 개발용 환경 변수
+# 이 파일을 복사하여 .dev.vars 파일을 생성하고 실제 값을 입력하세요.
+# .dev.vars 파일은 .gitignore에 포함되어 있어 Git에 커밋되지 않습니다.
+
+# 이메일 서비스 (Resend 또는 SendGrid 중 하나 선택)
+RESEND_API_KEY=your-resend-api-key-here
+# 또는
+# SENDGRID_API_KEY=your-sendgrid-api-key-here
+
+# 발신자 이메일 주소
+SMTP_FROM=noreply@yourdomain.com
+
+# SMS 서비스 (솔라피)
+SOLAPI_API_KEY=your-solapi-api-key-here
+SOLAPI_API_SECRET=your-solapi-api-secret-here
+SOLAPI_SENDER_PHONE=01012345678
+
+# 관리자 인증 (선택사항)
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-secure-password-here
+
