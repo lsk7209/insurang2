@@ -22,6 +22,19 @@ interface Env {
   SOLAPI_SENDER_PHONE?: string;
 }
 
+// CORS preflight 요청 처리
+export async function onRequestOptions(): Promise<Response> {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}
+
 export async function onRequestPost(context: {
   request: Request;
   env: Env;
