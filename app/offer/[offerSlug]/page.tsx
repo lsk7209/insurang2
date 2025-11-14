@@ -161,8 +161,14 @@ export default function OfferLandingPage() {
 
       if (result.success) {
         console.log(`[Offer Page] Form submission successful for ${offerSlug}, redirecting to thanks page...`);
+        // 정적 빌드 환경에서도 안정적으로 작동하도록 window.location 사용
         await new Promise((resolve) => setTimeout(resolve, 500));
-        router.push(`/offer/${offerSlug}/thanks`);
+        try {
+          router.push(`/offer/${offerSlug}/thanks`);
+        } catch (routerError) {
+          console.warn(`[Offer Page] router.push failed for ${offerSlug}, using window.location:`, routerError);
+          window.location.href = `/offer/${offerSlug}/thanks`;
+        }
       } else {
         const errorMessage = result.error || '신청 처리 중 오류가 발생했습니다.';
         console.error(`[Offer Page] API returned success: false for ${offerSlug}`, { error: errorMessage, result });
