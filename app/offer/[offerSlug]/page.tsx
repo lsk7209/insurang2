@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { validateEmail, validatePhone, normalizePhone } from '@/lib/utils/validation';
+import Header from '@/components/layout/Header';
 
 interface OfferData {
   id: number;
@@ -174,275 +175,428 @@ export default function OfferLandingPage() {
   }, [offerSlug]);
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <div className="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark text-text-primary dark:text-text-dark font-display">
+      {/* Header */}
+      <Header onCtaClick={handleCtaClick} ctaText="AI 상담 워크북 받기" />
+
       {/* Loading Overlay */}
       {isSubmitting && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="loading-title">
           <div className="bg-white rounded-lg p-8 flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <p className="text-gray-900 font-medium">신청 처리 중...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" aria-hidden="true"></div>
+            <p id="loading-title" className="text-gray-900 font-medium">신청 처리 중...</p>
           </div>
         </div>
       )}
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-16 md:py-24 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          {isLoadingOffer ? (
-            <div className="py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" aria-label="로딩 중"></div>
-              <p className="text-gray-600" aria-live="polite">로딩 중...</p>
-            </div>
-          ) : (
-            <>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                {offerData?.name || 'AI 상담 워크북'}
-              </h1>
-              {offerData?.description && (
-                <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
-                  {offerData.description}
-                </p>
-              )}
-              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                복잡한 입력 없이, 현장에서 바로 쓰는 보험설계사 전용 ChatGPT 자동화 도구.
-              </p>
-            </>
-          )}
-          <button
-            onClick={handleCtaClick}
-            aria-label="신청 폼으로 이동"
-            className="bg-warning hover:bg-warning-dark text-white font-bold py-4 px-8 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            무료로 시작하기
-          </button>
-        </div>
-      </section>
-
-      {/* Key Benefits Section */}
-      <section className="py-16 md:py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            설계사의 시간을 돌려주는 실무 중심 기능
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { title: '상담 준비 자동화', desc: '고객 시나리오 요약, 상담 흐름, 질문리스트 생성' },
-              { title: '제안서 초안 생성', desc: '상품 비교표, 가입근거 문장, 이해하기 쉬운 요약' },
-              { title: 'DM·문자·SNS 카피', desc: '응답률을 높이는 문장 자동 구성' },
-              { title: '약관 핵심요약', desc: '고객 친화적 설명문 자동 생성' },
-            ].map((feature, idx) => (
-              <div
-                key={idx}
-                className="p-6 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-lg transition-shadow"
-              >
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
+      <main className="flex-1">
+        {/* Section 1: Hero */}
+        <section className="relative py-20 sm:py-24 lg:py-32" role="region" aria-label="히어로 섹션">
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-5"
+            style={{
+              backgroundImage:
+                'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA4yagbPVTg-Qkmjqg8im1y7hpZmmkqHQq0KXQt09GN6q_UuwcESTvdRzp8_M1kcKfrgpt78PBQs45bj76iA5lMErTdRmlUpTpFKIzYTP8oOLhHJTMlOOndejFPoXbUBNd1ozj53PKcStyZN2YnN9Dm4MCbM9tpu2mcF0dr3dmeMxFvKYuZNAIy9D_MIP26Wweav9o_j1lWKBYfCn7I0c5_j15kUPHh-XtHtjf9B4EbnEO1qXa-Jn6FqlRnWwIlw1xoN7LQE6QeJ2NV")',
+            }}
+            aria-hidden="true"
+          />
+          <div className="relative container mx-auto max-w-5xl px-4 text-center">
+            {isLoadingOffer ? (
+              <div className="py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" aria-label="로딩 중"></div>
+                <p className="text-text-primary dark:text-text-dark" aria-live="polite">로딩 중...</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Application Form Section */}
-      <section id="application-form-section" className="py-16 md:py-20 px-4 bg-gray-50">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
-            지금 바로 시작하세요
-          </h2>
-              <p className="text-center text-gray-600 mb-8 text-lg">
-                아래 정보를 입력하시면 {offerData?.name || 'AI 상담 워크북'}을 무료로 받으실 수 있습니다.
-              </p>
-
-          <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg" noValidate>
-            {/* 에러 메시지 영역 (ARIA live) */}
-            {Object.keys(errors).length > 0 && (
-              <div
-                role="alert"
-                aria-live="polite"
-                aria-atomic="true"
-                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
-              >
-                <p className="text-sm font-medium text-red-800 mb-2">입력 오류가 있습니다. 아래 항목을 확인해주세요.</p>
-                <ul className="list-disc list-inside text-sm text-red-700">
-                  {Object.values(errors).map((error, idx) => (
-                    <li key={idx}>{error}</li>
-                  ))}
-                </ul>
-              </div>
+            ) : (
+              <>
+                <div className="mx-auto max-w-3xl">
+                  <h1 className="text-4xl font-black leading-tight tracking-tight text-primary dark:text-white sm:text-5xl lg:text-6xl">
+                    혹시 매일 같은 상담에 지치지 않으셨나요?
+                  </h1>
+                  <p className="mt-6 text-lg leading-relaxed text-text-primary dark:text-text-dark sm:text-xl">
+                    반복되는 질문, 끝없는 자료 준비에서 벗어나 고객의 마음에만 집중하세요. AI가 당신의 상담을 혁신합니다.
+                  </p>
+                </div>
+                <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                  <button
+                    onClick={handleCtaClick}
+                    className="flex w-full sm:w-auto min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-8 bg-cta text-white text-lg font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cta focus:ring-offset-2"
+                    aria-label="AI 상담 워크북 무료로 받기"
+                  >
+                    <span className="truncate">AI 상담 워크북 무료로 받기</span>
+                  </button>
+                </div>
+                <div className="absolute bottom-[-60px] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-text-primary/70 dark:text-text-dark/70" aria-hidden="true">
+                  <span className="material-symbols-outlined animate-bounce">south</span>
+                </div>
+              </>
             )}
+          </div>
+        </section>
 
-            <div className="space-y-6">
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  이름 <span className="text-red-500" aria-label="필수 항목">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange('name')}
-                  aria-invalid={errors.name ? 'true' : 'false'}
-                  aria-describedby={errors.name ? 'name-error' : undefined}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  required
-                />
-                {errors.name && (
-                  <p id="name-error" className="mt-1 text-sm text-red-500" role="alert">
-                    {errors.name}
-                  </p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  이메일 <span className="text-red-500" aria-label="필수 항목">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange('email')}
-                  aria-invalid={errors.email ? 'true' : 'false'}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  required
-                />
-                {errors.email && (
-                  <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  휴대폰 번호 <span className="text-red-500" aria-label="필수 항목">*</span>
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange('phone')}
-                  placeholder="010-1234-5678"
-                  aria-invalid={errors.phone ? 'true' : 'false'}
-                  aria-describedby={errors.phone ? 'phone-error' : 'phone-hint'}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  required
-                />
-                {errors.phone ? (
-                  <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">
-                    {errors.phone}
-                  </p>
-                ) : (
-                  <p id="phone-hint" className="mt-1 text-sm text-gray-500">예: 010-1234-5678</p>
-                )}
-              </div>
-
-              {/* Organization */}
-              <div>
-                <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
-                  소속 <span className="text-gray-500 text-xs">(선택)</span>
-                </label>
-                <input
-                  type="text"
-                  id="organization"
-                  name="organization"
-                  value={formData.organization}
-                  onChange={handleChange('organization')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        {/* Section 2: Offer Preview */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-background-dark/50" role="region" aria-label="오퍼 미리보기 섹션">
+          <div className="container mx-auto max-w-5xl px-4">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
+                AI 상담 워크북, 이런 내용을 담았습니다
+              </h2>
+              <p className="mt-4 max-w-2xl mx-auto text-base text-text-primary/80 dark:text-text-dark/80">
+                고객의 첫마디부터 계약서 사인까지, 모든 단계를 체계적으로 안내하는 실전 가이드입니다.
+              </p>
+            </div>
+            <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-center">
+              <div className="w-full h-auto aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                <div
+                  className="w-full h-full bg-center bg-no-repeat bg-cover"
+                  style={{
+                    backgroundImage:
+                      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuApdcnBuidW2a8iye1uLx_TLeOi0L-CKTAQ5CHI-QLQi66MEKUUPeN5B0oT7btyuRG8Jc9-r6tWj6fZWb8rX6bjiRzJk-LKaEdEj_z5RmhoYAtdBvz0SRtyFOkp3uLRhNsjebOOntzGGKA49tRkiL97Tp2t27cuogPUVAPLCXWIAgDNMHAxeiQFV-ezvde9mPMvgOOIdOqK34zSLpAUnEQmFOQpnPZ63ullzYlDlIEc2PRonJZrbHzq_Bl2gJ2PQnkiCcyTjw-Fvj5p")',
+                  }}
+                  aria-label="워크북 샘플 페이지"
                 />
               </div>
+              <div className="flex flex-col gap-4 text-left">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 text-accent">
+                    <span className="material-symbols-outlined text-3xl">psychology</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-primary dark:text-white">고객 유형별 심리 분석 및 접근법</h3>
+                    <p className="mt-1 text-sm text-text-primary/80 dark:text-text-dark/80">
+                      분석형, 우호형 등 4가지 고객 유형을 파악하고 마음을 여는 대화 전략을 제시합니다.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 text-accent">
+                    <span className="material-symbols-outlined text-3xl">checklist</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-primary dark:text-white">상담 단계별 필수 질문 체크리스트</h3>
+                    <p className="mt-1 text-sm text-text-primary/80 dark:text-text-dark/80">
+                      상담의 흐름을 주도하고 고객의 핵심 니즈를 정확히 파악하는 질문들로 구성되어 있습니다.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 text-accent">
+                    <span className="material-symbols-outlined text-3xl">gavel</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-primary dark:text-white">거절에 대응하는 반론 화법 5가지</h3>
+                    <p className="mt-1 text-sm text-text-primary/80 dark:text-text-dark/80">
+                      고객의 거절을 기회로 바꾸는 데이터 기반의 설득 논리와 클로징 팁을 제공합니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-              {/* Consent Checkboxes */}
-              <fieldset className="space-y-3">
-                <legend className="sr-only">동의 항목</legend>
-                <div>
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      id="consent_privacy"
-                      name="consent_privacy"
-                      checked={formData.consent_privacy}
-                      onChange={handleChange('consent_privacy')}
-                      aria-invalid={errors.consent_privacy ? 'true' : 'false'}
-                      aria-describedby={errors.consent_privacy ? 'consent_privacy-error' : undefined}
-                      className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+        {/* Section 3: Value Section */}
+        <section className="py-16 sm:py-20 lg:py-24" role="region" aria-label="가치 섹션">
+          <div className="container mx-auto max-w-5xl px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
+                워크북 하나로 당신의 상담이 달라집니다
+              </h2>
+              <p className="mt-4 text-base text-text-primary/80 dark:text-text-dark/80">
+                단순한 스크립트가 아닙니다. 고객의 마음을 열고 계약으로 이끄는 과학적인 상담 전략입니다.
+              </p>
+            </div>
+            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  icon: 'timer',
+                  title: '상담 시간 50% 단축',
+                  desc: 'AI가 분석한 핵심 질문으로 불필요한 과정을 없애고 상담의 질을 높입니다.',
+                },
+                {
+                  icon: 'mood',
+                  title: '고객 만족도 30% 상승',
+                  desc: '고객 유형별 맞춤 응대 전략으로 모든 고객에게 최고의 경험을 선사합니다.',
+                },
+                {
+                  icon: 'trending_up',
+                  title: '계약 성공률 2배 증가',
+                  desc: '데이터 기반의 설득 논리로 고객의 최종 결정을 이끌어내는 클로징 팁을 제공합니다.',
+                },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-background-dark/50 p-6 text-center transition-transform hover:scale-105 hover:shadow-xl"
+                >
+                  <div className="mx-auto text-accent">
+                    <span className="material-symbols-outlined text-4xl">{item.icon}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-primary dark:text-white">{item.title}</h3>
+                  <p className="text-sm text-text-primary/80 dark:text-text-dark/80">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Section 4: Trust Section */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-background-dark/50" role="region" aria-label="신뢰 섹션">
+          <div className="container mx-auto max-w-5xl px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
+                먼저 경험한 설계사들의 생생한 후기
+              </h2>
+              <p className="mt-4 text-base text-text-primary/80 dark:text-text-dark/80">
+                이미 많은 분들이 INSURANG과 함께 최고의 성과를 만들고 있습니다.
+              </p>
+            </div>
+            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  name: '김민준 설계사',
+                  company: 'AIA생명',
+                  image:
+                    'https://lh3.googleusercontent.com/aida-public/AB6AXuB-6WcE3jby_vcv8z1lUrj8l6n5Or_RD1mfZ8gOIg0qn2EnDq8l0BihWQiG3Qgqw6cxPyQ5ra4HGJTNaYJfZMvdzPkSWBiesS0cNd_5vqGEwm8-XWwDiqeZYAze4CfJroK356AOwbglxpsXrqz2Uj2wW04O6XNbFFQwNsj67h3opzsP2MWUXzFEeInywLdJcVKo7hqEGv0IU9gP8JgJ85oX7aLn7Z7HuqqCIjZYaeiM6v9qUoZOgM2KlqNYYDFYJdOZ26mStU_XIDj6',
+                  review:
+                    '"매번 상담 준비에만 몇 시간을 썼는데, 워크북 덕분에 핵심만 짚어 상담할 수 있게 됐어요. 고객 반응부터 달라졌습니다."',
+                },
+                {
+                  name: '이서연 설계사',
+                  company: '메리츠화재',
+                  image:
+                    'https://lh3.googleusercontent.com/aida-public/AB6AXuDiL18lIzd5wJ1a3G8XR1ZW0myX_kvX3dBpUbTq4jJzYsoc5Eln6mmr_HQ7sbA2ieyN1ZrIilqfDBhVBgt_BlU34q8Xk88FzBInwhfhzTlbHGYAYktlZzfRjbmCBQtl6E0Jp487rUIqorLrknlmh3As_u5ZoPsFQX1FuQFn0cNMpYlexyBFIOlljkzNXq-AV0M2xTNyTrDn7heAq6ffSp3yFYgMm4nIAv-_ZugpGfXUEn_N4RDU9w2yXE3QBTp9x5AICDwT3mxOJePL',
+                  review:
+                    '"신입이라 상담이 막막했는데, 워크북이 훌륭한 멘토가 되어주었습니다. 특히 거절 대응 파트가 정말 큰 도움이 됐어요."',
+                },
+                {
+                  name: '박지훈 팀장',
+                  company: 'DB손해보험',
+                  image:
+                    'https://lh3.googleusercontent.com/aida-public/AB6AXuBJOld1Sg7unFatsojatL12hvygG4dJ4WtFrSOJqNhzdE-WC3ZPcDGO0i9Yc0gDWBSHvUYLJA1aDEZ2yIguHI3AtOYCXJLIAoSw9YsN3QErXKBVjx8ky_gWcVenp1VAjGt1IexkGqi2h9658MSYW8wtrIpn-auftih7tbneEgxTGQzqMzhq7Sa73E8scsSdT5wLNN_-wQsPJtwW5SPEPHWa8b1GlktNtKeDkOKvHrsshuNzTTuN7CEKzWESTUyFZogDAE54grR86FsF',
+                  review:
+                    '"팀원 교육 자료로 활용하고 있습니다. 체계적인 내용 덕분에 팀 전체의 상담 능력이 상향 평준화되었습니다."',
+                },
+              ].map((testimonial, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-slate-200 bg-background-light dark:border-slate-800 dark:bg-background-dark p-6"
+                >
+                  <div className="flex items-center gap-4">
+                    <img
+                      className="h-12 w-12 rounded-full object-cover"
+                      src={testimonial.image}
+                      alt={`${testimonial.name} 프로필 사진`}
                     />
-                    <span className={`text-sm ${errors.consent_privacy ? 'text-red-500' : 'text-gray-700'}`}>
-                      개인정보 수집 및 이용에 동의합니다. <span className="text-red-500" aria-label="필수 항목">(필수)</span>
-                    </span>
+                    <div>
+                      <p className="font-bold text-primary dark:text-white">{testimonial.name}</p>
+                      <p className="text-xs text-text-primary/60 dark:text-text-dark/60">{testimonial.company}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm text-text-primary/90 dark:text-text-dark/90">{testimonial.review}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Section 5: Form Section */}
+        <section
+          id="form-section"
+          className="py-16 sm:py-20 lg:py-24 bg-primary/5 dark:bg-background-dark/30"
+          role="region"
+          aria-label="신청 폼 섹션"
+        >
+          <div className="container mx-auto max-w-5xl px-4">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
+                성공적인 상담의 비밀, 지금 바로 확인하세요
+              </h2>
+              <p className="mt-4 text-base text-text-primary/80 dark:text-text-dark/80">
+                이름과 이메일만 입력하시면 AI 상담 워크북을 즉시 보내드립니다.
+              </p>
+            </div>
+            <div className="mt-12 mx-auto max-w-lg">
+              <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                {/* 에러 메시지 영역 */}
+                {Object.keys(errors).length > 0 && (
+                  <div
+                    role="alert"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800"
+                  >
+                    <p className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">입력 오류가 있습니다. 아래 항목을 확인해주세요.</p>
+                    <ul className="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+                      {Object.values(errors).map((error, idx) => (
+                        <li key={idx}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Name */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-text-primary dark:text-text-dark/90">
+                    이름
                   </label>
-                  {errors.consent_privacy && (
-                    <p id="consent_privacy-error" className="ml-8 mt-1 text-sm text-red-500" role="alert">
-                      {errors.consent_privacy}
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange('name')}
+                    placeholder="홍길동"
+                    aria-invalid={errors.name ? 'true' : 'false'}
+                    aria-describedby={errors.name ? 'name-error' : undefined}
+                    className={`mt-1 block w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm focus:border-accent focus:ring focus:ring-accent focus:ring-opacity-50 ${
+                      errors.name ? 'border-red-500' : ''
+                    }`}
+                    required
+                  />
+                  {errors.name && (
+                    <p id="name-error" className="mt-1 text-sm text-red-500" role="alert">
+                      {errors.name}
                     </p>
                   )}
                 </div>
 
+                {/* Email */}
                 <div>
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      id="consent_marketing"
-                      name="consent_marketing"
-                      checked={formData.consent_marketing}
-                      onChange={handleChange('consent_marketing')}
-                      className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
-                    <span className="text-sm text-gray-700">
-                      마케팅 정보 수신에 동의합니다. <span className="text-gray-500 text-xs">(선택)</span>
-                    </span>
+                  <label htmlFor="email" className="block text-sm font-medium text-text-primary dark:text-text-dark/90">
+                    이메일
                   </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange('email')}
+                    placeholder="your@email.com"
+                    aria-invalid={errors.email ? 'true' : 'false'}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
+                    className={`mt-1 block w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm focus:border-accent focus:ring focus:ring-accent focus:ring-opacity-50 ${
+                      errors.email ? 'border-red-500' : ''
+                    }`}
+                    required
+                  />
+                  {errors.email && (
+                    <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
 
-                <p className="ml-8 text-xs text-gray-500">
-                  ※ 수집된 정보는 워크북 제공 및 서비스 안내 목적으로만 사용됩니다.
-                </p>
-              </fieldset>
+                {/* Phone */}
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-text-primary dark:text-text-dark/90">
+                    연락처 (선택)
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange('phone')}
+                    placeholder="010-1234-5678"
+                    aria-invalid={errors.phone ? 'true' : 'false'}
+                    aria-describedby={errors.phone ? 'phone-error' : 'phone-hint'}
+                    className={`mt-1 block w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm focus:border-accent focus:ring focus:ring-accent focus:ring-opacity-50 ${
+                      errors.phone ? 'border-red-500' : ''
+                    }`}
+                  />
+                  {errors.phone ? (
+                    <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">
+                      {errors.phone}
+                    </p>
+                  ) : (
+                    <p id="phone-hint" className="mt-1 text-sm text-text-primary/60 dark:text-text-dark/60">선택 사항입니다</p>
+                  )}
+                </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                aria-busy={isSubmitting}
-                aria-disabled={isSubmitting}
-                className="w-full bg-warning hover:bg-warning-dark text-white font-bold py-4 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="sr-only">제출 중입니다</span>
-                    <span aria-hidden="true">제출 중...</span>
-                  </>
-                ) : (
-                  'AI 상담워크북 무료로 받기'
-                )}
-              </button>
+                {/* Consent Checkbox */}
+                <div className="flex items-start">
+                  <div className="flex h-5 items-center">
+                    <input
+                      type="checkbox"
+                      id="privacy"
+                      name="privacy"
+                      checked={formData.consent_privacy}
+                      onChange={handleChange('consent_privacy')}
+                      aria-invalid={errors.consent_privacy ? 'true' : 'false'}
+                      aria-describedby={errors.consent_privacy ? 'privacy-error' : undefined}
+                      className="h-4 w-4 rounded border-slate-300 text-cta focus:ring-cta"
+                      required
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label htmlFor="privacy" className="text-text-primary/80 dark:text-text-dark/80">
+                      <Link href="#" className="font-medium text-primary dark:text-accent hover:underline">
+                        개인정보 처리방침
+                      </Link>
+                      에 동의합니다.
+                    </label>
+                    {errors.consent_privacy && (
+                      <p id="privacy-error" className="mt-1 text-sm text-red-500" role="alert">
+                        {errors.consent_privacy}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  aria-busy={isSubmitting}
+                  aria-disabled={isSubmitting}
+                  className="w-full flex justify-center items-center rounded-lg h-12 px-6 bg-cta text-white text-base font-bold transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cta focus:ring-offset-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="sr-only">제출 중입니다</span>
+                      <span aria-hidden="true">워크북 무료로 받고 상담 혁신하기</span>
+                    </>
+                  ) : (
+                    '워크북 무료로 받고 상담 혁신하기'
+                  )}
+                </button>
+              </form>
             </div>
-          </form>
-        </div>
-      </section>
+          </div>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-sm text-gray-400">
-            © 2025 INSURANG. All rights reserved.
-          </p>
+      <footer className="bg-primary/90 text-white" role="contentinfo">
+        <div className="container mx-auto max-w-5xl px-4 py-8">
+          <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+            <div className="flex items-center gap-4">
+              <div className="size-5">
+                <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <g clipPath="url(#clip0_6_535_footer)">
+                    <path
+                      clipRule="evenodd"
+                      d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z"
+                      fill="currentColor"
+                      fillRule="evenodd"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_6_535_footer">
+                      <rect fill="white" height="48" width="48" />
+                    </clipPath>
+                  </defs>
+                </svg>
+              </div>
+              <span className="text-xl font-black tracking-tighter font-display">INSURANG</span>
+            </div>
+            <div className="text-xs opacity-70">
+              <p>(주)인슈랑 | 대표: 홍길동 | 사업자등록번호: 123-45-67890</p>
+              <p>© 2024 INSURANG Inc. All rights reserved.</p>
+            </div>
+          </div>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }
 
