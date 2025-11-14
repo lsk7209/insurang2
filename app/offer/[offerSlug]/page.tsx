@@ -46,44 +46,31 @@ export default function OfferLandingPage() {
     }
   }, []);
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = '이름을 입력해주세요.';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = '이메일을 입력해주세요.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = '올바른 이메일 형식을 입력해주세요.';
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = '휴대폰 번호를 입력해주세요.';
-    } else {
-      const phoneNumbers = formData.phone.replace(/[^\d]/g, '');
-      if (phoneNumbers.length < 10 || phoneNumbers.length > 11) {
-        newErrors.phone = '올바른 휴대폰 번호 형식을 입력해주세요.';
-      }
-    }
-
-    if (!formData.consent_privacy) {
-      newErrors.consent_privacy = '개인정보 수집 및 이용에 동의해주세요.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const formatPhoneNumber = (value: string): string => {
+  // 전화번호 포맷팅 함수
+  const formatPhoneNumber = useCallback((value: string): string => {
     const numbers = normalizePhone(value);
     if (numbers.length <= 3) return numbers;
     if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
-  };
+  }, []);
 
-  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 폼 검증 (중앙화된 validation 함수 사용)
+  const validateForm = useCallback((): boolean => {
+    const validation = validateLeadForm({
+      offer_slug: offerSlug,
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      organization: formData.organization || null,
+      consent_privacy: formData.consent_privacy,
+      consent_marketing: formData.consent_marketing,
+    });
+
+    setErrors(validation.errors);
+    return validation.valid;
+  }, [formData, offerSlug]);
+
+  const handleChange = useCallback((field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const isCheckbox = field === 'consent_privacy' || field === 'consent_marketing';
     const value = isCheckbox ? e.target.checked : e.target.value;
 
@@ -97,7 +84,7 @@ export default function OfferLandingPage() {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
-  };
+  }, [errors, formatPhoneNumber]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

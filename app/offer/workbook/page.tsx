@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
 import Link from 'next/link';
-import { validateEmail, validatePhone, normalizePhone } from '@/lib/utils/validation';
+import { validateLeadForm, normalizePhone } from '@/lib/utils/validation';
 import Header from '@/components/layout/Header';
 
 interface OfferData {
@@ -45,41 +44,31 @@ export default function WorkbookOfferPage() {
     }
   }, []);
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = '이름을 입력해주세요.';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = '이메일을 입력해주세요.';
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = '올바른 이메일 형식을 입력해주세요.';
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = '휴대폰 번호를 입력해주세요.';
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = '올바른 휴대폰 번호 형식을 입력해주세요.';
-    }
-
-    if (!formData.consent_privacy) {
-      newErrors.consent_privacy = '개인정보 수집 및 이용에 동의해주세요.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const formatPhoneNumber = (value: string): string => {
+  // 전화번호 포맷팅 함수
+  const formatPhoneNumber = useCallback((value: string): string => {
     const numbers = normalizePhone(value);
     if (numbers.length <= 3) return numbers;
     if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
-  };
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 폼 검증 (중앙화된 validation 함수 사용)
+  const validateForm = useCallback((): boolean => {
+    const validation = validateLeadForm({
+      offer_slug: 'workbook',
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      organization: formData.organization || null,
+      consent_privacy: formData.consent_privacy,
+      consent_marketing: formData.consent_marketing,
+    });
+
+    setErrors(validation.errors);
+    return validation.valid;
+  }, [formData]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value, checked } = e.target;
     const fieldValue = type === 'checkbox' ? checked : value;
 
@@ -97,7 +86,7 @@ export default function WorkbookOfferPage() {
         return newErrors;
       });
     }
-  };
+  }, [errors, formatPhoneNumber]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -192,24 +181,36 @@ export default function WorkbookOfferPage() {
 
   // 오퍼 데이터 로드
   useEffect(() => {
+    let cancelled = false;
+
     const fetchOffer = async () => {
       try {
         const response = await fetch('/api/offers?slug=workbook');
+        if (cancelled) return;
+
         const result = await response.json();
+        if (cancelled) return;
 
         if (result.success && result.data) {
           setOfferData(result.data);
         } else {
-          console.error('Failed to fetch offer:', result.error);
+          console.warn('[Workbook Page] Offer not found, using default values');
         }
       } catch (error) {
-        console.error('Error fetching offer:', error);
+        if (cancelled) return;
+        console.error('[Workbook Page] Failed to fetch offer:', error);
       } finally {
-        setIsLoadingOffer(false);
+        if (!cancelled) {
+          setIsLoadingOffer(false);
+        }
       }
     };
 
     fetchOffer();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
