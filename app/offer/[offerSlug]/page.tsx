@@ -203,8 +203,6 @@ export default function OfferLandingPage() {
       fetchOffer();
     }
 
-    // 페이지 로드 시 스크롤 위치 초기화
-    window.scrollTo(0, 0);
   }, [offerSlug]);
 
   return (

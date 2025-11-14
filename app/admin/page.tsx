@@ -6,6 +6,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import EmailIcon from '@mui/icons-material/Email';
 import SmsIcon from '@mui/icons-material/Sms';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import type { LeadListItem } from '@/types/api';
 
 interface DashboardStats {
   totalLeads: number;
@@ -27,21 +28,33 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
       try {
         const response = await fetch('/api/admin/leads');
+        
+        if (response.status === 401) {
+          console.warn('[Admin Dashboard] Authentication required');
+          // 브라우저가 자동으로 Basic Auth 다이얼로그를 표시합니다
+          return;
+        }
+
+        if (!response.ok) {
+          console.error('[Admin Dashboard] Failed to fetch stats:', response.status);
+          return;
+        }
+
         const result = await response.json();
 
-        if (result.success && result.data) {
+        if (result.success && Array.isArray(result.data)) {
           const leads = result.data;
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
-          const todayLeads = leads.filter((lead: any) => {
+          const todayLeads = leads.filter((lead: LeadListItem) => {
             const leadDate = new Date(lead.created_at);
             leadDate.setHours(0, 0, 0, 0);
             return leadDate.getTime() === today.getTime();
           });
 
-          const emailSuccess = leads.filter((lead: any) => lead.email_status === 'success').length;
-          const smsSuccess = leads.filter((lead: any) => lead.sms_status === 'success').length;
+          const emailSuccess = leads.filter((lead: LeadListItem) => lead.email_status === 'success').length;
+          const smsSuccess = leads.filter((lead: LeadListItem) => lead.sms_status === 'success').length;
 
           setStats({
             totalLeads: leads.length,
@@ -51,7 +64,7 @@ export default function AdminDashboard() {
           });
         }
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error('[Admin Dashboard] Error fetching stats:', error);
       } finally {
         setLoading(false);
       }
