@@ -175,7 +175,7 @@ export default function OfferLandingPage() {
   }, [offerSlug]);
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark text-text-primary dark:text-text-dark font-display">
+    <div className="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-display">
       {/* Header */}
       <Header onCtaClick={handleCtaClick} ctaText="AI 상담 워크북 받기" />
 
@@ -204,7 +204,7 @@ export default function OfferLandingPage() {
             {isLoadingOffer ? (
               <div className="py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" aria-label="로딩 중"></div>
-                <p className="text-text-primary dark:text-text-dark" aria-live="polite">로딩 중...</p>
+                <p className="text-text-light dark:text-text-dark" aria-live="polite">로딩 중...</p>
               </div>
             ) : (
               <>
@@ -212,7 +212,7 @@ export default function OfferLandingPage() {
                   <h1 className="text-4xl font-black leading-tight tracking-tight text-primary dark:text-white sm:text-5xl lg:text-6xl">
                     혹시 매일 같은 상담에 지치지 않으셨나요?
                   </h1>
-                  <p className="mt-6 text-lg leading-relaxed text-text-primary dark:text-text-dark sm:text-xl">
+                  <p className="mt-6 text-lg leading-relaxed text-text-light dark:text-text-dark sm:text-xl">
                     반복되는 질문, 끝없는 자료 준비에서 벗어나 고객의 마음에만 집중하세요. AI가 당신의 상담을 혁신합니다.
                   </p>
                 </div>
@@ -225,7 +225,7 @@ export default function OfferLandingPage() {
                     <span className="truncate">AI 상담 워크북 무료로 받기</span>
                   </button>
                 </div>
-                <div className="absolute bottom-[-60px] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-text-primary/70 dark:text-text-dark/70" aria-hidden="true">
+                <div className="absolute bottom-[-60px] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-text-light/70 dark:text-text-dark/70" aria-hidden="true">
                   <span className="material-symbols-outlined animate-bounce">south</span>
                 </div>
               </>
@@ -240,7 +240,7 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 AI 상담 워크북, 이런 내용을 담았습니다
               </h2>
-              <p className="mt-4 max-w-2xl mx-auto text-base text-text-primary/80 dark:text-text-dark/80">
+              <p className="mt-4 max-w-2xl mx-auto text-base text-text-light/80 dark:text-text-dark/80">
                 고객의 첫마디부터 계약서 사인까지, 모든 단계를 체계적으로 안내하는 실전 가이드입니다.
               </p>
             </div>
@@ -262,7 +262,7 @@ export default function OfferLandingPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary dark:text-white">고객 유형별 심리 분석 및 접근법</h3>
-                    <p className="mt-1 text-sm text-text-primary/80 dark:text-text-dark/80">
+                    <p className="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">
                       분석형, 우호형 등 4가지 고객 유형을 파악하고 마음을 여는 대화 전략을 제시합니다.
                     </p>
                   </div>
@@ -273,7 +273,7 @@ export default function OfferLandingPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary dark:text-white">상담 단계별 필수 질문 체크리스트</h3>
-                    <p className="mt-1 text-sm text-text-primary/80 dark:text-text-dark/80">
+                    <p className="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">
                       상담의 흐름을 주도하고 고객의 핵심 니즈를 정확히 파악하는 질문들로 구성되어 있습니다.
                     </p>
                   </div>
@@ -284,7 +284,7 @@ export default function OfferLandingPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary dark:text-white">거절에 대응하는 반론 화법 5가지</h3>
-                    <p className="mt-1 text-sm text-text-primary/80 dark:text-text-dark/80">
+                    <p className="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">
                       고객의 거절을 기회로 바꾸는 데이터 기반의 설득 논리와 클로징 팁을 제공합니다.
                     </p>
                   </div>
@@ -301,7 +301,7 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 워크북 하나로 당신의 상담이 달라집니다
               </h2>
-              <p className="mt-4 text-base text-text-primary/80 dark:text-text-dark/80">
+              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
                 단순한 스크립트가 아닙니다. 고객의 마음을 열고 계약으로 이끄는 과학적인 상담 전략입니다.
               </p>
             </div>
@@ -331,7 +331,7 @@ export default function OfferLandingPage() {
                     <span className="material-symbols-outlined text-4xl">{item.icon}</span>
                   </div>
                   <h3 className="text-lg font-bold text-primary dark:text-white">{item.title}</h3>
-                  <p className="text-sm text-text-primary/80 dark:text-text-dark/80">{item.desc}</p>
+                  <p className="text-sm text-text-light/80 dark:text-text-dark/80">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -345,7 +345,7 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 먼저 경험한 설계사들의 생생한 후기
               </h2>
-              <p className="mt-4 text-base text-text-primary/80 dark:text-text-dark/80">
+              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
                 이미 많은 분들이 INSURANG과 함께 최고의 성과를 만들고 있습니다.
               </p>
             </div>
@@ -388,10 +388,10 @@ export default function OfferLandingPage() {
                     />
                     <div>
                       <p className="font-bold text-primary dark:text-white">{testimonial.name}</p>
-                      <p className="text-xs text-text-primary/60 dark:text-text-dark/60">{testimonial.company}</p>
+                      <p className="text-xs text-text-light/60 dark:text-text-dark/60">{testimonial.company}</p>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm text-text-primary/90 dark:text-text-dark/90">{testimonial.review}</p>
+                  <p className="mt-4 text-sm text-text-light/90 dark:text-text-dark/90">{testimonial.review}</p>
                 </div>
               ))}
             </div>
@@ -410,7 +410,7 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 성공적인 상담의 비밀, 지금 바로 확인하세요
               </h2>
-              <p className="mt-4 text-base text-text-primary/80 dark:text-text-dark/80">
+              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
                 이름과 이메일만 입력하시면 AI 상담 워크북을 즉시 보내드립니다.
               </p>
             </div>
@@ -435,7 +435,7 @@ export default function OfferLandingPage() {
 
                 {/* Name */}
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-text-primary dark:text-text-dark/90">
+                  <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark/90">
                     이름
                   </label>
                   <input
@@ -461,7 +461,7 @@ export default function OfferLandingPage() {
 
                 {/* Email */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-text-primary dark:text-text-dark/90">
+                  <label htmlFor="email" className="block text-sm font-medium text-text-light dark:text-text-dark/90">
                     이메일
                   </label>
                   <input
@@ -487,7 +487,7 @@ export default function OfferLandingPage() {
 
                 {/* Phone */}
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-text-primary dark:text-text-dark/90">
+                  <label htmlFor="phone" className="block text-sm font-medium text-text-light dark:text-text-dark/90">
                     연락처 (선택)
                   </label>
                   <input
@@ -508,7 +508,7 @@ export default function OfferLandingPage() {
                       {errors.phone}
                     </p>
                   ) : (
-                    <p id="phone-hint" className="mt-1 text-sm text-text-primary/60 dark:text-text-dark/60">선택 사항입니다</p>
+                    <p id="phone-hint" className="mt-1 text-sm text-text-light/60 dark:text-text-dark/60">선택 사항입니다</p>
                   )}
                 </div>
 
@@ -528,7 +528,7 @@ export default function OfferLandingPage() {
                     />
                   </div>
                   <div className="ml-3 text-sm">
-                    <label htmlFor="privacy" className="text-text-primary/80 dark:text-text-dark/80">
+                    <label htmlFor="privacy" className="text-text-light/80 dark:text-text-dark/80">
                       <Link href="#" className="font-medium text-primary dark:text-accent hover:underline">
                         개인정보 처리방침
                       </Link>

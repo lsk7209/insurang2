@@ -23,7 +23,7 @@ export default function MainPage() {
   }, [router]);
 
   return (
-    <div className="relative w-full flex flex-col items-center bg-background-light dark:bg-background-dark text-text-primary dark:text-text-dark font-sans">
+    <div className="relative w-full flex flex-col items-center bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans">
       <Header onCtaClick={handleCtaClick} ctaText="무료 혜택 받기" />
 
       <main className="w-full max-w-7xl flex flex-col items-center px-6 sm:px-10">
@@ -44,7 +44,7 @@ export default function MainPage() {
               <br />
               보험 영업은 어려워졌습니다.
             </h1>
-            <p className="text-base sm:text-lg font-normal leading-relaxed text-text-primary/70 dark:text-text-dark/70 max-w-2xl">
+            <p className="text-base sm:text-lg font-normal leading-relaxed text-text-light/70 dark:text-text-dark/70 max-w-2xl">
               인슈랑은 AI 시대를 살아가는 보험 설계사님들의 고민을 가장 깊이 이해하고, 실질적인 해결책을 제공합니다.
             </p>
             <button
@@ -63,7 +63,7 @@ export default function MainPage() {
             <h2 className="text-3xl sm:text-4xl font-bold !leading-tight tracking-tight font-display">
               혼자서는 버거운, 오늘의 보험 영업
             </h2>
-            <p className="mt-4 text-base sm:text-lg text-text-primary/70 dark:text-text-dark/70 leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
               설계사님, 이런 어려움을 겪고 계신가요?
             </p>
           </div>
@@ -90,14 +90,14 @@ export default function MainPage() {
             ].map((pain, index) => (
               <div
                 key={index}
-                className="flex flex-col items-start justify-start rounded-xl p-6 sm:p-8 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                className="flex flex-col items-start justify-start rounded-xl p-6 sm:p-8 bg-white dark:bg-background-dark border border-subtle-light dark:border-subtle-dark shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <span className="material-symbols-outlined text-2xl">{pain.icon}</span>
                 </div>
                 <p className="text-primary text-sm font-bold leading-normal">{pain.label}</p>
                 <h3 className="text-lg font-bold leading-tight tracking-[-0.015em] mt-1 font-display">{pain.title}</h3>
-                <p className="text-text-primary/70 dark:text-text-dark/70 text-base font-normal leading-relaxed mt-3">
+                <p className="text-text-light/70 dark:text-text-dark/70 text-base font-normal leading-relaxed mt-3">
                   {pain.description}
                 </p>
               </div>
@@ -115,7 +115,7 @@ export default function MainPage() {
                 <br />
                 고객과의 '관계'에 집중하게 만듭니다."
               </p>
-              <p className="mt-6 text-base sm:text-lg text-text-primary/70 dark:text-text-dark/70 leading-relaxed">
+              <p className="mt-6 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
                 인슈랑은 기술이 사람을 대체하는 것이 아니라, 사람을 더욱 사람답게 만들기 위해 존재해야 한다고 믿습니다. 우리는 AI를 윤리적으로 활용하여 설계사님의 전문성을 극대화하고, 인간적인 가치를 높이는 교육을 제공합니다.
               </p>
             </div>
@@ -135,7 +135,7 @@ export default function MainPage() {
             <h2 className="text-3xl sm:text-4xl font-bold !leading-tight tracking-tight font-display">
               INSURANG이 제안하는 AI 기반 해결책
             </h2>
-            <p className="mt-4 text-base sm:text-lg text-text-primary/70 dark:text-text-dark/70 leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
               AI를 당신의 가장 강력한 비서로 만드세요.
             </p>
           </div>
@@ -166,7 +166,7 @@ export default function MainPage() {
                 </div>
                 <div>
                   <h4 className="text-xl sm:text-2xl font-bold font-display">{solution.title}</h4>
-                  <p className="mt-2 text-base sm:text-lg text-text-primary/70 dark:text-text-dark/70 leading-relaxed">
+                  <p className="mt-2 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
                     {solution.description}
                   </p>
                 </div>
@@ -188,11 +188,11 @@ export default function MainPage() {
 
         {/* Offer Section */}
         <section className="w-full py-16 sm:py-24" id="offer-section" role="region" aria-label="오퍼 섹션">
-          <div className="max-w-xl mx-auto p-6 sm:p-10 rounded-xl bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 shadow-2xl">
+          <div className="max-w-xl mx-auto p-6 sm:p-10 rounded-xl bg-white dark:bg-background-dark border border-subtle-light dark:border-subtle-dark shadow-2xl">
             <div className="flex flex-col justify-center">
               <div className="text-center">
                 <h2 className="text-3xl sm:text-4xl font-bold font-display">지금 바로 시작하세요</h2>
-                <p className="mt-4 text-base sm:text-lg text-text-primary/70 dark:text-text-dark/70 leading-relaxed">
+                <p className="mt-4 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
                   AI를 활용한 보험 영업, 더 이상 미룰 수 없습니다.
                   <br />
                   핵심만 담은 <span className="font-bold text-primary">AI 활용 워크북 & 가이드북</span>을 무료로 받아보세요.
@@ -207,11 +207,11 @@ export default function MainPage() {
                 noValidate
               >
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-text-primary dark:text-text-dark mb-1.5">
+                  <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">
                     이름
                   </label>
                   <input
-                    className="block w-full rounded-md border-gray-200 dark:border-gray-700 shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4"
+                    className="block w-full rounded-md border-subtle-light dark:border-subtle-dark shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4"
                     id="name"
                     name="name"
                     placeholder="홍길동"
@@ -219,11 +219,11 @@ export default function MainPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-text-primary dark:text-text-dark mb-1.5">
+                  <label htmlFor="email" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">
                     이메일
                   </label>
                   <input
-                    className="block w-full rounded-md border-gray-200 dark:border-gray-700 shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4"
+                    className="block w-full rounded-md border-subtle-light dark:border-subtle-dark shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4"
                     id="email"
                     name="email"
                     placeholder="your@email.com"
@@ -231,11 +231,11 @@ export default function MainPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-text-primary dark:text-text-dark mb-1.5">
+                  <label htmlFor="phone" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">
                     연락처
                   </label>
                   <input
-                    className="block w-full rounded-md border-gray-200 dark:border-gray-700 shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4"
+                    className="block w-full rounded-md border-subtle-light dark:border-subtle-dark shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4"
                     id="phone"
                     name="phone"
                     placeholder="010-1234-5678"
@@ -254,7 +254,7 @@ export default function MainPage() {
                       />
                     </div>
                     <div className="ml-3 text-sm">
-                      <label htmlFor="privacy" className="font-medium text-text-primary dark:text-text-dark">
+                      <label htmlFor="privacy" className="font-medium text-text-light dark:text-text-dark">
                         개인정보 수집 및 이용에 동의합니다.
                       </label>
                     </div>

@@ -79,11 +79,13 @@ body {
   font-feature-settings: 'kern' 1;
   text-rendering: optimizeLegibility;
   letter-spacing: -0.01em;
+  scroll-behavior: smooth;
 }
 
 /* 본문 텍스트 가독성 개선 */
 p {
   margin-bottom: 1em;
+  line-height: 1.75;
 }
 
 /* 제목 텍스트 가독성 개선 */
@@ -91,5 +93,18 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+/* 링크 가독성 개선 */
+a {
+  transition: color 0.2s ease-in-out;
+}
+
+/* 포커스 가시성 개선 */
+*:focus-visible {
+  outline: 2px solid #0052FF;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 

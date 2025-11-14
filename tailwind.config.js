@@ -10,9 +10,9 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#002d61',
-          light: '#004A9F',
-          dark: '#001A3F',
+          DEFAULT: '#0052FF',
+          light: '#3375FF',
+          dark: '#003ECC',
         },
         accent: {
           DEFAULT: '#5AA7E1',
@@ -30,12 +30,17 @@ module.exports = {
           dark: '#FF8C2A',
         },
         background: {
-          light: '#f5f7f8',
-          dark: '#0f1823',
+          light: '#FCFCFC',
+          dark: '#1D1D1F',
         },
         text: {
-          primary: '#333333',
-          dark: '#e5e7eb',
+          light: '#1D1D1F',
+          dark: '#FCFCFC',
+          primary: '#1D1D1F',
+        },
+        subtle: {
+          light: '#E5E5E5',
+          dark: '#333333',
         },
       },
       fontFamily: {
