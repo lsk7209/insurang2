@@ -24,10 +24,33 @@ export default function AdminLeadsPage() {
       
       if (response.status === 401) {
         setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setLoading(false);
         return;
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        try {
+          const errorResult = await response.json();
+          errorMessage = errorResult.error || errorMessage;
+        } catch {
+          // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
+        }
+        setError(errorMessage);
+        console.error('Failed to fetch leads:', response.status);
+        setLoading(false);
+        return;
+      }
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        setError('응답 처리 중 오류가 발생했습니다.');
+        setLoading(false);
+        return;
+      }
 
       if (result.success && Array.isArray(result.data)) {
         setLeads(result.data);
@@ -52,17 +75,41 @@ export default function AdminLeadsPage() {
       
       if (response.status === 401) {
         setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setDetailLoading(false);
         return;
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        try {
+          const errorResult = await response.json();
+          errorMessage = errorResult.error || errorMessage;
+        } catch {
+          // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
+        }
+        console.error('Failed to fetch lead detail:', response.status);
+        alert('리드 상세 정보를 불러오는데 실패했습니다: ' + errorMessage);
+        setDetailLoading(false);
+        return;
+      }
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        alert('응답 처리 중 오류가 발생했습니다.');
+        setDetailLoading(false);
+        return;
+      }
 
       if (result.success && result.data) {
         setSelectedLead(result.data as LeadDetail);
         setDetailOpen(true);
       } else {
-        console.error('Failed to fetch lead detail:', result.error);
-        alert('리드 상세 정보를 불러오는데 실패했습니다: ' + (result.error || '알 수 없는 오류'));
+        const errorMessage = result.error || '알 수 없는 오류';
+        console.error('Failed to fetch lead detail:', errorMessage);
+        alert('리드 상세 정보를 불러오는데 실패했습니다: ' + errorMessage);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';

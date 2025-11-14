@@ -1,11 +1,7 @@
 'use client';
 
-import { Box, Container, Grid, Paper, Typography, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
-import PeopleIcon from '@mui/icons-material/People';
-import EmailIcon from '@mui/icons-material/Email';
-import SmsIcon from '@mui/icons-material/Sms';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import Link from 'next/link';
 import type { LeadListItem } from '@/types/api';
 
 interface DashboardStats {
@@ -15,6 +11,11 @@ interface DashboardStats {
   smsSuccess: number;
 }
 
+/**
+ * Admin Dashboard Page
+ * 관리자 대시보드 페이지
+ * Tailwind CSS 기반
+ */
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalLeads: 0,
@@ -23,24 +24,37 @@ export default function AdminDashboard() {
     smsSuccess: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        setError(null);
         const response = await fetch('/api/admin/leads');
         
         if (response.status === 401) {
-          console.warn('[Admin Dashboard] Authentication required');
-          // 브라우저가 자동으로 Basic Auth 다이얼로그를 표시합니다
+          setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+          setLoading(false);
           return;
         }
 
         if (!response.ok) {
+          const errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+          setError(errorMessage);
           console.error('[Admin Dashboard] Failed to fetch stats:', response.status);
+          setLoading(false);
           return;
         }
 
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch (parseError) {
+          console.error('[Admin Dashboard] JSON parse error:', parseError);
+          setError('응답 처리 중 오류가 발생했습니다.');
+          setLoading(false);
+          return;
+        }
 
         if (result.success && Array.isArray(result.data)) {
           const leads = result.data;
@@ -62,8 +76,12 @@ export default function AdminDashboard() {
             emailSuccess,
             smsSuccess,
           });
+        } else {
+          setError('데이터 형식이 올바르지 않습니다.');
         }
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
+        setError(errorMessage);
         console.error('[Admin Dashboard] Error fetching stats:', error);
       } finally {
         setLoading(false);
@@ -77,140 +95,126 @@ export default function AdminDashboard() {
     {
       title: '전체 리드',
       value: stats.totalLeads,
-      icon: <PeopleIcon sx={{ fontSize: '2.5rem' }} />,
-      color: 'primary.main',
+      icon: (
+        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ),
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: '오늘 신청',
       value: stats.todayLeads,
-      icon: <TrendingUpIcon sx={{ fontSize: '2.5rem' }} />,
-      color: 'success.main',
+      icon: (
+        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      ),
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
     },
     {
       title: '이메일 발송 성공',
       value: stats.emailSuccess,
-      icon: <EmailIcon sx={{ fontSize: '2.5rem' }} />,
-      color: 'info.main',
+      icon: (
+        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
     },
     {
       title: 'SMS 발송 성공',
       value: stats.smsSuccess,
-      icon: <SmsIcon sx={{ fontSize: '2.5rem' }} />,
-      color: 'warning.main',
+      icon: (
+        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
     },
   ];
 
   return (
-    <Container maxWidth="xl">
-      <Stack spacing={4}>
-        {/* 헤더 */}
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-            대시보드
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            전체 현황을 한눈에 확인하세요.
-          </Typography>
-        </Box>
+    <div className="min-h-screen bg-background-light dark:bg-background-dark">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* 헤더 */}
+          <div>
+            <h1 className="text-4xl font-bold text-text-light dark:text-text-dark mb-2">
+              대시보드
+            </h1>
+            <p className="text-text-light/70 dark:text-text-dark/70">
+              전체 현황을 한눈에 확인하세요.
+            </p>
+          </div>
 
-        {/* 통계 카드 */}
-        <Grid container spacing={3}>
-          {statCards.map((card, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Paper
-                sx={{
-                  p: 3,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%',
-                  borderRadius: 2,
-                  boxShadow: 2,
-                  '&:hover': {
-                    boxShadow: 4,
-                  },
-                }}
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-red-800 dark:text-red-200">{error}</p>
+            </div>
+          )}
+
+          {/* 통계 카드 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {statCards.map((card, index) => (
+              <div
+                key={index}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
               >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Box
-                    sx={{
-                      color: card.color,
-                      opacity: 0.8,
-                    }}
-                  >
+                <div className="flex items-center space-x-4">
+                  <div className={`${card.bgColor} ${card.color} p-3 rounded-lg`}>
                     {card.icon}
-                  </Box>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-text-light/70 dark:text-text-dark/70 mb-1">
                       {card.title}
-                    </Typography>
-                    <Typography variant="h4" component="div" sx={{ fontWeight: 700 }}>
-                      {loading ? '...' : card.value}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
+                    </p>
+                    <p className="text-3xl font-bold text-text-light dark:text-text-dark">
+                      {loading ? '...' : card.value.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
 
-        {/* 빠른 링크 */}
-        <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-            빠른 링크
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
-              <Box
-                component="a"
+          {/* 빠른 링크 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-text-light dark:text-text-dark mb-4">
+              빠른 링크
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Link
                 href="/admin/leads"
-                sx={{
-                  display: 'block',
-                  p: 2,
-                  bgcolor: 'neutral.50',
-                  borderRadius: 1,
-                  textDecoration: 'none',
-                  color: 'text.primary',
-                  '&:hover': {
-                    bgcolor: 'neutral.100',
-                  },
-                }}
+                className="block p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors no-underline"
               >
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-1">
                   리드 관리
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </h3>
+                <p className="text-sm text-text-light/70 dark:text-text-dark/70">
                   신청 리드 목록 확인
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <Box
-                component="a"
+                </p>
+              </Link>
+              <Link
                 href="/admin/settings"
-                sx={{
-                  display: 'block',
-                  p: 2,
-                  bgcolor: 'neutral.50',
-                  borderRadius: 1,
-                  textDecoration: 'none',
-                  color: 'text.primary',
-                  '&:hover': {
-                    bgcolor: 'neutral.100',
-                  },
-                }}
+                className="block p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors no-underline"
               >
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-1">
                   설정 관리
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </h3>
+                <p className="text-sm text-text-light/70 dark:text-text-dark/70">
                   SMTP, API 키 등 설정
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
-      </Stack>
-    </Container>
+                </p>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
