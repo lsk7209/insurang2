@@ -52,12 +52,20 @@ export async function onRequestPost(context: {
     }
 
     const body = await context.request.json() as LeadCreateRequest;
+    console.log('[Leads API] Request body:', { 
+      offer_slug: body.offer_slug, 
+      email: body.email?.substring(0, 5) + '***',
+      has_name: !!body.name,
+      has_phone: !!body.phone,
+      consent_privacy: body.consent_privacy 
+    });
 
     // 중앙화된 Validation 사용
     const validation = validateLeadForm(body);
     if (!validation.valid) {
       // 첫 번째 에러 메시지 반환
       const firstError = Object.values(validation.errors)[0];
+      console.warn('[Leads API] Validation failed:', validation.errors);
       return new Response(
         JSON.stringify({ success: false, error: firstError } as LeadCreateResponse),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -109,8 +117,10 @@ export async function onRequestPost(context: {
       }
 
       leadId = leadResult.meta.last_row_id;
+      console.log('[Leads API] Lead inserted successfully:', { leadId, offer_slug });
     } catch (dbError: unknown) {
       const error = dbError instanceof Error ? dbError : new Error('Unknown database error');
+      console.error('[Leads API] Database error:', error);
       // 에러 로깅 (console + DB)
       await logError(context.env.DB, error, {
         operation: 'lead_insert',
@@ -174,13 +184,20 @@ export async function onRequestPost(context: {
     });
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error('Unknown error');
+    console.error('[Leads API] Unexpected error:', err);
     // 에러 로깅 (console + DB)
     await logError(context.env.DB, err, {
       operation: 'lead_creation',
     });
     return new Response(
       JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' } as LeadCreateResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        } 
+      }
     );
   }
 }
