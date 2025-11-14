@@ -10,6 +10,7 @@ import { checkRateLimit, getClientIdentifier } from '@/lib/utils/rate-limit';
 import { validateLeadForm, normalizeLeadData } from '@/lib/utils/validation';
 import { logError } from '@/lib/utils/error-logger';
 import { sendSMS } from '@/lib/services/sms-service';
+import { createSuccessResponse, createErrorResponse, createCorsResponse } from '@/lib/utils/api-response';
 import type { LeadCreateRequest, LeadCreateResponse } from '@/types/api';
 
 interface Env {
@@ -24,15 +25,7 @@ interface Env {
 
 // CORS preflight 요청 처리
 export async function onRequestOptions(): Promise<Response> {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
+  return createCorsResponse();
 }
 
 export async function onRequestPost(context: {
@@ -49,18 +42,10 @@ export async function onRequestPost(context: {
     });
 
     if (!rateLimit.allowed) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
-        }),
-        {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            'Retry-After': '60',
-          },
-        }
+      return createErrorResponse(
+        '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
+        429,
+        { 'Retry-After': '60' }
       );
     }
 
@@ -79,10 +64,7 @@ export async function onRequestPost(context: {
       // 첫 번째 에러 메시지 반환
       const firstError = Object.values(validation.errors)[0];
       console.warn('[Leads API] Validation failed:', validation.errors);
-      return new Response(
-        JSON.stringify({ success: false, error: firstError } as LeadCreateResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return createErrorResponse(firstError, 400);
     }
 
     // 데이터 정규화
@@ -140,10 +122,7 @@ export async function onRequestPost(context: {
         offer_slug: offer_slug,
         email_prefix: email.substring(0, 5) + '***', // 개인정보 마스킹
       });
-      return new Response(
-        JSON.stringify({ success: false, error: '데이터베이스 오류가 발생했습니다.' } as LeadCreateResponse),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      return createErrorResponse('데이터베이스 오류가 발생했습니다.', 500);
     }
 
     // 이메일 발송 (비동기, 실패해도 계속)
@@ -183,18 +162,8 @@ export async function onRequestPost(context: {
       }
     }
 
-    const responseBody = { success: true } as LeadCreateResponse;
     console.log('[Leads API] Success response:', { leadId, offer_slug: offer_slug });
-    
-    return new Response(JSON.stringify(responseBody), {
-      status: 200,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    });
+    return createSuccessResponse();
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error('Unknown error');
     console.error('[Leads API] Unexpected error:', err);
@@ -202,16 +171,7 @@ export async function onRequestPost(context: {
     await logError(context.env.DB, err, {
       operation: 'lead_creation',
     });
-    return new Response(
-      JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' } as LeadCreateResponse),
-      { 
-        status: 500, 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        } 
-      }
-    );
+    return createErrorResponse('서버 오류가 발생했습니다.', 500);
   }
 }
 

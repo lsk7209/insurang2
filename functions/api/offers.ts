@@ -5,24 +5,27 @@
  */
 
 import type { D1Database } from '@/types/cloudflare';
+import { createSuccessResponse, createErrorResponse, createCorsResponse } from '@/lib/utils/api-response';
+import { logError } from '@/lib/utils/error-logger';
 
 interface Env {
   DB: D1Database;
 }
 
-interface OfferResponse {
-  success: boolean;
-  data?: {
-    id: number;
-    slug: string;
-    name: string;
-    description: string | null;
-    status: string;
-    download_link: string | null;
-    created_at: string;
-    updated_at: string;
-  };
-  error?: string;
+interface OfferData {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  status: string;
+  download_link: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// CORS preflight 요청 처리
+export async function onRequestOptions(): Promise<Response> {
+  return createCorsResponse();
 }
 
 export async function onRequestGet(context: {
@@ -34,45 +37,27 @@ export async function onRequestGet(context: {
     const slug = url.searchParams.get('slug');
 
     if (!slug) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'slug 파라미터가 필요합니다.' } as OfferResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return createErrorResponse('slug 파라미터가 필요합니다.', 400);
     }
 
     const offer = await context.env.DB.prepare(
       'SELECT * FROM offers WHERE slug = ? AND status = ?'
     )
       .bind(slug, 'active')
-      .first<{
-        id: number;
-        slug: string;
-        name: string;
-        description: string | null;
-        status: string;
-        download_link: string | null;
-        created_at: string;
-        updated_at: string;
-      }>();
+      .first<OfferData>();
 
     if (!offer) {
-      return new Response(
-        JSON.stringify({ success: false, error: '오퍼를 찾을 수 없습니다.' } as OfferResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return createErrorResponse('오퍼를 찾을 수 없습니다.', 404);
     }
 
-    return new Response(JSON.stringify({ success: true, data: offer } as OfferResponse), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
+    return createSuccessResponse(offer);
+  } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error('Unknown error');
-    console.error('getOffer error:', err);
-    return new Response(
-      JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' } as OfferResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    console.error('[Offers API] Error:', err);
+    await logError(context.env.DB, err, {
+      operation: 'get_offer',
+    });
+    return createErrorResponse('서버 오류가 발생했습니다.', 500);
   }
 }
 

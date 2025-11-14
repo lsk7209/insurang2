@@ -6,6 +6,7 @@
 import type { D1Database } from '@/types/cloudflare';
 import type { AdminLeadsResponse, LeadListItem, LeadDetail } from '@/types/api';
 import { logError } from '@/lib/utils/error-logger';
+import { createSuccessResponse, createErrorResponse } from '@/lib/utils/api-response';
 
 interface Env {
   DB: D1Database;
@@ -57,34 +58,21 @@ export async function onRequestGet(context: {
     if (leadId) {
       const lead = await getLeadById(context.env.DB, parseInt(leadId));
       if (!lead) {
-      return new Response(
-        JSON.stringify({ success: false, error: '리드를 찾을 수 없습니다.' } as AdminLeadsResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-    return new Response(JSON.stringify({ success: true, data: lead } as AdminLeadsResponse), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+        return createErrorResponse('리드를 찾을 수 없습니다.', 404);
+      }
+      return createSuccessResponse(lead);
     }
 
     // 리드 목록 조회
     const leads = await getLeadsWithLogs(context.env.DB, limit, offset);
-
-    return new Response(JSON.stringify({ success: true, data: leads } as AdminLeadsResponse), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return createSuccessResponse(leads);
   } catch (error) {
     const err = error instanceof Error ? error : new Error('Unknown error');
     // 에러 로깅 (console + DB)
     await logError(context.env.DB, err, {
       operation: 'admin_leads_fetch',
     });
-    return new Response(
-      JSON.stringify({ success: false, error: '서버 오류가 발생했습니다.' } as AdminLeadsResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return createErrorResponse('서버 오류가 발생했습니다.', 500);
   }
 }
 

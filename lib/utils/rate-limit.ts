@@ -58,6 +58,18 @@ export async function checkRateLimit(
         console.error('Rate limit log error:', err);
       });
 
+    // 오래된 로그 정리 (비동기, 실패해도 계속)
+    const cleanupThreshold = now - config.windowMs * 2; // 2배 기간 이상 오래된 로그 삭제
+    db.prepare(
+      `DELETE FROM rate_limit_logs WHERE created_at < ?`
+    )
+      .bind(new Date(cleanupThreshold).toISOString())
+      .run()
+      .catch((err) => {
+        // 정리 실패는 무시 (비중요)
+        console.warn('Rate limit cleanup error:', err);
+      });
+
     return { allowed: true, remaining: config.maxRequests - requestCount - 1 };
   } catch (error) {
     // Rate limit 체크 실패 시 허용 (fail-open)
