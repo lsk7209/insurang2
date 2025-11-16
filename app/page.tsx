@@ -151,6 +151,11 @@ export default function MainPage() {
 
       if (result.success) {
         console.log('[Main Page] Form submission successful, redirecting to thanks page...');
+        
+        // 퍼널 이벤트 추적
+        const leadId = result.data?.leadId;
+        trackFunnelEvent('form_submit', '/', 'workbook', leadId);
+        
         // 정적 빌드 환경에서도 안정적으로 작동하도록 window.location.href 직접 사용
         // router.push는 정적 빌드 환경에서 제대로 작동하지 않을 수 있음
         window.location.href = '/offer/workbook/thanks';
