@@ -583,65 +583,6 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="solapi_api_key" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                    API Key <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="solapi_api_key"
-                    name="solapi_api_key"
-                    type="text"
-                    value={settings.solapi_api_key}
-                    onChange={handleChange('solapi_api_key')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="NCSAYU7YDBXYORXC"
-                    required
-                  />
-                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
-                    솔라피 콘솔에서 발급받은 API Key
-                  </p>
-                </div>
-                <div>
-                  <label htmlFor="solapi_api_secret" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                    API Secret <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="solapi_api_secret"
-                    name="solapi_api_secret"
-                    type="password"
-                    value={settings.solapi_api_secret}
-                    onChange={handleChange('solapi_api_secret')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="API Secret"
-                    required
-                  />
-                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
-                    솔라피 콘솔에서 발급받은 API Secret
-                  </p>
-                </div>
-                <div>
-                  <label htmlFor="solapi_sender_phone" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                    발신자 번호 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="solapi_sender_phone"
-                    name="solapi_sender_phone"
-                    type="tel"
-                    value={settings.solapi_sender_phone}
-                    onChange={handleChange('solapi_sender_phone')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="01012345678"
-                    required
-                  />
-                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
-                    SMS 발송 시 사용될 발신자 전화번호 (하이픈 없이 입력)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* 테스트 발송 섹션 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="space-y-4">
