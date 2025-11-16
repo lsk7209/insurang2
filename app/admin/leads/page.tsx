@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { LeadListItem, LeadDetail } from '@/types/api';
 
 /**
@@ -16,6 +16,14 @@ export default function AdminLeadsPage() {
   const [selectedLead, setSelectedLead] = useState<LeadDetail | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
+  
+  // 검색 및 필터링 상태
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterOffer, setFilterOffer] = useState<string>('all');
+  const [sortField, setSortField] = useState<keyof LeadListItem>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -144,6 +152,90 @@ export default function AdminLeadsPage() {
     return `${baseClasses} bg-gray-100 text-gray-800`;
   };
 
+  // 필터링 및 정렬된 리드 목록
+  const filteredAndSortedLeads = useMemo(() => {
+    let filtered = [...leads];
+
+    // 검색 필터
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (lead) =>
+          lead.name.toLowerCase().includes(query) ||
+          lead.email.toLowerCase().includes(query) ||
+          lead.phone.includes(query) ||
+          lead.offer_slug.toLowerCase().includes(query) ||
+          (lead.organization && lead.organization.toLowerCase().includes(query))
+      );
+    }
+
+    // 오퍼 필터
+    if (filterOffer !== 'all') {
+      filtered = filtered.filter((lead) => lead.offer_slug === filterOffer);
+    }
+
+    // 정렬
+    filtered.sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [leads, searchQuery, filterOffer, sortField, sortDirection]);
+
+  // 페이지네이션
+  const totalPages = Math.ceil(filteredAndSortedLeads.length / itemsPerPage);
+  const paginatedLeads = filteredAndSortedLeads.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // 고유한 오퍼 목록
+  const uniqueOffers = useMemo(() => {
+    const offers = new Set(leads.map((lead) => lead.offer_slug));
+    return Array.from(offers).sort();
+  }, [leads]);
+
+  // CSV 내보내기
+  const exportToCSV = () => {
+    const headers = ['ID', '오퍼', '이름', '이메일', '휴대폰', '소속', '이메일 상태', 'SMS 상태', '신청일'];
+    const rows = filteredAndSortedLeads.map((lead) => [
+      lead.id,
+      lead.offer_slug,
+      lead.name,
+      lead.email,
+      lead.phone,
+      lead.organization || '',
+      lead.email_status,
+      lead.sms_status,
+      formatDate(lead.created_at),
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+    ].join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `leads_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  const handleSort = (field: keyof LeadListItem) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+    setCurrentPage(1);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -183,10 +275,92 @@ export default function AdminLeadsPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">리드 관리</h1>
-          <p className="text-gray-600">
-            총 <span className="font-semibold">{leads.length}</span>건의 리드가 등록되었습니다.
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">리드 관리</h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                총 <span className="font-semibold">{leads.length}</span>건의 리드 중{' '}
+                <span className="font-semibold">{filteredAndSortedLeads.length}</span>건이 표시됩니다.
+              </p>
+            </div>
+            <button
+              onClick={exportToCSV}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              CSV 내보내기
+            </button>
+          </div>
+
+          {/* 검색 및 필터 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* 검색 */}
+              <div>
+                <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  검색
+                </label>
+                <input
+                  id="search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="이름, 이메일, 전화번호로 검색..."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+              {/* 오퍼 필터 */}
+              <div>
+                <label htmlFor="filter-offer" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  오퍼 필터
+                </label>
+                <select
+                  id="filter-offer"
+                  value={filterOffer}
+                  onChange={(e) => {
+                    setFilterOffer(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="all">전체</option>
+                  {uniqueOffers.map((offer) => (
+                    <option key={offer} value={offer}>
+                      {offer}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 정렬 */}
+              <div>
+                <label htmlFor="sort-field" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  정렬 기준
+                </label>
+                <select
+                  id="sort-field"
+                  value={sortField}
+                  onChange={(e) => {
+                    setSortField(e.target.value as keyof LeadListItem);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="created_at">신청일</option>
+                  <option value="id">ID</option>
+                  <option value="name">이름</option>
+                  <option value="email">이메일</option>
+                  <option value="offer_slug">오퍼</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Table */}
@@ -195,17 +369,29 @@ export default function AdminLeadsPage() {
             <table className="min-w-full divide-y divide-gray-200" role="table" aria-label="리드 목록">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('id')}>
+                    <div className="flex items-center gap-1">
+                      ID
+                      {sortField === 'id' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    오퍼
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('offer_slug')}>
+                    <div className="flex items-center gap-1">
+                      오퍼
+                      {sortField === 'offer_slug' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    이름
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('name')}>
+                    <div className="flex items-center gap-1">
+                      이름
+                      {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    이메일
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('email')}>
+                    <div className="flex items-center gap-1">
+                      이메일
+                      {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     휴대폰
@@ -219,8 +405,11 @@ export default function AdminLeadsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     SMS 상태
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    신청일
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
+                    <div className="flex items-center gap-1">
+                      신청일
+                      {sortField === 'created_at' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     상세
@@ -228,14 +417,14 @@ export default function AdminLeadsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {leads.length === 0 ? (
+                {paginatedLeads.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="px-6 py-8 text-center text-gray-500" role="status" aria-live="polite">
-                      등록된 리드가 없습니다.
+                      {leads.length === 0 ? '등록된 리드가 없습니다.' : '검색 결과가 없습니다.'}
                     </td>
                   </tr>
                 ) : (
-                  leads.map((lead) => (
+                  paginatedLeads.map((lead) => (
                     <tr key={lead.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lead.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lead.offer_slug}</td>
@@ -271,6 +460,62 @@ export default function AdminLeadsPage() {
             </table>
           </div>
         </div>
+
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              {((currentPage - 1) * itemsPerPage + 1).toLocaleString()} -{' '}
+              {Math.min(currentPage * itemsPerPage, filteredAndSortedLeads.length).toLocaleString()} /{' '}
+              {filteredAndSortedLeads.length.toLocaleString()}건
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                이전
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((page) => {
+                  if (totalPages <= 7) return true;
+                  if (page === 1 || page === totalPages) return true;
+                  if (Math.abs(page - currentPage) <= 1) return true;
+                  return false;
+                })
+                .map((page, idx, arr) => {
+                  if (idx > 0 && arr[idx - 1] !== page - 1) {
+                    return (
+                      <span key={`ellipsis-${page}`} className="px-2 py-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 rounded-lg transition-colors ${
+                        currentPage === page
+                          ? 'bg-primary text-white'
+                          : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                다음
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detail Modal */}
