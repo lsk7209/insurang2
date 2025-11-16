@@ -30,6 +30,18 @@ export default function AdminOffersPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
+  const [formData, setFormData] = useState<Partial<Offer>>({
+    name: '',
+    slug: '',
+    title: '',
+    description: '',
+    thumbnail: '',
+    status: 'draft',
+    download_link: '',
+    ab_test_variant: 'A',
+  });
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const fetchOffers = useCallback(async () => {
     try {
@@ -145,6 +157,107 @@ export default function AdminOffersPage() {
     });
   };
 
+  // 슬러그 자동 생성 (한글 → 영문)
+  const generateSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
+  // 모달 열기 (생성)
+  const handleOpenCreateModal = () => {
+    setFormData({
+      name: '',
+      slug: '',
+      title: '',
+      description: '',
+      thumbnail: '',
+      status: 'draft',
+      download_link: '',
+      ab_test_variant: 'A',
+    });
+    setFormError(null);
+    setShowCreateModal(true);
+    setEditingOffer(null);
+  };
+
+  // 모달 열기 (수정)
+  const handleOpenEditModal = (offer: Offer) => {
+    setFormData({
+      name: offer.name,
+      slug: offer.slug,
+      title: offer.title || '',
+      description: offer.description || '',
+      thumbnail: offer.thumbnail || '',
+      status: offer.status,
+      download_link: offer.download_link || '',
+      ab_test_variant: offer.ab_test_variant,
+    });
+    setFormError(null);
+    setEditingOffer(offer);
+    setShowCreateModal(true);
+  };
+
+  // 폼 제출
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormLoading(true);
+    setFormError(null);
+
+    try {
+      const url = editingOffer
+        ? `/api/admin/offers?id=${editingOffer.id}`
+        : '/api/admin/offers';
+      const method = editingOffer ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.status === 401) {
+        setFormError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setFormLoading(false);
+        return;
+      }
+
+      if (!response.ok) {
+        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        try {
+          const errorResult = await response.json();
+          errorMessage = errorResult.error || errorMessage;
+        } catch {
+          // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
+        }
+        setFormError(errorMessage);
+        setFormLoading(false);
+        return;
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        alert(editingOffer ? '오퍼가 성공적으로 수정되었습니다.' : '오퍼가 성공적으로 생성되었습니다.');
+        setShowCreateModal(false);
+        setEditingOffer(null);
+        fetchOffers();
+      } else {
+        setFormError(result.error || '오퍼 저장에 실패했습니다.');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      setFormError('오퍼 저장 중 오류가 발생했습니다: ' + errorMessage);
+      console.error('Error saving offer:', error);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -194,7 +307,7 @@ export default function AdminOffersPage() {
               </p>
             </div>
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={handleOpenCreateModal}
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +414,7 @@ export default function AdminOffersPage() {
                               보기
                             </Link>
                             <button
-                              onClick={() => setEditingOffer(offer)}
+                              onClick={() => handleOpenEditModal(offer)}
                               className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
                               aria-label={`${offer.name} 수정`}
                             >
@@ -326,43 +439,216 @@ export default function AdminOffersPage() {
         </div>
       </div>
 
-      {/* 생성/수정 모달 (간단한 버전 - 추후 확장) */}
-      {(showCreateModal || editingOffer) && (
+      {/* 생성/수정 모달 */}
+      {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">
-                  {editingOffer ? '오퍼 수정' : '새 오퍼 생성'}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setEditingOffer(null);
-                  }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
-                  aria-label="닫기"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <form onSubmit={handleSubmit}>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">
+                    {editingOffer ? '오퍼 수정' : '새 오퍼 생성'}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setEditingOffer(null);
+                      setFormError(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
+                    aria-label="닫기"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {formError && (
+                  <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-red-800 dark:text-red-200 text-sm">{formError}</p>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {/* 오퍼 이름 */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                      오퍼 이름 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      required
+                      value={formData.name || ''}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        setFormData({
+                          ...formData,
+                          name,
+                          slug: formData.slug || generateSlug(name),
+                        });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="예: AI 상담 워크북"
+                    />
+                  </div>
+
+                  {/* 슬러그 */}
+                  <div>
+                    <label htmlFor="slug" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                      슬러그 (URL) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="slug"
+                      type="text"
+                      required
+                      value={formData.slug || ''}
+                      onChange={(e) => {
+                        const slug = e.target.value
+                          .toLowerCase()
+                          .replace(/[^\w-]/g, '-')
+                          .replace(/-+/g, '-')
+                          .trim();
+                        setFormData({ ...formData, slug });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+                      placeholder="예: ai-consulting-workbook"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      URL에 사용될 고유 식별자입니다. 영문, 숫자, 하이픈만 사용 가능합니다.
+                    </p>
+                  </div>
+
+                  {/* SEO 제목 */}
+                  <div>
+                    <label htmlFor="title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                      SEO 제목
+                    </label>
+                    <input
+                      id="title"
+                      type="text"
+                      value={formData.title || ''}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="SEO에 사용될 제목 (선택사항)"
+                    />
+                  </div>
+
+                  {/* 설명 */}
+                  <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                      설명
+                    </label>
+                    <textarea
+                      id="description"
+                      rows={3}
+                      value={formData.description || ''}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="오퍼에 대한 설명을 입력하세요"
+                    />
+                  </div>
+
+                  {/* 썸네일 */}
+                  <div>
+                    <label htmlFor="thumbnail" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                      썸네일 이미지 URL
+                    </label>
+                    <input
+                      id="thumbnail"
+                      type="url"
+                      value={formData.thumbnail || ''}
+                      onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+
+                  {/* 다운로드 링크 */}
+                  <div>
+                    <label htmlFor="download_link" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                      다운로드 링크
+                    </label>
+                    <input
+                      id="download_link"
+                      type="url"
+                      value={formData.download_link || ''}
+                      onChange={(e) => setFormData({ ...formData, download_link: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="https://example.com/workbook.pdf"
+                    />
+                  </div>
+
+                  {/* 상태 및 A/B 테스트 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="status" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        상태
+                      </label>
+                      <select
+                        id="status"
+                        value={formData.status || 'draft'}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'active' | 'inactive' })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      >
+                        <option value="draft">초안</option>
+                        <option value="active">활성</option>
+                        <option value="inactive">비활성</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="ab_test_variant" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        A/B 테스트 변형
+                      </label>
+                      <select
+                        id="ab_test_variant"
+                        value={formData.ab_test_variant || 'A'}
+                        onChange={(e) => setFormData({ ...formData, ab_test_variant: e.target.value as 'A' | 'B' })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      >
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 버튼 */}
+                <div className="flex justify-end gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setEditingOffer(null);
+                      setFormError(null);
+                    }}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                    disabled={formLoading}
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={formLoading}
+                    className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {formLoading ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        저장 중...
+                      </span>
+                    ) : (
+                      editingOffer ? '수정' : '생성'
+                    )}
+                  </button>
+                </div>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                오퍼 생성/수정 기능은 다음 단계에서 구현됩니다. 현재는 기본 구조만 제공합니다.
-              </p>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setEditingOffer(null);
-                  }}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-                >
-                  취소
-                </button>
-              </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
