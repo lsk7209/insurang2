@@ -19,6 +19,33 @@ interface OfferData {
   description: string | null;
   status: string;
   download_link: string | null;
+  // 신청 페이지 콘텐츠
+  hero_title: string | null;
+  hero_subtitle: string | null;
+  hero_badge_text: string | null;
+  hero_cta_text: string | null;
+  hero_background_image: string | null;
+  hero_stats_text: string | null;
+  preview_title: string | null;
+  preview_subtitle: string | null;
+  preview_image: string | null;
+  preview_features: string | null;
+  value_title: string | null;
+  value_subtitle: string | null;
+  value_cards: string | null;
+  trust_title: string | null;
+  trust_subtitle: string | null;
+  testimonials: string | null;
+  form_title: string | null;
+  form_subtitle: string | null;
+  form_badge_text: string | null;
+  form_description: string | null;
+  // 감사 페이지 콘텐츠
+  thanks_title: string | null;
+  thanks_subtitle: string | null;
+  thanks_description: string | null;
+  thanks_cta_text: string | null;
+  thanks_examples: string | null;
   created_at: string;
   updated_at: string;
 }

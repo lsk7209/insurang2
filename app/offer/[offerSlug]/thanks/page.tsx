@@ -1,9 +1,23 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { trackPageView, trackFunnelEvent } from '@/lib/utils/tracking';
 import Header from '@/components/layout/Header';
+
+interface OfferContent {
+  thanks_title: string | null;
+  thanks_subtitle: string | null;
+  thanks_description: string | null;
+  thanks_cta_text: string | null;
+  thanks_examples: string | null;
+}
+
+interface Example {
+  title: string;
+  text: string;
+}
 
 /**
  * Thank You Page
@@ -15,6 +29,78 @@ export default function ThankYouPage() {
   const params = useParams();
   const offerSlug = params?.offerSlug as string;
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [offerContent, setOfferContent] = useState<OfferContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [examples, setExamples] = useState<Example[]>([
+    {
+      title: '즉시 신뢰를 구축하는 문장',
+      text: '"오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."',
+    },
+    {
+      title: '우아하게 거절에 대처하는 문장',
+      text: '"정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."',
+    },
+    {
+      title: '긴급성을 자연스럽게 만드는 문장',
+      text: '"이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."',
+    },
+  ]);
+
+  // 페이지뷰 및 감사 페이지 도달 추적
+  useEffect(() => {
+    if (offerSlug) {
+      trackPageView(`/offer/${offerSlug}/thanks`, offerSlug);
+      trackFunnelEvent('thank_you', `/offer/${offerSlug}/thanks`, offerSlug);
+    }
+  }, [offerSlug]);
+
+  // 오퍼 콘텐츠 로드
+  useEffect(() => {
+    const fetchOfferContent = async () => {
+      if (!offerSlug) return;
+      
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/offers?slug=${encodeURIComponent(offerSlug)}`);
+        
+        if (!response.ok) {
+          console.warn('Failed to fetch offer content, using defaults');
+          setIsLoading(false);
+          return;
+        }
+
+        const result = await response.json();
+        if (result.success && result.data) {
+          const content: OfferContent = {
+            thanks_title: result.data.thanks_title,
+            thanks_subtitle: result.data.thanks_subtitle,
+            thanks_description: result.data.thanks_description,
+            thanks_cta_text: result.data.thanks_cta_text,
+            thanks_examples: result.data.thanks_examples,
+          };
+          setOfferContent(content);
+
+          // 예시 문장 파싱
+          if (content.thanks_examples) {
+            try {
+              const parsedExamples = JSON.parse(content.thanks_examples);
+              if (Array.isArray(parsedExamples) && parsedExamples.length > 0) {
+                setExamples(parsedExamples);
+              }
+            } catch (e) {
+              console.warn('Failed to parse examples JSON, using defaults');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch offer content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOfferContent();
+  }, [offerSlug]);
 
   const handleCopy = useCallback(
     async (text: string, index: number) => {
@@ -29,25 +115,10 @@ export default function ThankYouPage() {
     []
   );
 
-  const examples = [
-    {
-      title: '즉시 신뢰를 구축하는 문장',
-      text: '"오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."',
-    },
-    {
-      title: '우아하게 거절에 대처하는 문장',
-      text: '"정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."',
-    },
-    {
-      title: '긴급성을 자연스럽게 만드는 문장',
-      text: '"이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."',
-    },
-  ];
-
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light font-display group/design-root overflow-x-hidden dark:bg-background-dark">
       <Header 
-        ctaText="홈으로" 
+        ctaText={offerContent?.thanks_cta_text || '홈으로'} 
         onCtaClick={() => {
           try {
             router.push('/');
@@ -63,12 +134,26 @@ export default function ThankYouPage() {
             {/* Header Section */}
             <header className="flex flex-col md:flex-row flex-wrap justify-between items-center gap-8 p-4 text-center md:text-left">
               <div className="flex flex-col gap-3 max-w-lg">
-                <h1 className="text-primary dark:text-white text-4xl lg:text-5xl font-black leading-tight tracking-tighter">
-                  오퍼 신청이 완료되었습니다!
-                </h1>
-                <p className="text-accent dark:text-gray-300 text-base lg:text-lg font-normal leading-normal">
-                  신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!
-                </p>
+                {isLoading ? (
+                  <>
+                    <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </>
+                ) : (
+                  <>
+                    <h1 className="text-primary dark:text-white text-4xl lg:text-5xl font-black leading-tight tracking-tighter">
+                      {offerContent?.thanks_title || '오퍼 신청이 완료되었습니다!'}
+                    </h1>
+                    <p className="text-accent dark:text-gray-300 text-base lg:text-lg font-normal leading-normal">
+                      {offerContent?.thanks_subtitle || '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!'}
+                    </p>
+                    {offerContent?.thanks_description && (
+                      <p className="text-accent dark:text-gray-300 text-sm font-normal leading-normal mt-2">
+                        {offerContent.thanks_description}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
               <div className="relative w-full max-w-[280px] md:max-w-[240px] lg:max-w-[300px] aspect-square flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/30 to-primary/30 rounded-full blur-2xl" aria-hidden="true"></div>
