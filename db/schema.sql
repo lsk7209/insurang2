@@ -157,6 +157,46 @@ CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 CREATE INDEX IF NOT EXISTS idx_consultant_schedules_consultant ON consultant_schedules(consultant_name);
 CREATE INDEX IF NOT EXISTS idx_consultant_schedules_day ON consultant_schedules(day_of_week);
 
+-- Content Articles 테이블 (콘텐츠 허브)
+CREATE TABLE IF NOT EXISTS content_articles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  excerpt TEXT, -- 요약
+  content TEXT NOT NULL, -- 본문 (Markdown 또는 HTML)
+  author TEXT, -- 작성자
+  category TEXT, -- 카테고리
+  tags TEXT, -- 태그 (쉼표로 구분)
+  featured_image TEXT, -- 대표 이미지 URL
+  published_at DATETIME, -- 발행일 (NULL이면 미발행)
+  status TEXT DEFAULT 'draft', -- 'draft', 'published', 'archived'
+  view_count INTEGER DEFAULT 0, -- 조회수
+  seo_title TEXT, -- SEO 제목
+  seo_description TEXT, -- SEO 설명
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Content CTAs 테이블 (콘텐츠 내 CTA)
+CREATE TABLE IF NOT EXISTS content_ctas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  article_id INTEGER NOT NULL,
+  offer_slug TEXT, -- 연결된 오퍼 슬러그
+  cta_text TEXT NOT NULL, -- CTA 버튼 텍스트
+  position INTEGER DEFAULT 0, -- 콘텐츠 내 위치 (문단 번호)
+  enabled INTEGER DEFAULT 1, -- 0 = 비활성, 1 = 활성
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (article_id) REFERENCES content_articles(id),
+  FOREIGN KEY (offer_slug) REFERENCES offers(slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_articles_slug ON content_articles(slug);
+CREATE INDEX IF NOT EXISTS idx_content_articles_status ON content_articles(status);
+CREATE INDEX IF NOT EXISTS idx_content_articles_published_at ON content_articles(published_at);
+CREATE INDEX IF NOT EXISTS idx_content_ctas_article_id ON content_ctas(article_id);
+CREATE INDEX IF NOT EXISTS idx_content_ctas_offer_slug ON content_ctas(offer_slug);
+
 -- 초기 오퍼 데이터 (예시)
 INSERT OR IGNORE INTO offers (slug, name, title, description, status, download_link, ab_test_variant) 
 VALUES (
