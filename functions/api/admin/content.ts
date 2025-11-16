@@ -190,8 +190,12 @@ export async function onRequestGet(context: {
     return createSuccessResponse(result);
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
-    console.error('[Admin Content API] GET error:', err);
-    return createErrorResponse('서버 오류가 발생했습니다.', 500);
+    console.error('[Admin Content API] GET error:', {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+    });
+    return createErrorResponse(`서버 오류가 발생했습니다: ${err.message}`, 500);
   }
 }
 

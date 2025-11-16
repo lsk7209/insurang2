@@ -487,11 +487,11 @@ export default function AdminSettingsPage() {
                   </p>
                 </div>
                 <div className="sm:col-span-2">
-                  <label htmlFor="smtp_from" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                  <label htmlFor="smtp_from_editable" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
                     발신자 이메일 <span className="text-red-500">*</span>
                   </label>
                   <input
-                    id="smtp_from_readonly"
+                    id="smtp_from_editable"
                     name="smtp_from"
                     type="email"
                     value={settings.smtp_from}
