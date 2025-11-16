@@ -171,23 +171,33 @@ export async function onRequestGet(context: {
     }
 
     // 아티클 목록 조회
-    let query = 'SELECT * FROM content_articles';
-    const params: any[] = [];
+    try {
+      let query = 'SELECT * FROM content_articles';
+      const params: any[] = [];
 
-    if (status) {
-      query += ' WHERE status = ?';
-      params.push(status);
+      if (status) {
+        query += ' WHERE status = ?';
+        params.push(status);
+      }
+
+      query += ' ORDER BY created_at DESC';
+
+      const articles = await context.env.DB.prepare(query)
+        .bind(...params)
+        .all<ArticleRow>();
+
+      const result = (articles.results || []).map(mapArticleRow);
+
+      return createSuccessResponse(result);
+    } catch (dbError: unknown) {
+      const dbErr = dbError instanceof Error ? dbError : new Error(String(dbError));
+      // 테이블이 존재하지 않는 경우 빈 배열 반환
+      if (dbErr.message.includes('no such table') || dbErr.message.includes('does not exist')) {
+        console.warn('[Admin Content API] Table does not exist, returning empty array');
+        return createSuccessResponse([]);
+      }
+      throw dbError;
     }
-
-    query += ' ORDER BY created_at DESC';
-
-    const articles = await context.env.DB.prepare(query)
-      .bind(...params)
-      .all<ArticleRow>();
-
-    const result = (articles.results || []).map(mapArticleRow);
-
-    return createSuccessResponse(result);
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
     console.error('[Admin Content API] GET error:', {

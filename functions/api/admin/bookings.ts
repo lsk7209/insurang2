@@ -155,36 +155,46 @@ export async function onRequestGet(context: {
     }
 
     // 예약 목록 조회
-    let query = 'SELECT * FROM bookings';
-    const params: any[] = [];
+    try {
+      let query = 'SELECT * FROM bookings';
+      const params: any[] = [];
 
-    if (leadId) {
-      query += ' WHERE lead_id = ?';
-      params.push(parseInt(leadId));
-    } else if (status) {
-      query += ' WHERE status = ?';
-      params.push(status);
+      if (leadId) {
+        query += ' WHERE lead_id = ?';
+        params.push(parseInt(leadId));
+      } else if (status) {
+        query += ' WHERE status = ?';
+        params.push(status);
+      }
+
+      query += ' ORDER BY scheduled_at ASC';
+
+      const bookings = await context.env.DB.prepare(query)
+        .bind(...params)
+        .all<BookingRow>();
+
+      const result = (bookings.results || []).map((booking) => ({
+        id: booking.id,
+        lead_id: booking.lead_id,
+        consultant_name: booking.consultant_name,
+        scheduled_at: booking.scheduled_at,
+        duration_minutes: booking.duration_minutes,
+        status: booking.status as 'pending' | 'confirmed' | 'completed' | 'cancelled',
+        notes: booking.notes,
+        created_at: booking.created_at,
+        updated_at: booking.updated_at,
+      }));
+
+      return createSuccessResponse(result);
+    } catch (dbError: unknown) {
+      const dbErr = dbError instanceof Error ? dbError : new Error(String(dbError));
+      // 테이블이 존재하지 않는 경우 빈 배열 반환
+      if (dbErr.message.includes('no such table') || dbErr.message.includes('does not exist')) {
+        console.warn('[Admin Bookings API] Table does not exist, returning empty array');
+        return createSuccessResponse([]);
+      }
+      throw dbError;
     }
-
-    query += ' ORDER BY scheduled_at ASC';
-
-    const bookings = await context.env.DB.prepare(query)
-      .bind(...params)
-      .all<BookingRow>();
-
-    const result = (bookings.results || []).map((booking) => ({
-      id: booking.id,
-      lead_id: booking.lead_id,
-      consultant_name: booking.consultant_name,
-      scheduled_at: booking.scheduled_at,
-      duration_minutes: booking.duration_minutes,
-      status: booking.status as 'pending' | 'confirmed' | 'completed' | 'cancelled',
-      notes: booking.notes,
-      created_at: booking.created_at,
-      updated_at: booking.updated_at,
-    }));
-
-    return createSuccessResponse(result);
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
     console.error('[Admin Bookings API] GET error:', {

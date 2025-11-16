@@ -164,36 +164,46 @@ export async function onRequestGet(context: {
     }
 
     // 시퀀스 목록 조회
-    let query = 'SELECT * FROM sequences';
-    const params: any[] = [];
+    try {
+      let query = 'SELECT * FROM sequences';
+      const params: any[] = [];
 
-    if (offerSlug) {
-      query += ' WHERE offer_slug = ?';
-      params.push(offerSlug);
+      if (offerSlug) {
+        query += ' WHERE offer_slug = ?';
+        params.push(offerSlug);
+      }
+
+      query += ' ORDER BY offer_slug, day_offset ASC';
+
+      const sequences = await context.env.DB.prepare(query)
+        .bind(...params)
+        .all<SequenceRow>();
+
+      const result = (sequences.results || []).map((seq) => ({
+        id: seq.id,
+        offer_slug: seq.offer_slug,
+        name: seq.name,
+        day_offset: seq.day_offset,
+        channel: seq.channel as 'email' | 'sms',
+        subject: seq.subject,
+        message: seq.message,
+        quiet_hour_start: seq.quiet_hour_start,
+        quiet_hour_end: seq.quiet_hour_end,
+        enabled: Boolean(seq.enabled),
+        created_at: seq.created_at,
+        updated_at: seq.updated_at,
+      }));
+
+      return createSuccessResponse(result);
+    } catch (dbError: unknown) {
+      const dbErr = dbError instanceof Error ? dbError : new Error(String(dbError));
+      // 테이블이 존재하지 않는 경우 빈 배열 반환
+      if (dbErr.message.includes('no such table') || dbErr.message.includes('does not exist')) {
+        console.warn('[Admin Sequences API] Table does not exist, returning empty array');
+        return createSuccessResponse([]);
+      }
+      throw dbError;
     }
-
-    query += ' ORDER BY offer_slug, day_offset ASC';
-
-    const sequences = await context.env.DB.prepare(query)
-      .bind(...params)
-      .all<SequenceRow>();
-
-    const result = (sequences.results || []).map((seq) => ({
-      id: seq.id,
-      offer_slug: seq.offer_slug,
-      name: seq.name,
-      day_offset: seq.day_offset,
-      channel: seq.channel as 'email' | 'sms',
-      subject: seq.subject,
-      message: seq.message,
-      quiet_hour_start: seq.quiet_hour_start,
-      quiet_hour_end: seq.quiet_hour_end,
-      enabled: Boolean(seq.enabled),
-      created_at: seq.created_at,
-      updated_at: seq.updated_at,
-    }));
-
-    return createSuccessResponse(result);
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
     console.error('[Admin Sequences API] GET error:', {
