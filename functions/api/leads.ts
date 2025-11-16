@@ -33,6 +33,13 @@ export async function onRequestPost(context: {
   env: Env;
 }): Promise<Response> {
   console.log('[Leads API] POST request received');
+  
+  // 초기 검증: DB 바인딩 확인
+  if (!context.env.DB) {
+    console.error('[Leads API] DB binding not found');
+    return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
+  }
+  
   try {
     // Rate Limiting 체크 (MVP: 간단한 IP 기반)
     const clientId = getClientIdentifier(context.request);
@@ -165,12 +172,26 @@ export async function onRequestPost(context: {
     console.log('[Leads API] Success response:', { leadId, offer_slug: offer_slug });
     return createSuccessResponse();
   } catch (error: unknown) {
-    const err = error instanceof Error ? error : new Error('Unknown error');
-    console.error('[Leads API] Unexpected error:', err);
-    // 에러 로깅 (console + DB)
-    await logError(context.env.DB, err, {
-      operation: 'lead_creation',
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[Leads API] Unexpected error:', {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+      error: String(error),
     });
+    
+    // 에러 로깅 (console + DB) - DB가 없을 수도 있으므로 try-catch로 감싸기
+    try {
+      if (context.env.DB) {
+        await logError(context.env.DB, err, {
+          operation: 'lead_creation',
+          error_type: err.name,
+        });
+      }
+    } catch (logErr) {
+      console.error('[Leads API] Failed to log error:', logErr);
+    }
+    
     return createErrorResponse('서버 오류가 발생했습니다.', 500);
   }
 }

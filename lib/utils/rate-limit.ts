@@ -4,7 +4,7 @@
  * MVP 수준: IP 기반 간단한 체크
  */
 
-import type { D1Database } from '@/types/cloudflare';
+import type { D1Database } from '../../types/cloudflare';
 
 interface RateLimitConfig {
   maxRequests: number;

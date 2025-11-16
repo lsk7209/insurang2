@@ -4,7 +4,7 @@
  * 요구사항: 에러 로그 반드시 console + DB
  */
 
-import type { D1Database } from '@/types/cloudflare';
+import type { D1Database } from '../../types/cloudflare';
 
 export interface ErrorLog {
   level: 'error' | 'warn' | 'info';

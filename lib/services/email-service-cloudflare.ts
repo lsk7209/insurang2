@@ -17,7 +17,7 @@ interface SendEmailParams {
   downloadLink: string;
 }
 
-import { generateEmailTemplate } from '@/lib/utils/email-template';
+import { generateEmailTemplate } from '../utils/email-template';
 
 /**
  * Send email using Resend API (예시)
