@@ -3,13 +3,17 @@
 import { useState, useEffect } from 'react';
 
 interface Settings {
-  // SMTP 설정
+  // SMTP 설정 (Cloudflare Workers에서는 사용 불가)
   smtp_host: string;
   smtp_port: string;
   smtp_secure: boolean;
   smtp_user: string;
   smtp_pass: string;
   smtp_from: string;
+  
+  // 이메일 서비스 API 키
+  resend_api_key: string;
+  sendgrid_api_key: string;
   
   // 솔라피 API 설정
   solapi_api_key: string;
@@ -30,6 +34,8 @@ export default function AdminSettingsPage() {
     smtp_user: '',
     smtp_pass: '',
     smtp_from: '',
+    resend_api_key: '',
+    sendgrid_api_key: '',
     solapi_api_key: '',
     solapi_api_secret: '',
     solapi_sender_phone: '',
@@ -297,7 +303,7 @@ export default function AdminSettingsPage() {
             </div>
           )}
 
-          {/* SMTP 설정 */}
+          {/* 이메일 서비스 설정 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -308,10 +314,93 @@ export default function AdminSettingsPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-text-light dark:text-text-dark">
-                    SMTP 설정
+                    이메일 서비스 설정
                   </h2>
                   <p className="text-sm text-text-light/70 dark:text-text-dark/70">
-                    이메일 발송을 위한 SMTP 서버 설정
+                    Resend 또는 SendGrid API 키 설정 (Cloudflare Dashboard에서 환경 변수로 관리)
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>💡 참고:</strong> 이메일/SMS 발송 설정은 Cloudflare Dashboard의 환경 변수에서 관리됩니다.
+                  <br />
+                  Pages 프로젝트 → Settings → Environment Variables에서 설정하세요.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="resend_api_key" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    Resend API Key
+                  </label>
+                  <input
+                    id="resend_api_key"
+                    name="resend_api_key"
+                    type="text"
+                    value={settings.resend_api_key || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed font-mono text-sm"
+                    placeholder="설정되지 않음"
+                  />
+                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
+                    Resend 서비스를 사용하는 경우 설정 (권장)
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="sendgrid_api_key" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    SendGrid API Key
+                  </label>
+                  <input
+                    id="sendgrid_api_key"
+                    name="sendgrid_api_key"
+                    type="text"
+                    value={settings.sendgrid_api_key || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed font-mono text-sm"
+                    placeholder="설정되지 않음"
+                  />
+                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
+                    SendGrid 서비스를 사용하는 경우 설정
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="smtp_from" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    발신자 이메일 (SMTP_FROM)
+                  </label>
+                  <input
+                    id="smtp_from"
+                    name="smtp_from"
+                    type="email"
+                    value={settings.smtp_from || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed"
+                    placeholder="noreply@example.com"
+                  />
+                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
+                    이메일 발송 시 사용될 발신자 이메일 주소
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SMTP 설정 (참고용 - Cloudflare Workers에서는 사용 불가) */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 opacity-60">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="text-gray-400">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-text-light dark:text-text-dark">
+                    SMTP 설정 (사용 불가)
+                  </h2>
+                  <p className="text-sm text-text-light/70 dark:text-text-dark/70">
+                    Cloudflare Workers에서는 직접 SMTP 연결을 지원하지 않습니다. Resend 또는 SendGrid API를 사용하세요.
                   </p>
                 </div>
               </div>
@@ -430,13 +519,69 @@ export default function AdminSettingsPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-text-light dark:text-text-dark">
-                    솔라피 API 설정
+                    SMS 서비스 설정 (솔라피)
                   </h2>
                   <p className="text-sm text-text-light/70 dark:text-text-dark/70">
-                    SMS 발송을 위한 솔라피 API 키 설정
+                    SMS 발송을 위한 솔라피 API 키 설정 (Cloudflare Dashboard에서 환경 변수로 관리)
                   </p>
                 </div>
               </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="solapi_api_key" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    API Key
+                  </label>
+                  <input
+                    id="solapi_api_key"
+                    name="solapi_api_key"
+                    type="text"
+                    value={settings.solapi_api_key || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed font-mono text-sm"
+                    placeholder="설정되지 않음"
+                  />
+                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
+                    솔라피 콘솔에서 발급받은 API Key
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="solapi_api_secret" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    API Secret
+                  </label>
+                  <input
+                    id="solapi_api_secret"
+                    name="solapi_api_secret"
+                    type="password"
+                    value={settings.solapi_api_secret || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed font-mono text-sm"
+                    placeholder={settings.solapi_api_secret ? '***' : '설정되지 않음'}
+                  />
+                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
+                    솔라피 콘솔에서 발급받은 API Secret (보안상 마스킹됨)
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="solapi_sender_phone" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    발신자 번호
+                  </label>
+                  <input
+                    id="solapi_sender_phone"
+                    name="solapi_sender_phone"
+                    type="tel"
+                    value={settings.solapi_sender_phone || ''}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed"
+                    placeholder="01012345678"
+                  />
+                  <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
+                    SMS 발송 시 사용될 발신자 전화번호 (하이픈 없이 입력)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
               <div className="space-y-4">
                 <div>
@@ -578,30 +723,21 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
-          {/* 저장 버튼 */}
-          <div className="flex justify-end">
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  저장 중...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  설정 저장
-                </>
-              )}
-            </button>
+          {/* 안내 메시지 */}
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">설정 변경 방법</h3>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  이메일/SMS 발송 설정은 Cloudflare Dashboard의 환경 변수에서 관리됩니다.
+                  <br />
+                  <strong>Cloudflare Dashboard</strong> → <strong>Pages</strong> → <strong>프로젝트 선택</strong> → <strong>Settings</strong> → <strong>Environment Variables</strong>에서 설정하세요.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
