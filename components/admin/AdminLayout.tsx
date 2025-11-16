@@ -76,7 +76,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         className={`fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
-        style={{ width: `${DRAWER_WIDTH}px` }}
+        style={{ width: `${DRAWER_WIDTH}px`, height: '100vh' }}
       >
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
@@ -120,8 +120,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Main content */}
       <div
-        className="flex-1 flex flex-col"
-        style={{ marginLeft: '0', width: '100%' }}
+        className="flex-1 flex flex-col md:ml-[280px]"
+        style={{ minHeight: '100vh' }}
       >
         {/* Top bar */}
         <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm h-16 flex items-center px-4 md:px-6">
@@ -140,7 +140,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto" style={{ marginLeft: '0' }}>
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
           <div className="p-4 md:p-6">{children}</div>
         </main>
       </div>
