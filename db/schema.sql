@@ -74,6 +74,37 @@ CREATE TABLE IF NOT EXISTS offer_metrics (
   UNIQUE(offer_id, period, period_date)
 );
 
+-- Sequences 테이블 (시퀀스 메시지 자동화)
+CREATE TABLE IF NOT EXISTS sequences (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  offer_slug TEXT NOT NULL,
+  name TEXT NOT NULL, -- 시퀀스 이름
+  day_offset INTEGER NOT NULL, -- D+0, D+2, D+5, D+7 등
+  channel TEXT NOT NULL, -- 'email' or 'sms'
+  subject TEXT, -- 이메일 제목 (email인 경우)
+  message TEXT NOT NULL, -- 메시지 내용
+  quiet_hour_start INTEGER DEFAULT 22, -- Quiet Hour 시작 시간 (0-23)
+  quiet_hour_end INTEGER DEFAULT 8, -- Quiet Hour 종료 시간 (0-23)
+  enabled INTEGER DEFAULT 1, -- 0 = 비활성, 1 = 활성
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (offer_slug) REFERENCES offers(slug)
+);
+
+-- Sequence Logs 테이블 (시퀀스 발송 로그)
+CREATE TABLE IF NOT EXISTS sequence_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sequence_id INTEGER NOT NULL,
+  lead_id INTEGER NOT NULL,
+  scheduled_at DATETIME NOT NULL, -- 예약 발송 시간
+  sent_at DATETIME, -- 실제 발송 시간 (NULL이면 아직 발송 안됨)
+  status TEXT DEFAULT 'pending', -- 'pending', 'sent', 'failed', 'skipped'
+  error_message TEXT, -- 실패 시 에러 메시지
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (sequence_id) REFERENCES sequences(id),
+  FOREIGN KEY (lead_id) REFERENCES leads(id)
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_leads_offer_slug ON leads(offer_slug);
 CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at);
@@ -87,6 +118,12 @@ CREATE INDEX IF NOT EXISTS idx_offers_status ON offers(status);
 CREATE INDEX IF NOT EXISTS idx_offers_slug ON offers(slug);
 CREATE INDEX IF NOT EXISTS idx_offer_metrics_offer_id ON offer_metrics(offer_id);
 CREATE INDEX IF NOT EXISTS idx_offer_metrics_period ON offer_metrics(period, period_date);
+CREATE INDEX IF NOT EXISTS idx_sequences_offer_slug ON sequences(offer_slug);
+CREATE INDEX IF NOT EXISTS idx_sequences_enabled ON sequences(enabled);
+CREATE INDEX IF NOT EXISTS idx_sequence_logs_sequence_id ON sequence_logs(sequence_id);
+CREATE INDEX IF NOT EXISTS idx_sequence_logs_lead_id ON sequence_logs(lead_id);
+CREATE INDEX IF NOT EXISTS idx_sequence_logs_status ON sequence_logs(status);
+CREATE INDEX IF NOT EXISTS idx_sequence_logs_scheduled_at ON sequence_logs(scheduled_at);
 
 -- 초기 오퍼 데이터 (예시)
 INSERT OR IGNORE INTO offers (slug, name, title, description, status, download_link, ab_test_variant) 
