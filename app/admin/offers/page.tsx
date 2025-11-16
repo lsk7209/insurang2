@@ -45,6 +45,12 @@ interface Offer {
   form_subtitle: string | null;
   form_badge_text: string | null;
   form_description: string | null;
+  // 감사 페이지 콘텐츠 필드
+  thanks_title: string | null;
+  thanks_subtitle: string | null;
+  thanks_description: string | null;
+  thanks_cta_text: string | null;
+  thanks_examples: string | null; // JSON
   created_at: string;
   updated_at: string;
 }
@@ -55,7 +61,7 @@ export default function AdminOffersPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'content'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'content' | 'thanks' | 'analytics'>('basic');
   const [formData, setFormData] = useState<Partial<Offer>>({
     name: '',
     slug: '',
@@ -86,6 +92,12 @@ export default function AdminOffersPage() {
     form_subtitle: '',
     form_badge_text: '100% 무료 · 즉시 다운로드',
     form_description: '',
+    // 감사 페이지 기본값
+    thanks_title: '오퍼 신청이 완료되었습니다!',
+    thanks_subtitle: '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+    thanks_description: '',
+    thanks_cta_text: '홈으로',
+    thanks_examples: '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -256,6 +268,11 @@ export default function AdminOffersPage() {
       form_subtitle: '',
       form_badge_text: '100% 무료 · 즉시 다운로드',
       form_description: '',
+      thanks_title: '오퍼 신청이 완료되었습니다!',
+      thanks_subtitle: '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+      thanks_description: '',
+      thanks_cta_text: '홈으로',
+      thanks_examples: '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
     });
     setFormError(null);
   };
@@ -291,6 +308,11 @@ export default function AdminOffersPage() {
       form_subtitle: '',
       form_badge_text: '100% 무료 · 즉시 다운로드',
       form_description: '',
+      thanks_title: '오퍼 신청이 완료되었습니다!',
+      thanks_subtitle: '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+      thanks_description: '',
+      thanks_cta_text: '홈으로',
+      thanks_examples: '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
     });
     setFormError(null);
     setActiveTab('basic');
@@ -329,6 +351,11 @@ export default function AdminOffersPage() {
       form_subtitle: offer.form_subtitle || '',
       form_badge_text: offer.form_badge_text || '100% 무료 · 즉시 다운로드',
       form_description: offer.form_description || '',
+      thanks_title: offer.thanks_title || '오퍼 신청이 완료되었습니다!',
+      thanks_subtitle: offer.thanks_subtitle || '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+      thanks_description: offer.thanks_description || '',
+      thanks_cta_text: offer.thanks_cta_text || '홈으로',
+      thanks_examples: offer.thanks_examples || '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
     });
     setFormError(null);
     setActiveTab('basic');
@@ -582,11 +609,11 @@ export default function AdminOffersPage() {
 
                 {/* 탭 네비게이션 */}
                 <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-                  <nav className="flex gap-4" aria-label="탭 메뉴">
+                  <nav className="flex gap-4 overflow-x-auto" aria-label="탭 메뉴">
                     <button
                       type="button"
                       onClick={() => setActiveTab('basic')}
-                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                         activeTab === 'basic'
                           ? 'border-primary text-primary'
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -597,14 +624,38 @@ export default function AdminOffersPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTab('content')}
-                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                         activeTab === 'content'
                           ? 'border-primary text-primary'
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      페이지 편집
+                      신청 페이지
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('thanks')}
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                        activeTab === 'thanks'
+                          ? 'border-primary text-primary'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      감사 페이지
+                    </button>
+                    {editingOffer && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('analytics')}
+                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                          activeTab === 'analytics'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                        }`}
+                      >
+                        통계 분석
+                      </button>
+                    )}
                   </nav>
                 </div>
 
@@ -1004,6 +1055,99 @@ export default function AdminOffersPage() {
                           placeholder="예: 신용카드 불필요 · 개인정보 보호 · 언제든지 구독 취소 가능"
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+                )}
+
+                {/* 감사 페이지 편집 탭 */}
+                {activeTab === 'thanks' && (
+                <div className="space-y-6">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">감사 페이지 콘텐츠</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="thanks_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                          메인 제목
+                        </label>
+                        <input
+                          id="thanks_title"
+                          type="text"
+                          value={formData.thanks_title || ''}
+                          onChange={(e) => setFormData({ ...formData, thanks_title: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          placeholder="예: 오퍼 신청이 완료되었습니다!"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="thanks_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                          부제목
+                        </label>
+                        <textarea
+                          id="thanks_subtitle"
+                          rows={3}
+                          value={formData.thanks_subtitle || ''}
+                          onChange={(e) => setFormData({ ...formData, thanks_subtitle: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          placeholder="예: 신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다."
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="thanks_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                          CTA 버튼 텍스트
+                        </label>
+                        <input
+                          id="thanks_cta_text"
+                          type="text"
+                          value={formData.thanks_cta_text || ''}
+                          onChange={(e) => setFormData({ ...formData, thanks_cta_text: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          placeholder="예: 홈으로"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="thanks_examples" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                          예시 문장 (JSON 형식)
+                        </label>
+                        <textarea
+                          id="thanks_examples"
+                          rows={8}
+                          value={formData.thanks_examples || ''}
+                          onChange={(e) => setFormData({ ...formData, thanks_examples: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+                          placeholder='[{"title": "제목", "text": "내용"}]'
+                        />
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          JSON 배열 형식으로 입력하세요. 예: [{"title": "제목", "text": "내용"}]
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                )}
+
+                {/* 통계 분석 탭 */}
+                {activeTab === 'analytics' && editingOffer && (
+                <div className="space-y-6">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
+                      {editingOffer.name} 퍼널 통계
+                    </h3>
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 dark:text-gray-400 mb-4">
+                        통계 분석 기능은 별도 페이지에서 확인할 수 있습니다.
+                      </p>
+                      <a
+                        href={`/admin/analytics?offer=${editingOffer.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        통계 분석 페이지로 이동
+                      </a>
                     </div>
                   </div>
                 </div>

@@ -64,6 +64,12 @@ interface Offer {
   form_subtitle: string | null;
   form_badge_text: string | null;
   form_description: string | null;
+  // 감사 페이지 콘텐츠 필드
+  thanks_title: string | null;
+  thanks_subtitle: string | null;
+  thanks_description: string | null;
+  thanks_cta_text: string | null;
+  thanks_examples: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -99,6 +105,12 @@ interface OfferCreateRequest {
   form_subtitle?: string;
   form_badge_text?: string;
   form_description?: string;
+  // 감사 페이지 콘텐츠 필드
+  thanks_title?: string;
+  thanks_subtitle?: string;
+  thanks_description?: string;
+  thanks_cta_text?: string;
+  thanks_examples?: string;
 }
 
 function createSuccessResponse<T>(data?: T, status = 200): Response {
@@ -274,8 +286,9 @@ export async function onRequestPost(context: {
         preview_title, preview_subtitle, preview_image, preview_features,
         value_title, value_subtitle, value_cards,
         trust_title, trust_subtitle, testimonials,
-        form_title, form_subtitle, form_badge_text, form_description
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        form_title, form_subtitle, form_badge_text, form_description,
+        thanks_title, thanks_subtitle, thanks_description, thanks_cta_text, thanks_examples
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         slug,
@@ -306,7 +319,12 @@ export async function onRequestPost(context: {
         body.form_title || null,
         body.form_subtitle || null,
         body.form_badge_text || null,
-        body.form_description || null
+        body.form_description || null,
+        body.thanks_title || null,
+        body.thanks_subtitle || null,
+        body.thanks_description || null,
+        body.thanks_cta_text || null,
+        body.thanks_examples || null
       )
       .run();
 
@@ -498,6 +516,27 @@ export async function onRequestPut(context: {
     if (body.form_description !== undefined) {
       updates.push('form_description = ?');
       values.push(body.form_description || null);
+    }
+    // 감사 페이지 콘텐츠 필드
+    if (body.thanks_title !== undefined) {
+      updates.push('thanks_title = ?');
+      values.push(body.thanks_title || null);
+    }
+    if (body.thanks_subtitle !== undefined) {
+      updates.push('thanks_subtitle = ?');
+      values.push(body.thanks_subtitle || null);
+    }
+    if (body.thanks_description !== undefined) {
+      updates.push('thanks_description = ?');
+      values.push(body.thanks_description || null);
+    }
+    if (body.thanks_cta_text !== undefined) {
+      updates.push('thanks_cta_text = ?');
+      values.push(body.thanks_cta_text || null);
+    }
+    if (body.thanks_examples !== undefined) {
+      updates.push('thanks_examples = ?');
+      values.push(body.thanks_examples || null);
     }
 
     if (updates.length === 0) {
