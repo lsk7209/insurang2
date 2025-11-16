@@ -75,6 +75,11 @@ export default function OfferLandingPage() {
     const isCheckbox = field === 'consent_privacy' || field === 'consent_marketing';
     const value = isCheckbox ? e.target.checked : e.target.value;
 
+    // 폼 시작 이벤트 추적 (첫 입력 시)
+    if (!formData.name && !formData.email && !formData.phone && (field === 'name' || field === 'email' || field === 'phone')) {
+      trackFunnelEvent('form_start', `/offer/${offerSlug}`, offerSlug);
+    }
+
     if (field === 'phone' && typeof value === 'string') {
       const formatted = formatPhoneNumber(value);
       setFormData((prev) => ({ ...prev, [field]: formatted }));
@@ -85,7 +90,7 @@ export default function OfferLandingPage() {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
-  }, [errors, formatPhoneNumber]);
+  }, [errors, formatPhoneNumber, formData, offerSlug]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -149,6 +154,11 @@ export default function OfferLandingPage() {
 
       if (result.success) {
         console.log(`[Offer Page] Form submission successful for ${offerSlug}, redirecting to thanks page...`);
+        
+        // 퍼널 이벤트 추적
+        const leadId = result.data?.leadId;
+        trackFunnelEvent('form_submit', `/offer/${offerSlug}`, offerSlug, leadId);
+        
         // 정적 빌드 환경에서도 안정적으로 작동하도록 window.location 사용
         await new Promise((resolve) => setTimeout(resolve, 500));
         try {
