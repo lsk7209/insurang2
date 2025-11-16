@@ -189,6 +189,40 @@ export async function onRequestPost(context: {
       return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
     }
 
+    // Offer 존재 확인 및 생성 (FOREIGN KEY 제약 조건을 위해 필요)
+    try {
+      const existingOffer = await context.env.DB.prepare(
+        'SELECT id FROM offers WHERE slug = ?'
+      )
+        .bind(offer_slug)
+        .first<{ id: number }>();
+
+      if (!existingOffer) {
+        // Offer가 없으면 생성
+        console.log('[Leads API] Offer not found, creating:', offer_slug);
+        await context.env.DB.prepare(
+          'INSERT OR IGNORE INTO offers (slug, name, description, status, download_link) VALUES (?, ?, ?, ?, ?)'
+        )
+          .bind(
+            offer_slug,
+            offer_slug === 'workbook' ? 'AI 상담 워크북' : offer_slug,
+            '보험설계사를 위한 AI 상담 워크북 무료 제공',
+            'active',
+            'https://example.com/workbook.pdf'
+          )
+          .run();
+        console.log('[Leads API] Offer created:', offer_slug);
+      }
+    } catch (offerError: unknown) {
+      const error = offerError instanceof Error ? offerError : new Error(String(offerError));
+      console.error('[Leads API] Offer check/create error:', {
+        message: error.message,
+        stack: error.stack,
+        offer_slug,
+      });
+      // Offer 생성 실패해도 계속 진행 (FOREIGN KEY가 비활성화되어 있을 수 있음)
+    }
+
     // 리드 저장
     let leadId: number;
     try {
@@ -222,6 +256,13 @@ export async function onRequestPost(context: {
         name,
         email: email.substring(0, 5) + '***',
       });
+      
+      // FOREIGN KEY 제약 조건 에러인지 확인
+      if (error.message.includes('FOREIGN KEY') || error.message.includes('constraint')) {
+        console.error('[Leads API] FOREIGN KEY constraint error - offer may not exist:', offer_slug);
+        return createErrorResponse('오퍼 정보를 찾을 수 없습니다. 관리자에게 문의해주세요.', 400);
+      }
+      
       return createErrorResponse('데이터베이스 오류가 발생했습니다.', 500);
     }
 
