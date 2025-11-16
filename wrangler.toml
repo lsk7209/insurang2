@@ -24,9 +24,16 @@ database_id = "62f0fdda-f6db-4627-91ce-49825760998b"
 # wrangler deploy --name insurang-cron --compatibility-date 2024-01-01
 #
 # 참고: Pages Functions의 Cron은 functions/_worker.ts의 scheduled 핸들러를 사용합니다.
+# Cloudflare Dashboard에서 Cron Triggers 설정 필요:
+# 1. "*/10 * * * *" - 10분마다: 시퀀스 메시지 발송
+# 2. "0 9 * * *" - 매일 오전 9시: 일일 리포트
+# 
+# 별도 Worker로 배포 시 아래 주석 해제:
+# [[triggers.crons]]
+# cron = "*/10 * * * *"  # 10분마다: 시퀀스 메시지 발송
 # 
 # [[triggers.crons]]
-# cron = "0 9 * * *"  # 매일 오전 9시 (UTC) - 별도 Worker 배포 시 사용
+# cron = "0 9 * * *"  # 매일 오전 9시 (UTC): 일일 리포트
 
 # 환경 변수 설정
 # 

@@ -1,6 +1,9 @@
 /**
  * Cloudflare Pages Functions Worker
- * 통합 Worker - API 라우팅 및 Cron 트리거 처리
+ * 통합 Worker - Cron 트리거 처리
+ * 
+ * Cloudflare Pages Functions의 Cron은 functions/_worker.ts의 scheduled 핸들러를 사용합니다.
+ * Cloudflare Dashboard에서 Cron Triggers 설정 필요
  */
 
 interface D1Database {
@@ -59,7 +62,7 @@ export default {
       ctx.waitUntil(processSequenceQueue(env));
     } else {
       // 일일 리포트 (매일 오전 9시)
-      ctx.waitUntil(processDailyReport(env, ctx));
+      ctx.waitUntil(processDailyReport(env));
     }
   },
 };
@@ -67,10 +70,9 @@ export default {
 /**
  * 일일 리포트 처리
  */
-async function processDailyReport(env: Env, ctx: ExecutionContext) {
+async function processDailyReport(env: Env) {
   try {
     // 오늘 날짜의 리드 수 조회
-    // D1은 SQLite 기반이므로 date() 함수 사용
     const today = new Date().toISOString().split('T')[0];
     const result = await env.DB.prepare(
       'SELECT COUNT(*) as count FROM leads WHERE date(created_at) = ?'
@@ -90,13 +92,14 @@ async function processDailyReport(env: Env, ctx: ExecutionContext) {
       .first<{ count: number }>();
 
     const errorCount = errorResult?.count || 0;
-
-    console.log(`[Cron] Daily report: ${errorCount} errors logged on ${today}`);
+    if (errorCount > 0) {
+      console.warn(`[Cron] Daily report: ${errorCount} errors occurred on ${today}`);
+    }
 
     // 여기서 관리자에게 리포트 이메일 발송 등 추가 작업 가능
-    // 예: 이메일 발송, Slack 알림 등
-  } catch (error) {
-    console.error('[Cron] Daily report error:', error);
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[Cron] Daily report error:', err);
   }
 }
 
@@ -204,6 +207,9 @@ async function processSequenceQueue(env: Env) {
             console.log(`[Sequence Sender] Skipping due to quiet hour: ${currentHour}`);
             const nextScheduled = new Date();
             nextScheduled.setHours(quietEnd, 0, 0, 0);
+            if (nextScheduled.getTime() <= new Date().getTime()) {
+              nextScheduled.setDate(nextScheduled.getDate() + 1);
+            }
             
             await env.DB.prepare('UPDATE sequence_logs SET scheduled_at = ? WHERE id = ?')
               .bind(nextScheduled.toISOString(), log.id)
