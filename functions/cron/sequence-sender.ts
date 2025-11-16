@@ -1,7 +1,7 @@
 /**
  * Cloudflare Workers Cron Trigger
  * 시퀀스 메시지 자동 발송 (10분마다 실행)
- * wrangler.toml에서 cron 설정 필요: "*/10 * * * *"
+ * wrangler.toml에서 cron 설정 필요: 10분마다 실행
  */
 
 interface D1Database {

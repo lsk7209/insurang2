@@ -13,12 +13,19 @@ interface D1PreparedStatement {
   bind(...values: any[]): D1PreparedStatement;
   first<T = unknown>(): Promise<T | null>;
   run(): Promise<D1Result>;
+  all<T = unknown>(): Promise<D1Result<T>>;
 }
 
-interface D1Result {
+interface D1Result<T = unknown> {
+  success: boolean;
   meta: {
+    changes: number;
     last_row_id: number;
+    duration: number;
+    rows_read: number;
+    rows_written: number;
   };
+  results?: T[];
 }
 
 interface Env {
