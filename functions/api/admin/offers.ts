@@ -43,6 +43,27 @@ interface Offer {
   download_link: string | null;
   json_ld: string | null;
   ab_test_variant: 'A' | 'B';
+  // 페이지 콘텐츠 필드
+  hero_title: string | null;
+  hero_subtitle: string | null;
+  hero_badge_text: string | null;
+  hero_cta_text: string | null;
+  hero_background_image: string | null;
+  hero_stats_text: string | null;
+  preview_title: string | null;
+  preview_subtitle: string | null;
+  preview_image: string | null;
+  preview_features: string | null;
+  value_title: string | null;
+  value_subtitle: string | null;
+  value_cards: string | null;
+  trust_title: string | null;
+  trust_subtitle: string | null;
+  testimonials: string | null;
+  form_title: string | null;
+  form_subtitle: string | null;
+  form_badge_text: string | null;
+  form_description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -57,6 +78,27 @@ interface OfferCreateRequest {
   download_link?: string;
   json_ld?: string;
   ab_test_variant?: 'A' | 'B';
+  // 페이지 콘텐츠 필드
+  hero_title?: string;
+  hero_subtitle?: string;
+  hero_badge_text?: string;
+  hero_cta_text?: string;
+  hero_background_image?: string;
+  hero_stats_text?: string;
+  preview_title?: string;
+  preview_subtitle?: string;
+  preview_image?: string;
+  preview_features?: string;
+  value_title?: string;
+  value_subtitle?: string;
+  value_cards?: string;
+  trust_title?: string;
+  trust_subtitle?: string;
+  testimonials?: string;
+  form_title?: string;
+  form_subtitle?: string;
+  form_badge_text?: string;
+  form_description?: string;
 }
 
 function createSuccessResponse<T>(data?: T, status = 200): Response {
@@ -227,8 +269,13 @@ export async function onRequestPost(context: {
     const result = await context.env.DB.prepare(
       `INSERT INTO offers (
         slug, name, title, description, thumbnail, status, 
-        download_link, json_ld, ab_test_variant
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        download_link, json_ld, ab_test_variant,
+        hero_title, hero_subtitle, hero_badge_text, hero_cta_text, hero_background_image, hero_stats_text,
+        preview_title, preview_subtitle, preview_image, preview_features,
+        value_title, value_subtitle, value_cards,
+        trust_title, trust_subtitle, testimonials,
+        form_title, form_subtitle, form_badge_text, form_description
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         slug,
@@ -239,7 +286,27 @@ export async function onRequestPost(context: {
         body.status || 'draft',
         body.download_link || null,
         body.json_ld || null,
-        body.ab_test_variant || 'A'
+        body.ab_test_variant || 'A',
+        body.hero_title || null,
+        body.hero_subtitle || null,
+        body.hero_badge_text || null,
+        body.hero_cta_text || null,
+        body.hero_background_image || null,
+        body.hero_stats_text || null,
+        body.preview_title || null,
+        body.preview_subtitle || null,
+        body.preview_image || null,
+        body.preview_features || null,
+        body.value_title || null,
+        body.value_subtitle || null,
+        body.value_cards || null,
+        body.trust_title || null,
+        body.trust_subtitle || null,
+        body.testimonials || null,
+        body.form_title || null,
+        body.form_subtitle || null,
+        body.form_badge_text || null,
+        body.form_description || null
       )
       .run();
 
@@ -350,6 +417,87 @@ export async function onRequestPut(context: {
     if (body.ab_test_variant !== undefined) {
       updates.push('ab_test_variant = ?');
       values.push(body.ab_test_variant);
+    }
+    // 페이지 콘텐츠 필드
+    if (body.hero_title !== undefined) {
+      updates.push('hero_title = ?');
+      values.push(body.hero_title || null);
+    }
+    if (body.hero_subtitle !== undefined) {
+      updates.push('hero_subtitle = ?');
+      values.push(body.hero_subtitle || null);
+    }
+    if (body.hero_badge_text !== undefined) {
+      updates.push('hero_badge_text = ?');
+      values.push(body.hero_badge_text || null);
+    }
+    if (body.hero_cta_text !== undefined) {
+      updates.push('hero_cta_text = ?');
+      values.push(body.hero_cta_text || null);
+    }
+    if (body.hero_background_image !== undefined) {
+      updates.push('hero_background_image = ?');
+      values.push(body.hero_background_image || null);
+    }
+    if (body.hero_stats_text !== undefined) {
+      updates.push('hero_stats_text = ?');
+      values.push(body.hero_stats_text || null);
+    }
+    if (body.preview_title !== undefined) {
+      updates.push('preview_title = ?');
+      values.push(body.preview_title || null);
+    }
+    if (body.preview_subtitle !== undefined) {
+      updates.push('preview_subtitle = ?');
+      values.push(body.preview_subtitle || null);
+    }
+    if (body.preview_image !== undefined) {
+      updates.push('preview_image = ?');
+      values.push(body.preview_image || null);
+    }
+    if (body.preview_features !== undefined) {
+      updates.push('preview_features = ?');
+      values.push(body.preview_features || null);
+    }
+    if (body.value_title !== undefined) {
+      updates.push('value_title = ?');
+      values.push(body.value_title || null);
+    }
+    if (body.value_subtitle !== undefined) {
+      updates.push('value_subtitle = ?');
+      values.push(body.value_subtitle || null);
+    }
+    if (body.value_cards !== undefined) {
+      updates.push('value_cards = ?');
+      values.push(body.value_cards || null);
+    }
+    if (body.trust_title !== undefined) {
+      updates.push('trust_title = ?');
+      values.push(body.trust_title || null);
+    }
+    if (body.trust_subtitle !== undefined) {
+      updates.push('trust_subtitle = ?');
+      values.push(body.trust_subtitle || null);
+    }
+    if (body.testimonials !== undefined) {
+      updates.push('testimonials = ?');
+      values.push(body.testimonials || null);
+    }
+    if (body.form_title !== undefined) {
+      updates.push('form_title = ?');
+      values.push(body.form_title || null);
+    }
+    if (body.form_subtitle !== undefined) {
+      updates.push('form_subtitle = ?');
+      values.push(body.form_subtitle || null);
+    }
+    if (body.form_badge_text !== undefined) {
+      updates.push('form_badge_text = ?');
+      values.push(body.form_badge_text || null);
+    }
+    if (body.form_description !== undefined) {
+      updates.push('form_description = ?');
+      values.push(body.form_description || null);
     }
 
     if (updates.length === 0) {
