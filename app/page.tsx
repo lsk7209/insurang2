@@ -140,14 +140,9 @@ export default function MainPage() {
 
       if (result.success) {
         console.log('[Main Page] Form submission successful, redirecting to thanks page...');
-        // 정적 빌드 환경에서도 안정적으로 작동하도록 window.location 사용
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        try {
-          router.push('/offer/workbook/thanks');
-        } catch (routerError) {
-          console.warn('[Main Page] router.push failed, using window.location:', routerError);
-          window.location.href = '/offer/workbook/thanks';
-        }
+        // 정적 빌드 환경에서도 안정적으로 작동하도록 window.location.href 직접 사용
+        // router.push는 정적 빌드 환경에서 제대로 작동하지 않을 수 있음
+        window.location.href = '/offer/workbook/thanks';
       } else {
         const errorMessage = result.error || '신청 처리 중 오류가 발생했습니다.';
         console.error('[Main Page] API returned success: false', { error: errorMessage, result });
