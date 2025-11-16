@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { trackPageView, trackFunnelEvent } from '@/lib/utils/tracking';
 import Header from '@/components/layout/Header';
 
 /**
@@ -13,6 +14,12 @@ import Header from '@/components/layout/Header';
 export default function WorkbookThankYouPage() {
   const router = useRouter();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  // 페이지뷰 및 감사 페이지 도달 추적
+  useEffect(() => {
+    trackPageView('/offer/workbook/thanks', 'workbook');
+    trackFunnelEvent('thank_you', '/offer/workbook/thanks', 'workbook');
+  }, []);
 
   const handleCopy = useCallback(
     async (text: string, index: number) => {

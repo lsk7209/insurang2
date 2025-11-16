@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { validateLeadForm, normalizePhone } from '@/lib/utils/validation';
+import { trackPageView, trackFunnelEvent } from '@/lib/utils/tracking';
 import Header from '@/components/layout/Header';
 
 interface OfferData {
@@ -178,6 +179,13 @@ export default function OfferLandingPage() {
   };
 
   // 오퍼 데이터 로드
+  // 페이지뷰 추적
+  useEffect(() => {
+    if (offerSlug) {
+      trackPageView(`/offer/${offerSlug}`, offerSlug);
+    }
+  }, [offerSlug]);
+
   useEffect(() => {
     const fetchOffer = async () => {
       try {

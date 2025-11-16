@@ -211,6 +211,41 @@ CREATE INDEX IF NOT EXISTS idx_autoops_monitoring_metric_name ON autoops_monitor
 CREATE INDEX IF NOT EXISTS idx_autoops_monitoring_checked_at ON autoops_monitoring(checked_at);
 CREATE INDEX IF NOT EXISTS idx_autoops_monitoring_status ON autoops_monitoring(status);
 
+-- 페이지뷰 추적 테이블
+CREATE TABLE IF NOT EXISTS page_views (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL, -- 세션 ID (쿠키 또는 UUID)
+  page_path TEXT NOT NULL, -- 페이지 경로 (예: /, /offer/workbook)
+  referrer TEXT, -- 리퍼러 URL
+  user_agent TEXT, -- User Agent
+  ip_address TEXT, -- IP 주소 (마스킹 가능)
+  offer_slug TEXT, -- 오퍼 슬러그 (해당하는 경우)
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 퍼널 이벤트 테이블
+CREATE TABLE IF NOT EXISTS funnel_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL, -- 세션 ID
+  event_type TEXT NOT NULL, -- 'page_view', 'form_start', 'form_submit', 'thank_you', 'download'
+  page_path TEXT NOT NULL, -- 이벤트 발생 페이지
+  offer_slug TEXT, -- 오퍼 슬러그
+  lead_id INTEGER, -- 리드 ID (폼 제출 시)
+  metadata TEXT, -- JSON 형식의 추가 메타데이터
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (lead_id) REFERENCES leads(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_session_id ON page_views(session_id);
+CREATE INDEX IF NOT EXISTS idx_page_views_page_path ON page_views(page_path);
+CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_page_views_offer_slug ON page_views(offer_slug);
+CREATE INDEX IF NOT EXISTS idx_funnel_events_session_id ON funnel_events(session_id);
+CREATE INDEX IF NOT EXISTS idx_funnel_events_event_type ON funnel_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_funnel_events_page_path ON funnel_events(page_path);
+CREATE INDEX IF NOT EXISTS idx_funnel_events_created_at ON funnel_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_funnel_events_offer_slug ON funnel_events(offer_slug);
+
 -- 초기 오퍼 데이터 (예시)
 INSERT OR IGNORE INTO offers (slug, name, title, description, status, download_link, ab_test_variant) 
 VALUES (

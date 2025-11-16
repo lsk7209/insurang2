@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { validateLeadForm, normalizePhone } from '@/lib/utils/validation';
+import { trackPageView, trackFunnelEvent } from '@/lib/utils/tracking';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -21,6 +22,11 @@ export default function MainPage() {
     consent_privacy: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // 페이지뷰 추적
+  useEffect(() => {
+    trackPageView('/', 'workbook');
+  }, []);
 
   const handleCtaClick = useCallback(() => {
     const offerSection = document.getElementById('offer-section');
@@ -60,6 +66,11 @@ export default function MainPage() {
     const { name, type, value, checked } = e.target;
     const fieldValue = type === 'checkbox' ? checked : value;
 
+    // 폼 시작 이벤트 추적 (첫 입력 시)
+    if (!formData.name && !formData.email && !formData.phone && (name === 'name' || name === 'email' || name === 'phone')) {
+      trackFunnelEvent('form_start', '/', 'workbook');
+    }
+
     if (name === 'phone' && type === 'text') {
       const formatted = formatPhoneNumber(value);
       setFormData((prev) => ({ ...prev, [name]: formatted }));
@@ -75,7 +86,7 @@ export default function MainPage() {
         return newErrors;
       });
     }
-  }, [errors, formatPhoneNumber]);
+  }, [errors, formatPhoneNumber, formData]);
 
   // 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
