@@ -366,11 +366,11 @@ export default function AdminSettingsPage() {
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="smtp_from" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                  <label htmlFor="smtp_from_readonly" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
                     발신자 이메일 (SMTP_FROM)
                   </label>
                   <input
-                    id="smtp_from"
+                    id="smtp_from_readonly"
                     name="smtp_from"
                     type="email"
                     value={settings.smtp_from || ''}
@@ -491,7 +491,7 @@ export default function AdminSettingsPage() {
                     발신자 이메일 <span className="text-red-500">*</span>
                   </label>
                   <input
-                    id="smtp_from"
+                    id="smtp_from_readonly"
                     name="smtp_from"
                     type="email"
                     value={settings.smtp_from}

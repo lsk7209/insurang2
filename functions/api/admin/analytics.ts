@@ -139,67 +139,80 @@ async function getTrafficData(db: D1Database, dateFilter: string, offerSlug?: st
   const params: any[] = [];
   if (offerSlug) params.push(offerSlug);
 
-  // 총 페이지뷰
-  const totalViews = await db.prepare(
-    `SELECT COUNT(*) as count FROM page_views WHERE 1=1 ${dateFilter} ${offerFilter}`
-  )
-    .bind(...params)
-    .first<{ count: number }>();
+  try {
+    // 총 페이지뷰
+    const totalViews = await db.prepare(
+      `SELECT COUNT(*) as count FROM page_views WHERE 1=1 ${dateFilter} ${offerFilter}`
+    )
+      .bind(...params)
+      .first<{ count: number }>();
 
-  // 고유 세션 수
-  const uniqueSessions = await db.prepare(
-    `SELECT COUNT(DISTINCT session_id) as count FROM page_views WHERE 1=1 ${dateFilter} ${offerFilter}`
-  )
-    .bind(...params)
-    .first<{ count: number }>();
+    // 고유 세션 수
+    const uniqueSessions = await db.prepare(
+      `SELECT COUNT(DISTINCT session_id) as count FROM page_views WHERE 1=1 ${dateFilter} ${offerFilter}`
+    )
+      .bind(...params)
+      .first<{ count: number }>();
 
-  // 페이지별 뷰 수
-  const pageViews = await db.prepare(
-    `SELECT page_path, COUNT(*) as views, COUNT(DISTINCT session_id) as unique_visitors
-     FROM page_views
-     WHERE 1=1 ${dateFilter} ${offerFilter}
-     GROUP BY page_path
-     ORDER BY views DESC
-     LIMIT 20`
-  )
-    .bind(...params)
-    .all<{ page_path: string; views: number; unique_visitors: number }>();
+    // 페이지별 뷰 수
+    const pageViews = await db.prepare(
+      `SELECT page_path, COUNT(*) as views, COUNT(DISTINCT session_id) as unique_visitors
+       FROM page_views
+       WHERE 1=1 ${dateFilter} ${offerFilter}
+       GROUP BY page_path
+       ORDER BY views DESC
+       LIMIT 20`
+    )
+      .bind(...params)
+      .all<{ page_path: string; views: number; unique_visitors: number }>();
 
-  // 일별 트래픽 추이
-  const dailyTraffic = await db.prepare(
-    `SELECT 
-       date(created_at) as date,
-       COUNT(*) as views,
-       COUNT(DISTINCT session_id) as unique_visitors
-     FROM page_views
-     WHERE 1=1 ${dateFilter} ${offerFilter}
-     GROUP BY date(created_at)
-     ORDER BY date ASC`
-  )
-    .bind(...params)
-    .all<{ date: string; views: number; unique_visitors: number }>();
+    // 일별 트래픽 추이
+    const dailyTraffic = await db.prepare(
+      `SELECT 
+         date(created_at) as date,
+         COUNT(*) as views,
+         COUNT(DISTINCT session_id) as unique_visitors
+       FROM page_views
+       WHERE 1=1 ${dateFilter} ${offerFilter}
+       GROUP BY date(created_at)
+       ORDER BY date ASC`
+    )
+      .bind(...params)
+      .all<{ date: string; views: number; unique_visitors: number }>();
 
-  // 오퍼별 트래픽
-  const offerTraffic = await db.prepare(
-    `SELECT 
-       offer_slug,
-       COUNT(*) as views,
-       COUNT(DISTINCT session_id) as unique_visitors
-     FROM page_views
-     WHERE offer_slug IS NOT NULL ${dateFilter}
-     GROUP BY offer_slug
-     ORDER BY views DESC`
-  )
-    .bind(...params.filter((_, i) => !offerSlug || i > 0))
-    .all<{ offer_slug: string; views: number; unique_visitors: number }>();
+    // 오퍼별 트래픽
+    const offerTrafficParams: any[] = [];
+    const offerTraffic = await db.prepare(
+      `SELECT 
+         offer_slug,
+         COUNT(*) as views,
+         COUNT(DISTINCT session_id) as unique_visitors
+       FROM page_views
+       WHERE offer_slug IS NOT NULL ${dateFilter}
+       GROUP BY offer_slug
+       ORDER BY views DESC`
+    )
+      .bind(...offerTrafficParams)
+      .all<{ offer_slug: string; views: number; unique_visitors: number }>();
 
-  return {
-    totalViews: totalViews?.count || 0,
-    uniqueSessions: uniqueSessions?.count || 0,
-    pageViews: pageViews.results || [],
-    dailyTraffic: dailyTraffic.results || [],
-    offerTraffic: offerTraffic.results || [],
-  };
+    return {
+      totalViews: totalViews?.count || 0,
+      uniqueSessions: uniqueSessions?.count || 0,
+      pageViews: pageViews.results || [],
+      dailyTraffic: dailyTraffic.results || [],
+      offerTraffic: offerTraffic.results || [],
+    };
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[Admin Analytics API] getTrafficData error:', err);
+    return {
+      totalViews: 0,
+      uniqueSessions: 0,
+      pageViews: [],
+      dailyTraffic: [],
+      offerTraffic: [],
+    };
+  }
 }
 
 async function getFunnelData(db: D1Database, dateFilter: string, offerSlug?: string | null) {
@@ -207,89 +220,110 @@ async function getFunnelData(db: D1Database, dateFilter: string, offerSlug?: str
   const params: any[] = [];
   if (offerSlug) params.push(offerSlug);
 
-  // 퍼널 단계별 이벤트 수
-  const funnelSteps = await db.prepare(
-    `SELECT 
-       event_type,
-       COUNT(DISTINCT session_id) as sessions,
-       COUNT(*) as events
-     FROM funnel_events
-     WHERE 1=1 ${dateFilter} ${offerFilter}
-     GROUP BY event_type
-     ORDER BY 
-       CASE event_type
-         WHEN 'page_view' THEN 1
-         WHEN 'form_start' THEN 2
-         WHEN 'form_submit' THEN 3
-         WHEN 'thank_you' THEN 4
-         WHEN 'download' THEN 5
-         ELSE 6
-       END`
-  )
-    .bind(...params)
-    .all<{ event_type: string; sessions: number; events: number }>();
+  try {
+    // 퍼널 단계별 이벤트 수
+    const funnelSteps = await db.prepare(
+      `SELECT 
+         event_type,
+         COUNT(DISTINCT session_id) as sessions,
+         COUNT(*) as events
+       FROM funnel_events
+       WHERE 1=1 ${dateFilter} ${offerFilter}
+       GROUP BY event_type
+       ORDER BY 
+         CASE event_type
+           WHEN 'page_view' THEN 1
+           WHEN 'form_start' THEN 2
+           WHEN 'form_submit' THEN 3
+           WHEN 'thank_you' THEN 4
+           WHEN 'download' THEN 5
+           ELSE 6
+         END`
+    )
+      .bind(...params)
+      .all<{ event_type: string; sessions: number; events: number }>();
 
-  // 세션별 퍼널 진행도
-  const sessionFunnels = await db.prepare(
-    `SELECT 
-       session_id,
-       GROUP_CONCAT(event_type, ' > ') as funnel_path,
-       COUNT(DISTINCT event_type) as steps_completed,
-       MAX(created_at) as last_event_at
-     FROM funnel_events
-     WHERE 1=1 ${dateFilter} ${offerFilter}
-     GROUP BY session_id
-     ORDER BY last_event_at DESC
-     LIMIT 100`
-  )
-    .bind(...params)
-    .all<{ session_id: string; funnel_path: string; steps_completed: number; last_event_at: string }>();
+    // 세션별 퍼널 진행도
+    const sessionFunnels = await db.prepare(
+      `SELECT 
+         session_id,
+         GROUP_CONCAT(event_type, ' > ') as funnel_path,
+         COUNT(DISTINCT event_type) as steps_completed,
+         MAX(created_at) as last_event_at
+       FROM funnel_events
+       WHERE 1=1 ${dateFilter} ${offerFilter}
+       GROUP BY session_id
+       ORDER BY last_event_at DESC
+       LIMIT 100`
+    )
+      .bind(...params)
+      .all<{ session_id: string; funnel_path: string; steps_completed: number; last_event_at: string }>();
 
-  // 퍼널 전환율 계산
-  const pageViews = await db.prepare(
-    `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'page_view' ${dateFilter} ${offerFilter}`
-  )
-    .bind(...params)
-    .first<{ count: number }>();
+    // 퍼널 전환율 계산
+    const pageViews = await db.prepare(
+      `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'page_view' ${dateFilter} ${offerFilter}`
+    )
+      .bind(...params)
+      .first<{ count: number }>();
 
-  const formStarts = await db.prepare(
-    `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'form_start' ${dateFilter} ${offerFilter}`
-  )
-    .bind(...params)
-    .first<{ count: number }>();
+    const formStarts = await db.prepare(
+      `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'form_start' ${dateFilter} ${offerFilter}`
+    )
+      .bind(...params)
+      .first<{ count: number }>();
 
-  const formSubmits = await db.prepare(
-    `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'form_submit' ${dateFilter} ${offerFilter}`
-  )
-    .bind(...params)
-    .first<{ count: number }>();
+    const formSubmits = await db.prepare(
+      `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'form_submit' ${dateFilter} ${offerFilter}`
+    )
+      .bind(...params)
+      .first<{ count: number }>();
 
-  const thankYous = await db.prepare(
-    `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'thank_you' ${dateFilter} ${offerFilter}`
-  )
-    .bind(...params)
-    .first<{ count: number }>();
+    const thankYous = await db.prepare(
+      `SELECT COUNT(DISTINCT session_id) as count FROM funnel_events WHERE event_type = 'thank_you' ${dateFilter} ${offerFilter}`
+    )
+      .bind(...params)
+      .first<{ count: number }>();
 
-  const pageViewCount = pageViews?.count || 0;
-  const formStartCount = formStarts?.count || 0;
-  const formSubmitCount = formSubmits?.count || 0;
-  const thankYouCount = thankYous?.count || 0;
+    const pageViewCount = pageViews?.count || 0;
+    const formStartCount = formStarts?.count || 0;
+    const formSubmitCount = formSubmits?.count || 0;
+    const thankYouCount = thankYous?.count || 0;
 
-  return {
-    funnelSteps: funnelSteps.results || [],
-    sessionFunnels: sessionFunnels.results || [],
-    conversionRates: {
-      pageViewToFormStart: pageViewCount > 0 ? (formStartCount / pageViewCount) * 100 : 0,
-      formStartToSubmit: formStartCount > 0 ? (formSubmitCount / formStartCount) * 100 : 0,
-      formSubmitToThankYou: formSubmitCount > 0 ? (thankYouCount / formSubmitCount) * 100 : 0,
-      overall: pageViewCount > 0 ? (thankYouCount / pageViewCount) * 100 : 0,
-    },
-    counts: {
-      pageViews: pageViewCount,
-      formStarts: formStartCount,
-      formSubmits: formSubmitCount,
-      thankYous: thankYouCount,
-    },
-  };
+    return {
+      funnelSteps: funnelSteps.results || [],
+      sessionFunnels: sessionFunnels.results || [],
+      conversionRates: {
+        pageViewToFormStart: pageViewCount > 0 ? (formStartCount / pageViewCount) * 100 : 0,
+        formStartToSubmit: formStartCount > 0 ? (formSubmitCount / formStartCount) * 100 : 0,
+        formSubmitToThankYou: formSubmitCount > 0 ? (thankYouCount / formSubmitCount) * 100 : 0,
+        overall: pageViewCount > 0 ? (thankYouCount / pageViewCount) * 100 : 0,
+      },
+      counts: {
+        pageViews: pageViewCount,
+        formStarts: formStartCount,
+        formSubmits: formSubmitCount,
+        thankYous: thankYouCount,
+      },
+    };
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[Admin Analytics API] getFunnelData error:', err);
+    return {
+      funnelSteps: [],
+      sessionFunnels: [],
+      conversionRates: {
+        pageViewToFormStart: 0,
+        formStartToSubmit: 0,
+        formSubmitToThankYou: 0,
+        overall: 0,
+      },
+      counts: {
+        pageViews: 0,
+        formStarts: 0,
+        formSubmits: 0,
+        thankYous: 0,
+      },
+    };
+  }
 }
 
