@@ -260,6 +260,23 @@ export default function AdminSequencesPage() {
     fetchOffers();
   }, [fetchSequences, fetchOffers]);
 
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setEditingSequence(null);
+    setFormData({
+      offer_slug: filterOffer !== 'all' ? filterOffer : '',
+      name: '',
+      day_offset: 0,
+      channel: 'email',
+      subject: '',
+      message: '',
+      quiet_hour_start: 22,
+      quiet_hour_end: 8,
+      enabled: true,
+    });
+    setFormError(null);
+  };
+
   const handleOpenCreateModal = () => {
     setFormData({
       offer_slug: filterOffer !== 'all' ? filterOffer : '',
@@ -299,6 +316,13 @@ export default function AdminSequencesPage() {
     setFormLoading(true);
     setFormError(null);
 
+    // 필수 필드 검증
+    if (!formData.offer_slug || !formData.name || !formData.message) {
+      setFormError('오퍼, 시퀀스명, 메시지는 필수 입력 항목입니다.');
+      setFormLoading(false);
+      return;
+    }
+
     try {
       const url = editingSequence
         ? `/api/admin/sequences?id=${editingSequence.id}`
@@ -335,8 +359,7 @@ export default function AdminSequencesPage() {
       const result = await response.json();
       if (result.success) {
         alert(editingSequence ? '시퀀스가 성공적으로 수정되었습니다.' : '시퀀스가 성공적으로 생성되었습니다.');
-        setShowCreateModal(false);
-        setEditingSequence(null);
+        handleCloseModal();
         fetchSequences();
       } else {
         setFormError(result.error || '시퀀스 저장에 실패했습니다.');
@@ -811,11 +834,7 @@ export default function AdminSequencesPage() {
                   </h2>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setEditingSequence(null);
-                      setFormError(null);
-                    }}
+                    onClick={handleCloseModal}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
                     aria-label="닫기"
                   >

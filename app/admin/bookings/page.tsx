@@ -120,6 +120,20 @@ export default function AdminBookingsPage() {
     fetchLeads();
   }, [fetchBookings, fetchLeads]);
 
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setEditingBooking(null);
+    setFormData({
+      lead_id: 0,
+      consultant_name: '',
+      scheduled_at: '',
+      duration_minutes: 30,
+      notes: '',
+      status: 'pending',
+    });
+    setFormError(null);
+  };
+
   const handleOpenCreateModal = () => {
     setFormData({
       lead_id: 0,
@@ -152,6 +166,13 @@ export default function AdminBookingsPage() {
     e.preventDefault();
     setFormLoading(true);
     setFormError(null);
+
+    // 필수 필드 검증
+    if (!formData.lead_id || !formData.consultant_name || !formData.scheduled_at) {
+      setFormError('리드, 상담사명, 예약 일시는 필수 입력 항목입니다.');
+      setFormLoading(false);
+      return;
+    }
 
     try {
       const url = editingBooking
@@ -197,8 +218,7 @@ export default function AdminBookingsPage() {
       const result = await response.json();
       if (result.success) {
         alert(editingBooking ? '예약이 성공적으로 수정되었습니다.' : '예약이 성공적으로 생성되었습니다.');
-        setShowCreateModal(false);
-        setEditingBooking(null);
+        handleCloseModal();
         fetchBookings();
       } else {
         setFormError(result.error || '예약 저장에 실패했습니다.');
@@ -477,11 +497,7 @@ export default function AdminBookingsPage() {
                   </h2>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setEditingBooking(null);
-                      setFormError(null);
-                    }}
+                    onClick={handleCloseModal}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
                     aria-label="닫기"
                   >

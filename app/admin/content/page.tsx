@@ -121,6 +121,26 @@ export default function AdminContentPage() {
       .trim();
   };
 
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setEditingArticle(null);
+    setFormData({
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '',
+      author: '',
+      category: '',
+      tags: '',
+      featured_image: '',
+      published_at: '',
+      status: 'draft',
+      seo_title: '',
+      seo_description: '',
+    });
+    setFormError(null);
+  };
+
   const handleOpenCreateModal = () => {
     setFormData({
       title: '',
@@ -166,6 +186,13 @@ export default function AdminContentPage() {
     setFormLoading(true);
     setFormError(null);
 
+    // 필수 필드 검증
+    if (!formData.title || !formData.slug || !formData.content) {
+      setFormError('제목, 슬러그, 내용은 필수 입력 항목입니다.');
+      setFormLoading(false);
+      return;
+    }
+
     try {
       const url = editingArticle
         ? `/api/admin/content?id=${editingArticle.id}`
@@ -210,8 +237,7 @@ export default function AdminContentPage() {
       const result = await response.json();
       if (result.success) {
         alert(editingArticle ? '아티클이 성공적으로 수정되었습니다.' : '아티클이 성공적으로 생성되었습니다.');
-        setShowCreateModal(false);
-        setEditingArticle(null);
+        handleCloseModal();
         fetchArticles();
       } else {
         setFormError(result.error || '아티클 저장에 실패했습니다.');
@@ -488,11 +514,7 @@ export default function AdminContentPage() {
                   </h2>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setEditingArticle(null);
-                      setFormError(null);
-                    }}
+                    onClick={handleCloseModal}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
                     aria-label="닫기"
                   >

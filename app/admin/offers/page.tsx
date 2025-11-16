@@ -167,6 +167,23 @@ export default function AdminOffersPage() {
       .trim();
   };
 
+  // 모달 닫기
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setEditingOffer(null);
+    setFormData({
+      name: '',
+      slug: '',
+      title: '',
+      description: '',
+      thumbnail: '',
+      status: 'draft',
+      download_link: '',
+      ab_test_variant: 'A',
+    });
+    setFormError(null);
+  };
+
   // 모달 열기 (생성)
   const handleOpenCreateModal = () => {
     setFormData({
@@ -207,6 +224,13 @@ export default function AdminOffersPage() {
     setFormLoading(true);
     setFormError(null);
 
+    // 필수 필드 검증
+    if (!formData.name || !formData.slug) {
+      setFormError('오퍼명과 슬러그는 필수 입력 항목입니다.');
+      setFormLoading(false);
+      return;
+    }
+
     try {
       const url = editingOffer
         ? `/api/admin/offers?id=${editingOffer.id}`
@@ -243,8 +267,7 @@ export default function AdminOffersPage() {
       const result = await response.json();
       if (result.success) {
         alert(editingOffer ? '오퍼가 성공적으로 수정되었습니다.' : '오퍼가 성공적으로 생성되었습니다.');
-        setShowCreateModal(false);
-        setEditingOffer(null);
+        handleCloseModal();
         fetchOffers();
       } else {
         setFormError(result.error || '오퍼 저장에 실패했습니다.');
@@ -451,11 +474,7 @@ export default function AdminOffersPage() {
                   </h2>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setEditingOffer(null);
-                      setFormError(null);
-                    }}
+                    onClick={handleCloseModal}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
                     aria-label="닫기"
                   >
