@@ -11,6 +11,14 @@ interface DashboardStats {
   smsSuccess: number;
 }
 
+interface OfferStats {
+  offer_slug: string;
+  offer_name: string;
+  total_leads: number;
+  today_leads: number;
+  conversion_rate: number;
+}
+
 /**
  * Admin Dashboard Page
  * 관리자 대시보드 페이지
@@ -26,30 +34,33 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
+  const [offerStats, setOfferStats] = useState<OfferStats[]>([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setError(null);
-        const response = await fetch('/api/admin/leads');
         
-        if (response.status === 401) {
+        // 통계 API 호출
+        const statsResponse = await fetch('/api/admin/stats');
+        
+        if (statsResponse.status === 401) {
           setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
           setLoading(false);
           return;
         }
 
-        if (!response.ok) {
-          const errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        if (!statsResponse.ok) {
+          const errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${statsResponse.status})`;
           setError(errorMessage);
-          console.error('[Admin Dashboard] Failed to fetch stats:', response.status);
+          console.error('[Admin Dashboard] Failed to fetch stats:', statsResponse.status);
           setLoading(false);
           return;
         }
 
-        let result;
+        let statsResult;
         try {
-          result = await response.json();
+          statsResult = await statsResponse.json();
         } catch (parseError) {
           console.error('[Admin Dashboard] JSON parse error:', parseError);
           setError('응답 처리 중 오류가 발생했습니다.');
@@ -57,29 +68,24 @@ export default function AdminDashboard() {
           return;
         }
 
-        if (result.success && Array.isArray(result.data)) {
-          const leads = result.data;
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          const todayLeads = leads.filter((lead: LeadListItem) => {
-            const leadDate = new Date(lead.created_at);
-            leadDate.setHours(0, 0, 0, 0);
-            return leadDate.getTime() === today.getTime();
-          });
-
-          const emailSuccess = leads.filter((lead: LeadListItem) => lead.email_status === 'success').length;
-          const smsSuccess = leads.filter((lead: LeadListItem) => lead.sms_status === 'success').length;
-
+        if (statsResult.success && statsResult.data) {
+          const data = statsResult.data;
           setStats({
-            totalLeads: leads.length,
-            todayLeads: todayLeads.length,
-            emailSuccess,
-            smsSuccess,
+            totalLeads: data.totalLeads || 0,
+            todayLeads: data.todayLeads || 0,
+            emailSuccess: data.emailSuccess || 0,
+            smsSuccess: data.smsSuccess || 0,
           });
-          setResult(result);
-        } else {
-          setError('데이터 형식이 올바르지 않습니다.');
+          setOfferStats(data.offerStats || []);
+        }
+
+        // 최근 리드 목록을 위한 별도 호출
+        const leadsResponse = await fetch('/api/admin/leads');
+        if (leadsResponse.ok) {
+          const leadsResult = await leadsResponse.json();
+          if (leadsResult.success) {
+            setResult(leadsResult);
+          }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
@@ -262,12 +268,86 @@ export default function AdminDashboard() {
             )}
           </div>
 
+          {/* 오퍼별 통계 */}
+          {offerStats.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-text-light dark:text-text-dark">
+                  오퍼별 통계
+                </h2>
+                <Link
+                  href="/admin/offers"
+                  className="text-sm text-primary hover:text-primary-dark font-medium"
+                >
+                  오퍼 관리 →
+                </Link>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        오퍼명
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        전체 리드
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        오늘 리드
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        전환율
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {offerStats.map((offer) => (
+                      <tr key={offer.offer_slug} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {offer.offer_name}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {offer.total_leads.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {offer.today_leads.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            offer.conversion_rate >= 80
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : offer.conversion_rate >= 50
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                          }`}>
+                            {offer.conversion_rate.toFixed(1)}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* 빠른 링크 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-text-light dark:text-text-dark mb-4">
               빠른 링크
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Link
+                href="/admin/offers"
+                className="block p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors no-underline"
+              >
+                <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-1">
+                  오퍼 관리
+                </h3>
+                <p className="text-sm text-text-light/70 dark:text-text-dark/70">
+                  오퍼 생성 및 관리
+                </p>
+              </Link>
               <Link
                 href="/admin/leads"
                 className="block p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors no-underline"
