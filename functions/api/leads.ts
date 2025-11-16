@@ -247,6 +247,70 @@ export async function onRequestPost(context: {
 
       leadId = leadResult.meta.last_row_id;
       console.log('[Leads API] Lead inserted successfully:', { leadId, offer_slug, name, email: email.substring(0, 5) + '***' });
+
+      // 시퀀스 로그 자동 생성 (리드 생성 시)
+      try {
+        const sequences = await context.env.DB.prepare(
+          'SELECT * FROM sequences WHERE offer_slug = ? AND enabled = 1 ORDER BY day_offset ASC'
+        )
+          .bind(offer_slug)
+          .all<{
+            id: number;
+            day_offset: number;
+            quiet_hour_start: number;
+            quiet_hour_end: number;
+          }>();
+
+        if (sequences.results && sequences.results.length > 0) {
+          const leadCreatedAt = new Date();
+          
+          for (const sequence of sequences.results) {
+            // 예약 발송 시간 계산 (D+N일 후)
+            const scheduledDate = new Date(leadCreatedAt);
+            scheduledDate.setDate(scheduledDate.getDate() + sequence.day_offset);
+            
+            // Quiet Hour 체크: 시작 시간 설정
+            const scheduledHour = scheduledDate.getHours();
+            const quietStart = sequence.quiet_hour_start;
+            const quietEnd = sequence.quiet_hour_end;
+            
+            // Quiet Hour 내에 있으면 다음 날로 이동
+            if (quietStart > quietEnd) {
+              // 22시~8시 같은 경우 (자정을 넘김)
+              if (scheduledHour >= quietStart || scheduledHour < quietEnd) {
+                scheduledDate.setDate(scheduledDate.getDate() + 1);
+                scheduledDate.setHours(quietEnd, 0, 0, 0);
+              }
+            } else {
+              // 일반적인 경우 (예: 22시~8시가 아니라면)
+              if (scheduledHour >= quietStart && scheduledHour < quietEnd) {
+                scheduledDate.setHours(quietEnd, 0, 0, 0);
+              }
+            }
+
+            // 시퀀스 로그 생성
+            await context.env.DB.prepare(
+              'INSERT INTO sequence_logs (sequence_id, lead_id, scheduled_at, status) VALUES (?, ?, ?, ?)'
+            )
+              .bind(
+                sequence.id,
+                leadId,
+                scheduledDate.toISOString(),
+                'pending'
+              )
+              .run();
+          }
+          console.log('[Leads API] Sequence logs created:', sequences.results.length);
+        }
+      } catch (sequenceError: unknown) {
+        const err = sequenceError instanceof Error ? sequenceError : new Error(String(sequenceError));
+        console.warn('[Leads API] Failed to create sequence logs:', {
+          message: err.message,
+          leadId,
+          offer_slug,
+        });
+        // 시퀀스 로그 생성 실패해도 리드 생성은 성공 처리
+      }
     } catch (dbError: unknown) {
       const error = dbError instanceof Error ? dbError : new Error(String(dbError));
       console.error('[Leads API] Database error:', {

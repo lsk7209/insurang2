@@ -1,6 +1,7 @@
 /**
- * Cloudflare Pages Functions Worker
- * 통합 Worker - API 라우팅 및 Cron 트리거 처리
+ * Cloudflare Workers Cron Trigger
+ * 시퀀스 메시지 자동 발송 (10분마다 실행)
+ * wrangler.toml에서 cron 설정 필요: "*/10 * * * *"
  */
 
 interface D1Database {
@@ -45,64 +46,39 @@ interface Env {
   SOLAPI_SENDER_PHONE?: string;
 }
 
-/**
- * Cron 트리거 핸들러
- * Cloudflare Dashboard에서 Cron Triggers 설정 필요
- */
+interface SequenceLogRow {
+  id: number;
+  sequence_id: number;
+  lead_id: number;
+  scheduled_at: string;
+  sent_at: string | null;
+  status: string;
+}
+
+interface SequenceRow {
+  id: number;
+  offer_slug: string;
+  name: string;
+  day_offset: number;
+  channel: string;
+  subject: string | null;
+  message: string;
+}
+
+interface LeadRow {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  offer_slug: string;
+}
+
 export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    // Cron 타입에 따라 다른 작업 수행
-    const cron = event.cron || '';
-    
-    if (cron.includes('*/10')) {
-      // 10분마다: 시퀀스 메시지 발송
-      ctx.waitUntil(processSequenceQueue(env));
-    } else {
-      // 일일 리포트 (매일 오전 9시)
-      ctx.waitUntil(processDailyReport(env, ctx));
-    }
+    ctx.waitUntil(processSequenceQueue(env));
   },
 };
 
-/**
- * 일일 리포트 처리
- */
-async function processDailyReport(env: Env, ctx: ExecutionContext) {
-  try {
-    // 오늘 날짜의 리드 수 조회
-    // D1은 SQLite 기반이므로 date() 함수 사용
-    const today = new Date().toISOString().split('T')[0];
-    const result = await env.DB.prepare(
-      'SELECT COUNT(*) as count FROM leads WHERE date(created_at) = ?'
-    )
-      .bind(today)
-      .first<{ count: number }>();
-
-    const count = result?.count || 0;
-
-    console.log(`[Cron] Daily report: ${count} leads created on ${today}`);
-
-    // 에러 로그도 함께 조회
-    const errorResult = await env.DB.prepare(
-      "SELECT COUNT(*) as count FROM error_logs WHERE level = 'error' AND date(created_at) = ?"
-    )
-      .bind(today)
-      .first<{ count: number }>();
-
-    const errorCount = errorResult?.count || 0;
-
-    console.log(`[Cron] Daily report: ${errorCount} errors logged on ${today}`);
-
-    // 여기서 관리자에게 리포트 이메일 발송 등 추가 작업 가능
-    // 예: 이메일 발송, Slack 알림 등
-  } catch (error) {
-    console.error('[Cron] Daily report error:', error);
-  }
-}
-
-/**
- * 시퀀스 메시지 큐 처리 (10분마다 실행)
- */
 async function processSequenceQueue(env: Env) {
   try {
     console.log('[Sequence Sender] Starting sequence queue processing...');
@@ -122,14 +98,7 @@ async function processSequenceQueue(env: Env) {
        LIMIT 50`
     )
       .bind(now)
-      .all<{
-        id: number;
-        sequence_id: number;
-        lead_id: number;
-        scheduled_at: string;
-        sent_at: string | null;
-        status: string;
-      }>();
+      .all<SequenceLogRow>();
 
     if (!pendingLogs.results || pendingLogs.results.length === 0) {
       console.log('[Sequence Sender] No pending sequences to send');
@@ -144,17 +113,7 @@ async function processSequenceQueue(env: Env) {
         // 시퀀스 정보 조회
         const sequence = await env.DB.prepare('SELECT * FROM sequences WHERE id = ?')
           .bind(log.sequence_id)
-          .first<{
-            id: number;
-            offer_slug: string;
-            name: string;
-            day_offset: number;
-            channel: string;
-            subject: string | null;
-            message: string;
-            quiet_hour_start: number;
-            quiet_hour_end: number;
-          }>();
+          .first<SequenceRow>();
 
         if (!sequence) {
           console.warn(`[Sequence Sender] Sequence not found: ${log.sequence_id}`);
@@ -165,13 +124,7 @@ async function processSequenceQueue(env: Env) {
         // 리드 정보 조회
         const lead = await env.DB.prepare('SELECT * FROM leads WHERE id = ?')
           .bind(log.lead_id)
-          .first<{
-            id: number;
-            name: string;
-            email: string;
-            phone: string;
-            offer_slug: string;
-          }>();
+          .first<LeadRow>();
 
         if (!lead) {
           console.warn(`[Sequence Sender] Lead not found: ${log.lead_id}`);
@@ -181,35 +134,20 @@ async function processSequenceQueue(env: Env) {
 
         // Quiet Hour 체크
         const currentHour = new Date().getHours();
-        const quietStart = sequence.quiet_hour_start;
-        const quietEnd = sequence.quiet_hour_end;
+        const quietStart = 22; // 기본값 (sequence 테이블에서 가져올 수도 있음)
+        const quietEnd = 8;
 
-        if (quietStart > quietEnd) {
-          // 22시~8시 같은 경우 (자정을 넘김)
-          if (currentHour >= quietStart || currentHour < quietEnd) {
-            console.log(`[Sequence Sender] Skipping due to quiet hour: ${currentHour}`);
-            // 다음 날 Quiet Hour 종료 후로 재스케줄
-            const nextScheduled = new Date();
-            nextScheduled.setDate(nextScheduled.getDate() + 1);
-            nextScheduled.setHours(quietEnd, 0, 0, 0);
-            
-            await env.DB.prepare('UPDATE sequence_logs SET scheduled_at = ? WHERE id = ?')
-              .bind(nextScheduled.toISOString(), log.id)
-              .run();
-            continue;
-          }
-        } else {
-          // 일반적인 경우
-          if (currentHour >= quietStart && currentHour < quietEnd) {
-            console.log(`[Sequence Sender] Skipping due to quiet hour: ${currentHour}`);
-            const nextScheduled = new Date();
-            nextScheduled.setHours(quietEnd, 0, 0, 0);
-            
-            await env.DB.prepare('UPDATE sequence_logs SET scheduled_at = ? WHERE id = ?')
-              .bind(nextScheduled.toISOString(), log.id)
-              .run();
-            continue;
-          }
+        if (currentHour >= quietStart || currentHour < quietEnd) {
+          console.log(`[Sequence Sender] Skipping due to quiet hour: ${currentHour}`);
+          // 다음 날 Quiet Hour 종료 후로 재스케줄
+          const nextScheduled = new Date();
+          nextScheduled.setDate(nextScheduled.getDate() + 1);
+          nextScheduled.setHours(quietEnd, 0, 0, 0);
+          
+          await env.DB.prepare('UPDATE sequence_logs SET scheduled_at = ? WHERE id = ?')
+            .bind(nextScheduled.toISOString(), log.id)
+            .run();
+          continue;
         }
 
         // 메시지 발송
@@ -259,11 +197,11 @@ async function updateLogStatus(
     .run();
 }
 
-// 이메일 발송
+// 이메일 발송 (간단한 버전)
 async function sendEmail(
   env: Env,
-  lead: { email: string; name: string },
-  sequence: { subject: string | null; message: string }
+  lead: LeadRow,
+  sequence: SequenceRow
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const apiKey = env.RESEND_API_KEY || env.SENDGRID_API_KEY;
@@ -328,11 +266,11 @@ async function sendEmail(
   }
 }
 
-// SMS 발송
+// SMS 발송 (간단한 버전)
 async function sendSMS(
   env: Env,
-  lead: { phone: string },
-  sequence: { message: string }
+  lead: LeadRow,
+  sequence: SequenceRow
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const apiKey = env.SOLAPI_API_KEY;
@@ -399,3 +337,4 @@ async function sendSMS(
     return { success: false, error: err.message };
   }
 }
+
