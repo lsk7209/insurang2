@@ -240,9 +240,11 @@ export default function OfferLandingPage() {
 
       <main className="flex-1">
         {/* Section 1: Hero */}
-        <section className="relative py-20 sm:py-24 lg:py-32" role="region" aria-label="히어로 섹션">
+        <section className="relative py-20 sm:py-24 lg:py-32 overflow-hidden" role="region" aria-label="히어로 섹션">
+          {/* 그라데이션 배경 */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 dark:from-primary/10 dark:via-accent/10 dark:to-primary/20" aria-hidden="true" />
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-5"
+            className="absolute inset-0 bg-cover bg-center opacity-5 dark:opacity-3"
             style={{
               backgroundImage:
                 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA4yagbPVTg-Qkmjqg8im1y7hpZmmkqHQq0KXQt09GN6q_UuwcESTvdRzp8_M1kcKfrgpt78PBQs45bj76iA5lMErTdRmlUpTpFKIzYTP8oOLhHJTMlOOndejFPoXbUBNd1ozj53PKcStyZN2YnN9Dm4MCbM9tpu2mcF0dr3dmeMxFvKYuZNAIy9D_MIP26Wweav9o_j1lWKBYfCn7I0c5_j15kUPHh-XtHtjf9B4EbnEO1qXa-Jn6FqlRnWwIlw1xoN7LQE6QeJ2NV")',
@@ -257,22 +259,54 @@ export default function OfferLandingPage() {
               </div>
             ) : (
               <>
-                <div className="mx-auto max-w-3xl">
-                  <h1 className="text-4xl font-black leading-tight tracking-tight text-primary dark:text-white sm:text-5xl lg:text-6xl">
-                    혹시 매일 같은 상담에 지치지 않으셨나요?
+                <div className="mx-auto max-w-4xl">
+                  {/* 배지 */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 mb-6">
+                    <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="text-sm font-bold text-primary">무료 제공 · 즉시 다운로드</span>
+                  </div>
+                  
+                  <h1 className="text-4xl font-black leading-[1.1] tracking-tight text-primary dark:text-white sm:text-5xl lg:text-7xl mb-6">
+                    <span className="block mb-2">상담 성공률을</span>
+                    <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">2배로 높이는</span>
+                    <span className="block mt-2">AI 워크북</span>
                   </h1>
-                  <p className="mt-6 text-lg leading-relaxed text-text-light dark:text-text-dark sm:text-xl">
-                    반복되는 질문, 끝없는 자료 준비에서 벗어나 고객의 마음에만 집중하세요. AI가 당신의 상담을 혁신합니다.
+                  <p className="mt-6 text-lg sm:text-xl lg:text-2xl leading-relaxed text-text-light/90 dark:text-text-dark/90 font-medium max-w-2xl mx-auto">
+                    매일 같은 상담에 지치셨나요?<br />
+                    <span className="text-primary dark:text-accent font-bold">고객 유형별 맞춤 전략</span>으로 상담 시간은 절반으로, 계약 성공률은 2배로.
                   </p>
+                  
+                  {/* 통계 배지 */}
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" aria-hidden="true"></div>
+                      <span className="text-text-light/80 dark:text-text-dark/80">이미 <strong className="text-primary">1,247명</strong>이 다운로드</span>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-2">
+                      <span className="text-text-light/60 dark:text-text-dark/60">•</span>
+                      <span className="text-text-light/80 dark:text-text-dark/80">평균 <strong className="text-accent">4.9/5.0</strong> 만족도</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <button
                     onClick={handleCtaClick}
-                    className="flex w-full sm:w-auto min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-8 bg-cta text-white text-lg font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cta focus:ring-offset-2"
+                    className="group relative flex w-full sm:w-auto min-w-[280px] cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-xl h-16 px-10 bg-gradient-to-r from-primary to-accent text-white text-lg font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     aria-label="AI 상담 워크북 무료로 받기"
                   >
-                    <span className="truncate">AI 상담 워크북 무료로 받기</span>
+                    <span className="relative z-10 flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      지금 바로 무료로 받기
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
                   </button>
+                  <p className="text-sm text-text-light/60 dark:text-text-dark/60">
+                    <span className="hidden sm:inline">신용카드 불필요 · </span>30초면 완료
+                  </p>
                 </div>
                 <div className="absolute bottom-[-60px] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-text-light/70 dark:text-text-dark/70" aria-hidden="true">
                   <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -469,22 +503,35 @@ export default function OfferLandingPage() {
 
         {/* Section 5: Form Section */}
         <section
-          id="form-section"
-          className="py-16 sm:py-20 lg:py-24 bg-primary/5 dark:bg-background-dark/30"
+          id="application-form-section"
+          className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white via-primary/5 to-white dark:from-background-dark dark:via-primary/10 dark:to-background-dark"
           role="region"
           aria-label="신청 폼 섹션"
         >
+          {/* 장식 요소 */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" aria-hidden="true"></div>
+          
           <div className="container mx-auto max-w-5xl px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
-                성공적인 상담의 비밀, 지금 바로 확인하세요
+            <div className="mx-auto max-w-2xl text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 dark:bg-accent/20 border border-accent/20 dark:border-accent/30 mb-6">
+                <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-bold text-accent">100% 무료 · 즉시 다운로드</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight text-primary dark:text-white mb-4">
+                <span className="block">지금 바로 시작하세요</span>
+                <span className="block mt-2 text-lg sm:text-xl lg:text-2xl font-medium text-text-light/70 dark:text-text-dark/70">
+                  이름과 이메일만 입력하면 워크북을 즉시 보내드립니다
+                </span>
               </h2>
-              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
-                이름과 이메일만 입력하시면 AI 상담 워크북을 즉시 보내드립니다.
+              <p className="mt-4 text-base text-text-light/70 dark:text-text-dark/70">
+                신용카드 불필요 · 개인정보 보호 · 언제든지 구독 취소 가능
               </p>
             </div>
             <div className="mt-12 mx-auto max-w-lg">
-              <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+              <div className="bg-white dark:bg-background-dark/80 rounded-2xl shadow-xl shadow-primary/10 dark:shadow-primary/20 border border-slate-200 dark:border-slate-800 p-8 sm:p-10">
+                <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                 {/* 에러 메시지 영역 */}
                 {Object.keys(errors).length > 0 && (
                   <div
@@ -504,8 +551,8 @@ export default function OfferLandingPage() {
 
                 {/* Name */}
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark/90">
-                    이름
+                  <label htmlFor="name" className="block text-sm font-bold text-text-light dark:text-text-dark/90 mb-2">
+                    이름 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -516,13 +563,13 @@ export default function OfferLandingPage() {
                     placeholder="홍길동"
                     aria-invalid={errors.name ? 'true' : 'false'}
                     aria-describedby={errors.name ? 'name-error' : undefined}
-                    className={`mt-1 block w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm focus:border-accent focus:ring focus:ring-accent focus:ring-opacity-50 ${
-                      errors.name ? 'border-red-500' : ''
+                    className={`mt-1 block w-full h-12 rounded-xl border-2 px-4 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm transition-all focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none ${
+                      errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200'
                     }`}
                     required
                   />
                   {errors.name && (
-                    <p id="name-error" className="mt-1 text-sm text-red-500" role="alert">
+                    <p id="name-error" className="mt-2 text-sm text-red-500 font-medium" role="alert">
                       {errors.name}
                     </p>
                   )}
@@ -530,8 +577,8 @@ export default function OfferLandingPage() {
 
                 {/* Email */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-text-light dark:text-text-dark/90">
-                    이메일
+                  <label htmlFor="email" className="block text-sm font-bold text-text-light dark:text-text-dark/90 mb-2">
+                    이메일 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -542,13 +589,13 @@ export default function OfferLandingPage() {
                     placeholder="your@email.com"
                     aria-invalid={errors.email ? 'true' : 'false'}
                     aria-describedby={errors.email ? 'email-error' : undefined}
-                    className={`mt-1 block w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm focus:border-accent focus:ring focus:ring-accent focus:ring-opacity-50 ${
-                      errors.email ? 'border-red-500' : ''
+                    className={`mt-1 block w-full h-12 rounded-xl border-2 px-4 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm transition-all focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none ${
+                      errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200'
                     }`}
                     required
                   />
                   {errors.email && (
-                    <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
+                    <p id="email-error" className="mt-2 text-sm text-red-500 font-medium" role="alert">
                       {errors.email}
                     </p>
                   )}
@@ -556,8 +603,8 @@ export default function OfferLandingPage() {
 
                 {/* Phone */}
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-text-light dark:text-text-dark/90">
-                    연락처 (선택)
+                  <label htmlFor="phone" className="block text-sm font-bold text-text-light dark:text-text-dark/90 mb-2">
+                    연락처 <span className="text-text-light/50 dark:text-text-dark/50 font-normal">(선택)</span>
                   </label>
                   <input
                     type="tel"
@@ -568,22 +615,22 @@ export default function OfferLandingPage() {
                     placeholder="010-1234-5678"
                     aria-invalid={errors.phone ? 'true' : 'false'}
                     aria-describedby={errors.phone ? 'phone-error' : 'phone-hint'}
-                    className={`mt-1 block w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm focus:border-accent focus:ring focus:ring-accent focus:ring-opacity-50 ${
-                      errors.phone ? 'border-red-500' : ''
+                    className={`mt-1 block w-full h-12 rounded-xl border-2 px-4 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm transition-all focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none ${
+                      errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200'
                     }`}
                   />
                   {errors.phone ? (
-                    <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">
+                    <p id="phone-error" className="mt-2 text-sm text-red-500 font-medium" role="alert">
                       {errors.phone}
                     </p>
                   ) : (
-                    <p id="phone-hint" className="mt-1 text-sm text-text-light/60 dark:text-text-dark/60">선택 사항입니다</p>
+                    <p id="phone-hint" className="mt-2 text-sm text-text-light/50 dark:text-text-dark/50">선택 사항입니다. 더 빠른 안내를 위해 입력해주세요.</p>
                   )}
                 </div>
 
                 {/* Consent Checkbox */}
-                <div className="flex items-start">
-                  <div className="flex h-5 items-center">
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700">
+                  <div className="flex h-5 items-center pt-0.5">
                     <input
                       type="checkbox"
                       id="privacy"
@@ -592,19 +639,19 @@ export default function OfferLandingPage() {
                       onChange={handleChange('consent_privacy')}
                       aria-invalid={errors.consent_privacy ? 'true' : 'false'}
                       aria-describedby={errors.consent_privacy ? 'privacy-error' : undefined}
-                      className="h-4 w-4 rounded border-slate-300 text-cta focus:ring-cta"
+                      className="h-5 w-5 rounded border-2 border-slate-300 text-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
                       required
                     />
                   </div>
-                  <div className="ml-3 text-sm">
-                    <label htmlFor="privacy" className="text-text-light/80 dark:text-text-dark/80">
-                      <Link href="#" className="font-medium text-primary dark:text-accent hover:underline">
+                  <div className="flex-1 text-sm">
+                    <label htmlFor="privacy" className="text-text-light/90 dark:text-text-dark/90 cursor-pointer">
+                      <Link href="#" className="font-bold text-primary dark:text-accent hover:underline">
                         개인정보 처리방침
                       </Link>
-                      에 동의합니다.
+                      에 동의합니다. <span className="text-red-500">*</span>
                     </label>
                     {errors.consent_privacy && (
-                      <p id="privacy-error" className="mt-1 text-sm text-red-500" role="alert">
+                      <p id="privacy-error" className="mt-2 text-sm text-red-500 font-medium" role="alert">
                         {errors.consent_privacy}
                       </p>
                     )}
@@ -617,18 +664,48 @@ export default function OfferLandingPage() {
                   disabled={isSubmitting}
                   aria-busy={isSubmitting}
                   aria-disabled={isSubmitting}
-                  className="w-full flex justify-center items-center rounded-lg h-12 px-6 bg-cta text-white text-base font-bold transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cta focus:ring-offset-2"
+                  className="group relative w-full flex justify-center items-center gap-3 rounded-xl h-14 px-6 bg-gradient-to-r from-primary to-accent text-white text-lg font-bold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
                   {isSubmitting ? (
                     <>
                       <span className="sr-only">제출 중입니다</span>
-                      <span aria-hidden="true">워크북 무료로 받고 상담 혁신하기</span>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span aria-hidden="true">처리 중...</span>
                     </>
                   ) : (
-                    '워크북 무료로 받고 상담 혁신하기'
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>지금 바로 무료로 받기</span>
+                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
                   )}
                 </button>
+                
+                {/* 보안 배지 */}
+                <div className="flex items-center justify-center gap-4 pt-4 text-xs text-text-light/60 dark:text-text-dark/60">
+                  <div className="flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>SSL 보안</span>
+                  </div>
+                  <span>•</span>
+                  <div className="flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span>개인정보 보호</span>
+                  </div>
+                </div>
               </form>
+              </div>
             </div>
           </div>
         </section>
