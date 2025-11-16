@@ -13,7 +13,7 @@
     "cf:dev": "wrangler pages dev out",
     "cf:deploy": "wrangler pages deploy out",
     "d1:local": "wrangler d1 execute insurang-db --local --file=./db/schema.sql",
-    "d1:remote": "wrangler d1 execute insurang-db --file=./db/schema.sql"
+    "d1:remote": "wrangler d1 execute insurang-db --remote --file=./db/schema.sql"
   },
   "dependencies": {
     "@emotion/react": "^11.13.0",
