@@ -125,6 +125,38 @@ CREATE INDEX IF NOT EXISTS idx_sequence_logs_lead_id ON sequence_logs(lead_id);
 CREATE INDEX IF NOT EXISTS idx_sequence_logs_status ON sequence_logs(status);
 CREATE INDEX IF NOT EXISTS idx_sequence_logs_scheduled_at ON sequence_logs(scheduled_at);
 
+-- Bookings 테이블 (코칭 예약)
+CREATE TABLE IF NOT EXISTS bookings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lead_id INTEGER NOT NULL,
+  consultant_name TEXT NOT NULL, -- 상담사 이름
+  scheduled_at DATETIME NOT NULL, -- 예약 일시
+  duration_minutes INTEGER DEFAULT 30, -- 상담 시간 (분)
+  status TEXT DEFAULT 'pending', -- 'pending', 'confirmed', 'completed', 'cancelled'
+  notes TEXT, -- 메모
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (lead_id) REFERENCES leads(id)
+);
+
+-- Consultant Schedules 테이블 (상담사 일정)
+CREATE TABLE IF NOT EXISTS consultant_schedules (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  consultant_name TEXT NOT NULL,
+  day_of_week INTEGER NOT NULL, -- 0=일요일, 1=월요일, ..., 6=토요일
+  start_time TEXT NOT NULL, -- HH:MM 형식
+  end_time TEXT NOT NULL, -- HH:MM 형식
+  enabled INTEGER DEFAULT 1, -- 0 = 비활성, 1 = 활성
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_bookings_lead_id ON bookings(lead_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_scheduled_at ON bookings(scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_consultant_schedules_consultant ON consultant_schedules(consultant_name);
+CREATE INDEX IF NOT EXISTS idx_consultant_schedules_day ON consultant_schedules(day_of_week);
+
 -- 초기 오퍼 데이터 (예시)
 INSERT OR IGNORE INTO offers (slug, name, title, description, status, download_link, ab_test_variant) 
 VALUES (
