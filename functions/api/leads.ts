@@ -183,43 +183,51 @@ export async function onRequestPost(context: {
     const normalizedData = normalizeLeadData(body);
     const { offer_slug, name, email, phone, organization, consent_privacy, consent_marketing } = normalizedData;
 
-    // 리드 저장 (DB가 있으면 시도, 없으면 건너뛰기)
-    let leadId: number | null = null;
-    if (context.env.DB) {
-      try {
-        const leadResult = await context.env.DB.prepare(
-          'INSERT INTO leads (offer_slug, name, email, phone, organization, consent_privacy, consent_marketing) VALUES (?, ?, ?, ?, ?, ?, ?)'
-        )
-          .bind(
-            offer_slug,
-            name,
-            email,
-            phone,
-            organization || null,
-            consent_privacy ? 1 : 0,
-            consent_marketing ? 1 : 0
-          )
-          .run();
-
-        if (leadResult.meta.last_row_id) {
-          leadId = leadResult.meta.last_row_id;
-          console.log('[Leads API] Lead inserted successfully:', { leadId, offer_slug });
-        }
-      } catch (dbError: unknown) {
-        const error = dbError instanceof Error ? dbError : new Error(String(dbError));
-        console.error('[Leads API] Database error (non-fatal):', {
-          message: error.message,
-          stack: error.stack,
-        });
-        // DB 에러는 무시하고 계속 진행 (일단 성공 응답 반환)
-      }
-    } else {
-      console.warn('[Leads API] DB not available, skipping database save');
+    // DB 바인딩 확인
+    if (!context.env.DB) {
+      console.error('[Leads API] DB binding not found');
+      return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
     }
 
-    // 성공 응답 반환 (DB 저장 실패해도 성공으로 처리)
+    // 리드 저장
+    let leadId: number;
+    try {
+      const leadResult = await context.env.DB.prepare(
+        'INSERT INTO leads (offer_slug, name, email, phone, organization, consent_privacy, consent_marketing) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      )
+        .bind(
+          offer_slug,
+          name,
+          email,
+          phone,
+          organization || null,
+          consent_privacy ? 1 : 0,
+          consent_marketing ? 1 : 0
+        )
+        .run();
+
+      if (!leadResult.meta.last_row_id) {
+        console.error('[Leads API] Failed to insert lead: last_row_id is missing');
+        return createErrorResponse('리드 저장에 실패했습니다.', 500);
+      }
+
+      leadId = leadResult.meta.last_row_id;
+      console.log('[Leads API] Lead inserted successfully:', { leadId, offer_slug, name, email: email.substring(0, 5) + '***' });
+    } catch (dbError: unknown) {
+      const error = dbError instanceof Error ? dbError : new Error(String(dbError));
+      console.error('[Leads API] Database error:', {
+        message: error.message,
+        stack: error.stack,
+        offer_slug,
+        name,
+        email: email.substring(0, 5) + '***',
+      });
+      return createErrorResponse('데이터베이스 오류가 발생했습니다.', 500);
+    }
+
+    // 성공 응답 반환
     console.log('[Leads API] Success response:', { leadId, offer_slug });
-    return createSuccessResponse({ leadId: leadId || 0 });
+    return createSuccessResponse({ leadId });
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
     console.error('[Leads API] Unexpected error:', {
