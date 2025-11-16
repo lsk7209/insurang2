@@ -197,6 +197,20 @@ CREATE INDEX IF NOT EXISTS idx_content_articles_published_at ON content_articles
 CREATE INDEX IF NOT EXISTS idx_content_ctas_article_id ON content_ctas(article_id);
 CREATE INDEX IF NOT EXISTS idx_content_ctas_offer_slug ON content_ctas(offer_slug);
 
+-- AutoOps Monitoring 테이블 (시스템 모니터링)
+CREATE TABLE IF NOT EXISTS autoops_monitoring (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  metric_name TEXT NOT NULL, -- 'cron_status', 'queue_backlog', 'error_count', 'backup_status', 'index_status', 'lead_trend'
+  metric_value TEXT NOT NULL, -- JSON 형식의 값
+  status TEXT DEFAULT 'ok', -- 'ok', 'warning', 'error'
+  checked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_autoops_monitoring_metric_name ON autoops_monitoring(metric_name);
+CREATE INDEX IF NOT EXISTS idx_autoops_monitoring_checked_at ON autoops_monitoring(checked_at);
+CREATE INDEX IF NOT EXISTS idx_autoops_monitoring_status ON autoops_monitoring(status);
+
 -- 초기 오퍼 데이터 (예시)
 INSERT OR IGNORE INTO offers (slug, name, title, description, status, download_link, ab_test_variant) 
 VALUES (
