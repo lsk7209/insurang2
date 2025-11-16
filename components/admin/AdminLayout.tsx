@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ReactNode, useState } from 'react';
+import ToastContainer from '@/app/components/admin/Toast';
 
 const DRAWER_WIDTH = 280;
 
@@ -198,6 +199,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="p-4 md:p-6">{children}</div>
         </main>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
   );
 }

@@ -2,6 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { toast } from '@/app/components/admin/Toast';
+import ConfirmModal from '@/app/components/admin/ConfirmModal';
+import { TableSkeleton } from '@/app/components/admin/Skeleton';
+import EmptyState from '@/app/components/admin/EmptyState';
 
 /**
  * Admin Offers Page
@@ -42,6 +46,7 @@ export default function AdminOffersPage() {
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; offerId: number; offerName: string } | null>(null);
 
   const fetchOffers = useCallback(async () => {
     try {
@@ -96,10 +101,13 @@ export default function AdminOffersPage() {
     fetchOffers();
   }, [fetchOffers]);
 
-  const handleDelete = async (offerId: number, offerName: string) => {
-    if (!confirm(`정말로 "${offerName}" 오퍼를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
-      return;
-    }
+  const handleDeleteClick = (offerId: number, offerName: string) => {
+    setDeleteConfirm({ isOpen: true, offerId, offerName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return;
+    const { offerId, offerName } = deleteConfirm;
 
     try {
       const response = await fetch(`/api/admin/offers?id=${offerId}`, {
@@ -107,7 +115,8 @@ export default function AdminOffersPage() {
       });
 
       if (response.status === 401) {
-        alert('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        toast.error('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setDeleteConfirm(null);
         return;
       }
 
@@ -119,21 +128,24 @@ export default function AdminOffersPage() {
         } catch {
           // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
         }
-        alert('오퍼 삭제에 실패했습니다: ' + errorMessage);
+        toast.error('오퍼 삭제에 실패했습니다: ' + errorMessage);
+        setDeleteConfirm(null);
         return;
       }
 
       const result = await response.json();
       if (result.success) {
-        alert('오퍼가 성공적으로 삭제되었습니다.');
+        toast.success('오퍼가 성공적으로 삭제되었습니다.');
         fetchOffers();
       } else {
-        alert('오퍼 삭제에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
+        toast.error('오퍼 삭제에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
       console.error('Error deleting offer:', error);
-      alert('오퍼 삭제 중 오류가 발생했습니다: ' + errorMessage);
+      toast.error('오퍼 삭제 중 오류가 발생했습니다: ' + errorMessage);
+    } finally {
+      setDeleteConfirm(null);
     }
   };
 
@@ -266,7 +278,7 @@ export default function AdminOffersPage() {
 
       const result = await response.json();
       if (result.success) {
-        alert(editingOffer ? '오퍼가 성공적으로 수정되었습니다.' : '오퍼가 성공적으로 생성되었습니다.');
+        toast.success(editingOffer ? '오퍼가 성공적으로 수정되었습니다.' : '오퍼가 성공적으로 생성되었습니다.');
         handleCloseModal();
         fetchOffers();
       } else {
@@ -283,10 +295,12 @@ export default function AdminOffersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">로딩 중...</p>
+      <div className="min-h-screen">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 animate-pulse"></div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <TableSkeleton rows={5} cols={6} />
+          </div>
         </div>
       </div>
     );
@@ -343,36 +357,12 @@ export default function AdminOffersPage() {
           {/* 오퍼 목록 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
             {offers.length === 0 ? (
-              <div className="p-12 text-center">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">오퍼가 없습니다</h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  새 오퍼를 생성하여 시작하세요.
-                </p>
-                <div className="mt-6">
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    첫 오퍼 생성
-                  </button>
-                </div>
-              </div>
+              <EmptyState
+                title="오퍼가 없습니다"
+                description="새 오퍼를 생성하여 시작하세요."
+                actionLabel="첫 오퍼 생성"
+                onAction={handleOpenCreateModal}
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -444,7 +434,7 @@ export default function AdminOffersPage() {
                               수정
                             </button>
                             <button
-                              onClick={() => handleDelete(offer.id, offer.name)}
+                              onClick={() => handleDeleteClick(offer.id, offer.name)}
                               className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
                               aria-label={`${offer.name} 삭제`}
                             >
@@ -638,11 +628,7 @@ export default function AdminOffersPage() {
                 <div className="flex justify-end gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setEditingOffer(null);
-                      setFormError(null);
-                    }}
+                    onClick={handleCloseModal}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
                     disabled={formLoading}
                   >
@@ -670,6 +656,20 @@ export default function AdminOffersPage() {
             </form>
           </div>
         </div>
+        )}
+
+      {/* 삭제 확인 모달 */}
+      {deleteConfirm && (
+        <ConfirmModal
+          isOpen={deleteConfirm.isOpen}
+          title="오퍼 삭제 확인"
+          message={`정말로 "${deleteConfirm.offerName}" 오퍼를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`}
+          confirmText="삭제"
+          cancelText="취소"
+          type="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteConfirm(null)}
+        />
       )}
     </div>
   );
