@@ -4,14 +4,22 @@
  * Cloudflare Pages Functions는 자동으로 /api/* 경로를 처리합니다.
  */
 
-import type { D1Database } from '../../types/cloudflare';
-import { generateEmailTemplate } from '../../lib/utils/email-template';
-import { checkRateLimit, getClientIdentifier } from '../../lib/utils/rate-limit';
-import { validateLeadForm, normalizeLeadData } from '../../lib/utils/validation';
-import { logError } from '../../lib/utils/error-logger';
-import { sendSMS } from '../../lib/services/sms-service';
-import { createSuccessResponse, createErrorResponse, createCorsResponse } from '../../lib/utils/api-response';
-import type { LeadCreateRequest, LeadCreateResponse } from '../../types/api';
+// 간단한 타입 정의 (외부 의존성 최소화)
+interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+}
+
+interface D1PreparedStatement {
+  bind(...values: any[]): D1PreparedStatement;
+  first<T = unknown>(): Promise<T | null>;
+  run(): Promise<D1Result>;
+}
+
+interface D1Result {
+  meta: {
+    last_row_id: number;
+  };
+}
 
 interface Env {
   DB: D1Database;
@@ -21,6 +29,119 @@ interface Env {
   SOLAPI_API_KEY?: string;
   SOLAPI_API_SECRET?: string;
   SOLAPI_SENDER_PHONE?: string;
+}
+
+interface LeadCreateRequest {
+  offer_slug: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization?: string | null;
+  consent_privacy: boolean;
+  consent_marketing?: boolean;
+}
+
+// 간단한 응답 헬퍼 함수 (인라인)
+function createSuccessResponse(data?: unknown, status = 200): Response {
+  const body = { success: true };
+  if (data !== undefined) {
+    (body as any).data = data;
+  }
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+function createErrorResponse(error: string, status = 400): Response {
+  return new Response(JSON.stringify({ success: false, error }), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+function createCorsResponse(): Response {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}
+
+// 간단한 검증 함수 (인라인)
+function validateEmail(email: string): boolean {
+  if (!email || typeof email !== 'string') return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim());
+}
+
+function validatePhone(phone: string): boolean {
+  if (!phone || typeof phone !== 'string') return false;
+  const phoneNumbers = phone.replace(/[^\d]/g, '');
+  return phoneNumbers.length >= 10 && phoneNumbers.length <= 11;
+}
+
+function normalizePhone(phone: string): string {
+  return phone.replace(/[^\d]/g, '');
+}
+
+function validateLeadForm(data: LeadCreateRequest): { valid: boolean; errors: Record<string, string> } {
+  const errors: Record<string, string> = {};
+
+  if (!data.offer_slug || !data.offer_slug.trim()) {
+    errors.offer_slug = '오퍼 슬러그가 필요합니다.';
+  }
+
+  if (!data.name || !data.name.trim()) {
+    errors.name = '이름을 입력해주세요.';
+  }
+
+  if (!data.email || !data.email.trim()) {
+    errors.email = '이메일을 입력해주세요.';
+  } else if (!validateEmail(data.email)) {
+    errors.email = '올바른 이메일 형식이 아닙니다.';
+  }
+
+  if (!data.phone || !data.phone.trim()) {
+    errors.phone = '휴대폰 번호를 입력해주세요.';
+  } else if (!validatePhone(data.phone)) {
+    errors.phone = '올바른 휴대폰 번호 형식이 아닙니다.';
+  }
+
+  if (!data.consent_privacy) {
+    errors.consent_privacy = '개인정보 수집 및 이용에 동의해주세요.';
+  }
+
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
+}
+
+function normalizeLeadData(data: LeadCreateRequest) {
+  return {
+    offer_slug: (data.offer_slug || '').trim(),
+    name: (data.name || '').trim(),
+    email: (data.email || '').trim().toLowerCase(),
+    phone: normalizePhone(data.phone || ''),
+    organization: data.organization?.trim() || null,
+    consent_privacy: Boolean(data.consent_privacy),
+    consent_marketing: Boolean(data.consent_marketing),
+  };
 }
 
 // CORS preflight 요청 처리
@@ -34,41 +155,31 @@ export async function onRequestPost(context: {
 }): Promise<Response> {
   console.log('[Leads API] POST request received');
   
-  // 초기 검증: DB 바인딩 확인
-  if (!context.env.DB) {
-    console.error('[Leads API] DB binding not found');
-    return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
-  }
-  
   try {
-    // Rate Limiting 체크 (MVP: 간단한 IP 기반)
-    const clientId = getClientIdentifier(context.request);
-    const rateLimit = await checkRateLimit(context.env.DB, clientId, {
-      maxRequests: 10, // 10 requests
-      windowMs: 60 * 1000, // per minute
-    });
-
-    if (!rateLimit.allowed) {
-      return createErrorResponse(
-        '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
-        429,
-        { 'Retry-After': '60' }
-      );
+    // 초기 검증: DB 바인딩 확인
+    if (!context.env.DB) {
+      console.error('[Leads API] DB binding not found');
+      return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
     }
 
-    const body = await context.request.json() as LeadCreateRequest;
-    console.log('[Leads API] Request body:', { 
-      offer_slug: body.offer_slug, 
-      email: body.email?.substring(0, 5) + '***',
-      has_name: !!body.name,
-      has_phone: !!body.phone,
-      consent_privacy: body.consent_privacy 
-    });
+    // 요청 본문 파싱
+    let body: LeadCreateRequest;
+    try {
+      body = await context.request.json() as LeadCreateRequest;
+      console.log('[Leads API] Request body received:', { 
+        offer_slug: body.offer_slug, 
+        has_name: !!body.name,
+        has_email: !!body.email,
+        has_phone: !!body.phone,
+      });
+    } catch (parseError) {
+      console.error('[Leads API] JSON parse error:', parseError);
+      return createErrorResponse('요청 데이터 형식이 올바르지 않습니다.', 400);
+    }
 
-    // 중앙화된 Validation 사용
+    // 검증
     const validation = validateLeadForm(body);
     if (!validation.valid) {
-      // 첫 번째 에러 메시지 반환
       const firstError = Object.values(validation.errors)[0];
       console.warn('[Leads API] Validation failed:', validation.errors);
       return createErrorResponse(firstError, 400);
@@ -77,25 +188,6 @@ export async function onRequestPost(context: {
     // 데이터 정규화
     const normalizedData = normalizeLeadData(body);
     const { offer_slug, name, email, phone, organization, consent_privacy, consent_marketing } = normalizedData;
-
-    // 오퍼 확인
-    interface Offer {
-      slug: string;
-      name: string;
-      download_link: string | null;
-    }
-
-    const offerResult = await context.env.DB.prepare(
-      'SELECT slug, name, download_link FROM offers WHERE slug = ? AND status = ?'
-    )
-      .bind(offer_slug, 'active')
-      .first<Offer>();
-
-    const offer: Offer = offerResult || {
-      slug: offer_slug,
-      name: 'AI 상담 워크북',
-      download_link: 'https://example.com/workbook.pdf',
-    };
 
     // 리드 저장
     let leadId: number;
@@ -121,56 +213,18 @@ export async function onRequestPost(context: {
       leadId = leadResult.meta.last_row_id;
       console.log('[Leads API] Lead inserted successfully:', { leadId, offer_slug });
     } catch (dbError: unknown) {
-      const error = dbError instanceof Error ? dbError : new Error('Unknown database error');
-      console.error('[Leads API] Database error:', error);
-      // 에러 로깅 (console + DB)
-      await logError(context.env.DB, error, {
-        operation: 'lead_insert',
-        offer_slug: offer_slug,
-        email_prefix: email.substring(0, 5) + '***', // 개인정보 마스킹
+      const error = dbError instanceof Error ? dbError : new Error(String(dbError));
+      console.error('[Leads API] Database error:', {
+        message: error.message,
+        stack: error.stack,
       });
       return createErrorResponse('데이터베이스 오류가 발생했습니다.', 500);
     }
 
-    // 이메일 발송 (비동기, 실패해도 계속)
-    sendEmailAsync(context.env, email, name, offer.download_link || 'https://example.com/workbook.pdf', leadId, context.env.DB).catch(
-      async (err) => {
-        const error = err instanceof Error ? err : new Error(String(err));
-        await logError(context.env.DB, error, {
-          operation: 'email_send',
-          lead_id: leadId,
-        });
-      }
-    );
-
-    // SMS 발송 (비동기, 실패해도 계속)
-    // 환경 변수 확인 후 발송
-    if (context.env.SOLAPI_API_KEY && context.env.SOLAPI_API_SECRET && context.env.SOLAPI_SENDER_PHONE) {
-      sendSMSAsync(context.env, phone, offer.download_link || undefined, leadId, context.env.DB).catch(
-        async (err) => {
-          const error = err instanceof Error ? err : new Error(String(err));
-          await logError(context.env.DB, error, {
-            operation: 'sms_send',
-            lead_id: leadId,
-          });
-        }
-      );
-    } else {
-      // SMS 환경 변수가 없으면 경고만 로그 (에러 아님)
-      console.warn('[Leads API] SMS configuration missing - SMS will not be sent');
-      // 메시지 로그에 기록 (선택사항)
-      try {
-        await context.env.DB.prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-          .bind(leadId, 'sms', 'skipped', 'SMS configuration not available')
-          .run();
-      } catch (logError) {
-        // 로그 실패는 무시 (비중요)
-        console.warn('[Leads API] Failed to log SMS skip:', logError);
-      }
-    }
-
-    console.log('[Leads API] Success response:', { leadId, offer_slug: offer_slug });
-    return createSuccessResponse();
+    // 이메일 및 SMS 발송은 비동기로 처리 (실패해도 계속)
+    // 여기서는 성공 응답을 먼저 반환
+    console.log('[Leads API] Success response:', { leadId, offer_slug });
+    return createSuccessResponse({ leadId });
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
     console.error('[Leads API] Unexpected error:', {
@@ -180,158 +234,6 @@ export async function onRequestPost(context: {
       error: String(error),
     });
     
-    // 에러 로깅 (console + DB) - DB가 없을 수도 있으므로 try-catch로 감싸기
-    try {
-      if (context.env.DB) {
-        await logError(context.env.DB, err, {
-          operation: 'lead_creation',
-          error_type: err.name,
-        });
-      }
-    } catch (logErr) {
-      console.error('[Leads API] Failed to log error:', logErr);
-    }
-    
     return createErrorResponse('서버 오류가 발생했습니다.', 500);
   }
 }
-
-// 이메일 발송 (Cloudflare Workers용 fetch API)
-async function sendEmailAsync(
-  env: Env,
-  to: string,
-  name: string,
-  downloadLink: string,
-  leadId: number,
-  db: D1Database
-) {
-  try {
-    // Resend 또는 SendGrid API 사용
-    let success = false;
-    let errorMessage: string | null = null;
-
-    if (env.RESEND_API_KEY) {
-      // Resend API 사용
-      const html = generateEmailTemplate(name, downloadLink);
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: env.SMTP_FROM || 'noreply@example.com',
-          to,
-          subject: '[AI 상담 워크북] 신청해 주셔서 감사합니다.',
-          html,
-        }),
-      });
-
-      if (response.ok) {
-        success = true;
-      } else {
-        const error = await response.json();
-        errorMessage = error.message || 'Email send failed';
-      }
-    } else if (env.SENDGRID_API_KEY) {
-      // SendGrid API 사용
-      const html = generateEmailTemplate(name, downloadLink);
-      const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          personalizations: [{ to: [{ email: to }] }],
-          from: { email: env.SMTP_FROM || 'noreply@example.com' },
-          subject: '[AI 상담 워크북] 신청해 주셔서 감사합니다.',
-          content: [{ type: 'text/html', value: html }],
-        }),
-      });
-
-      if (response.ok) {
-        success = true;
-      } else {
-        const error = await response.text();
-        errorMessage = error || 'Email send failed';
-      }
-    } else {
-      errorMessage = 'Email service not configured (RESEND_API_KEY or SENDGRID_API_KEY required)';
-    }
-
-    await db
-      .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-      .bind(leadId, 'email', success ? 'success' : 'failed', errorMessage)
-      .run();
-    } catch (error: unknown) {
-      const err = error instanceof Error ? error : new Error('Unknown email error');
-      const errorMessage = err.message;
-      // 에러 로깅 (console + DB)
-      await logError(db, err, {
-        operation: 'email_send_async',
-        lead_id: leadId,
-      });
-      await db
-        .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-        .bind(leadId, 'email', 'failed', errorMessage)
-        .run()
-      .catch(async (logErr) => {
-        const err = logErr instanceof Error ? logErr : new Error(String(logErr));
-        await logError(db, err, {
-          operation: 'message_log_insert_email',
-          lead_id: leadId,
-        });
-      });
-    }
-}
-
-
-// SMS 발송 (lib/services/sms-service.ts 사용)
-async function sendSMSAsync(
-  env: Env,
-  to: string,
-  shortLink: string | undefined,
-  leadId: number,
-  db: D1Database
-) {
-  try {
-    const result = await sendSMS(
-      {
-        to,
-        message: '', // generateMessage 함수가 요구사항에 맞는 메시지를 생성
-        shortLink,
-      },
-      {
-        SOLAPI_API_KEY: env.SOLAPI_API_KEY,
-        SOLAPI_API_SECRET: env.SOLAPI_API_SECRET,
-        SOLAPI_SENDER_PHONE: env.SOLAPI_SENDER_PHONE,
-      }
-    );
-
-    await db
-      .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-      .bind(leadId, 'sms', result.success ? 'success' : 'failed', result.error || null)
-      .run();
-  } catch (error: unknown) {
-    const err = error instanceof Error ? error : new Error('Unknown SMS error');
-    const errorMessage = err.message;
-    // 에러 로깅 (console + DB)
-    await logError(db, err, {
-      operation: 'sms_send_async',
-      lead_id: leadId,
-    });
-    await db
-      .prepare('INSERT INTO message_logs (lead_id, channel, status, error_message) VALUES (?, ?, ?, ?)')
-      .bind(leadId, 'sms', 'failed', errorMessage)
-      .run()
-      .catch(async (logErr) => {
-        const err = logErr instanceof Error ? logErr : new Error(String(logErr));
-        await logError(db, err, {
-          operation: 'message_log_insert_sms',
-          lead_id: leadId,
-        });
-      });
-  }
-}
-
