@@ -39,6 +39,14 @@ export default function AdminSettingsPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  
+  // 테스트 발송 상태
+  const [testEmail, setTestEmail] = useState('');
+  const [testPhone, setTestPhone] = useState('');
+  const [testEmailLoading, setTestEmailLoading] = useState(false);
+  const [testSmsLoading, setTestSmsLoading] = useState(false);
+  const [testEmailResult, setTestEmailResult] = useState<string | null>(null);
+  const [testSmsResult, setTestSmsResult] = useState<string | null>(null);
 
   // 설정 불러오기
   useEffect(() => {
@@ -153,6 +161,90 @@ export default function AdminSettingsPage() {
       console.error('Error saving settings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 테스트 이메일 발송
+  const handleTestEmail = async () => {
+    if (!testEmail || !testEmail.includes('@')) {
+      setTestEmailResult('올바른 이메일 주소를 입력해주세요.');
+      return;
+    }
+
+    setTestEmailLoading(true);
+    setTestEmailResult(null);
+
+    try {
+      const response = await fetch('/api/admin/settings/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'email',
+          email: testEmail,
+        }),
+      });
+
+      if (response.status === 401) {
+        setTestEmailResult('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setTestEmailLoading(false);
+        return;
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setTestEmailResult('✅ ' + (result.data?.message || '테스트 이메일이 발송되었습니다.'));
+      } else {
+        setTestEmailResult('❌ ' + (result.error || '이메일 발송에 실패했습니다.'));
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      setTestEmailResult('❌ 이메일 발송 중 오류가 발생했습니다: ' + errorMessage);
+    } finally {
+      setTestEmailLoading(false);
+    }
+  };
+
+  // 테스트 SMS 발송
+  const handleTestSMS = async () => {
+    if (!testPhone || testPhone.replace(/[^\d]/g, '').length < 10) {
+      setTestSmsResult('올바른 전화번호를 입력해주세요.');
+      return;
+    }
+
+    setTestSmsLoading(true);
+    setTestSmsResult(null);
+
+    try {
+      const response = await fetch('/api/admin/settings/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'sms',
+          phone: testPhone,
+        }),
+      });
+
+      if (response.status === 401) {
+        setTestSmsResult('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setTestSmsLoading(false);
+        return;
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setTestSmsResult('✅ ' + (result.data?.message || '테스트 SMS가 발송되었습니다.'));
+      } else {
+        setTestSmsResult('❌ ' + (result.error || 'SMS 발송에 실패했습니다.'));
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      setTestSmsResult('❌ SMS 발송 중 오류가 발생했습니다: ' + errorMessage);
+    } finally {
+      setTestSmsLoading(false);
     }
   };
 
@@ -400,6 +492,87 @@ export default function AdminSettingsPage() {
                   <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
                     SMS 발송 시 사용될 발신자 전화번호 (하이픈 없이 입력)
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 테스트 발송 섹션 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="text-green-600">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-text-light dark:text-text-dark">
+                    테스트 발송
+                  </h2>
+                  <p className="text-sm text-text-light/70 dark:text-text-dark/70">
+                    설정한 API 키로 테스트 이메일/SMS를 발송합니다
+                  </p>
+                </div>
+              </div>
+
+              {/* 이메일 테스트 */}
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="test-email" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    테스트 이메일 주소
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="test-email"
+                      type="email"
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                      placeholder="test@example.com"
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                    <button
+                      onClick={handleTestEmail}
+                      disabled={testEmailLoading || !testEmail}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      {testEmailLoading ? '발송 중...' : '이메일 테스트'}
+                    </button>
+                  </div>
+                  {testEmailResult && (
+                    <p className={`mt-2 text-sm ${testEmailResult.startsWith('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                      {testEmailResult}
+                    </p>
+                  )}
+                </div>
+
+                {/* SMS 테스트 */}
+                <div>
+                  <label htmlFor="test-phone" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    테스트 전화번호
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="test-phone"
+                      type="tel"
+                      value={testPhone}
+                      onChange={(e) => setTestPhone(e.target.value)}
+                      placeholder="01012345678"
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                    <button
+                      onClick={handleTestSMS}
+                      disabled={testSmsLoading || !testPhone}
+                      className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+                    >
+                      {testSmsLoading ? '발송 중...' : 'SMS 테스트'}
+                    </button>
+                  </div>
+                  {testSmsResult && (
+                    <p className={`mt-2 text-sm ${testSmsResult.startsWith('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                      {testSmsResult}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

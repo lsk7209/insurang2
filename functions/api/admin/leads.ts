@@ -71,7 +71,7 @@ function createSuccessResponse<T>(data?: T, status = 200): Response {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
   });
@@ -83,8 +83,21 @@ function createErrorResponse(error: string, status = 400): Response {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+// CORS preflight 요청 처리
+export async function onRequestOptions(): Promise<Response> {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     },
   });
 }
@@ -105,82 +118,13 @@ function checkBasicAuth(request: Request, env: Env): boolean {
   const credentials = atob(base64Credentials);
   const [username, password] = credentials.split(':');
 
-  const adminUsername = env.ADMIN_USERNAME || 'admin';
-  const adminPassword = env.ADMIN_PASSWORD;
+  const expectedUsername = env.ADMIN_USERNAME || 'admin';
+  const expectedPassword = env.ADMIN_PASSWORD;
 
-  return username === adminUsername && password === adminPassword;
+  return username === expectedUsername && password === expectedPassword;
 }
 
-// Helper functions
 interface LeadRow {
-  id: number;
-  offer_slug: string;
-  name: string;
-  email: string;
-  phone: string;
-  organization: string | null;
-  consent_privacy: number;
-  consent_marketing: number;
-  created_at: string;
-  email_status: string | null;
-  sms_status: string | null;
-}
-
-async function getLeadsWithLogs(
-  db: D1Database,
-  limit: number,
-  offset: number
-): Promise<LeadListItem[]> {
-  try {
-    // N+1 쿼리 문제 해결: JOIN을 사용하여 한 번의 쿼리로 해결
-    // SQLite는 LEFT JOIN LATERAL을 지원하지 않으므로 서브쿼리 사용
-    const query = `
-      SELECT 
-        l.*,
-        (SELECT status FROM message_logs 
-         WHERE lead_id = l.id AND channel = 'email' 
-         ORDER BY sent_at DESC LIMIT 1) as email_status,
-        (SELECT status FROM message_logs 
-         WHERE lead_id = l.id AND channel = 'sms' 
-         ORDER BY sent_at DESC LIMIT 1) as sms_status
-      FROM leads l
-      ORDER BY l.created_at DESC
-      LIMIT ? OFFSET ?
-    `;
-
-    const result = await db
-      .prepare(query)
-      .bind(limit, offset)
-      .all<LeadRow>();
-
-    if (!result.results) {
-      return [];
-    }
-
-    return result.results.map((lead) => ({
-      id: lead.id,
-      offer_slug: lead.offer_slug,
-      name: lead.name,
-      email: lead.email,
-      phone: lead.phone,
-      organization: lead.organization,
-      consent_privacy: Boolean(lead.consent_privacy),
-      consent_marketing: Boolean(lead.consent_marketing),
-      created_at: lead.created_at,
-      email_status: lead.email_status || 'pending',
-      sms_status: lead.sms_status || 'pending',
-    }));
-  } catch (error: unknown) {
-    const err = error instanceof Error ? error : new Error(String(error));
-    console.error('[Admin API] getLeadsWithLogs error:', {
-      message: err.message,
-      stack: err.stack,
-    });
-    return [];
-  }
-}
-
-interface LeadDetailRow {
   id: number;
   offer_slug: string;
   name: string;
@@ -201,12 +145,89 @@ interface MessageLogRow {
   sent_at: string;
 }
 
+interface LeadDetailRow extends LeadRow {
+  email_status: string;
+  sms_status: string;
+}
+
+async function getLeadsWithLogs(db: D1Database, limit = 100, offset = 0): Promise<LeadListItem[]> {
+  try {
+    const leads = await db
+      .prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT ? OFFSET ?')
+      .bind(limit, offset)
+      .all<LeadRow>();
+
+    if (!leads.results || leads.results.length === 0) {
+      return [];
+    }
+
+    const leadIds = leads.results.map((lead) => lead.id);
+    const placeholders = leadIds.map(() => '?').join(',');
+
+    const logs = await db
+      .prepare(`SELECT * FROM message_logs WHERE lead_id IN (${placeholders}) ORDER BY sent_at DESC`)
+      .bind(...leadIds)
+      .all<MessageLogRow>();
+
+    const logsByLeadId = new Map<number, MessageLogRow[]>();
+    (logs.results || []).forEach((log) => {
+      if (!logsByLeadId.has(log.lead_id)) {
+        logsByLeadId.set(log.lead_id, []);
+      }
+      logsByLeadId.get(log.lead_id)!.push(log);
+    });
+
+    return leads.results.map((lead) => {
+      const leadLogs = logsByLeadId.get(lead.id) || [];
+      const emailLog = leadLogs.find((log) => log.channel === 'email');
+      const smsLog = leadLogs.find((log) => log.channel === 'sms');
+
+      return {
+        id: lead.id,
+        offer_slug: lead.offer_slug,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        organization: lead.organization,
+        consent_privacy: Boolean(lead.consent_privacy),
+        consent_marketing: Boolean(lead.consent_marketing),
+        created_at: lead.created_at,
+        email_status: emailLog ? emailLog.status : 'pending',
+        sms_status: smsLog ? smsLog.status : 'pending',
+      };
+    });
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[Admin API] getLeadsWithLogs error:', {
+      message: err.message,
+      stack: err.stack,
+    });
+    return [];
+  }
+}
+
+interface LeadDetailRow {
+  id: number;
+  offer_slug: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization: string | null;
+  consent_privacy: number;
+  consent_marketing: number;
+  created_at: string;
+  email_status: string;
+  sms_status: string;
+  error_message: string | null;
+  sent_at: string;
+}
+
 async function getLeadById(db: D1Database, leadId: number): Promise<LeadDetail | null> {
   try {
     const lead = await db
       .prepare('SELECT * FROM leads WHERE id = ?')
       .bind(leadId)
-      .first<LeadDetailRow>();
+      .first<LeadRow>();
 
     if (!lead) {
       return null;
@@ -216,6 +237,10 @@ async function getLeadById(db: D1Database, leadId: number): Promise<LeadDetail |
       .prepare('SELECT * FROM message_logs WHERE lead_id = ? ORDER BY sent_at DESC')
       .bind(leadId)
       .all<MessageLogRow>();
+
+    const leadLogs = logs.results || [];
+    const emailLog = leadLogs.find((log) => log.channel === 'email');
+    const smsLog = leadLogs.find((log) => log.channel === 'sms');
 
     return {
       id: lead.id,
@@ -227,9 +252,9 @@ async function getLeadById(db: D1Database, leadId: number): Promise<LeadDetail |
       consent_privacy: Boolean(lead.consent_privacy),
       consent_marketing: Boolean(lead.consent_marketing),
       created_at: lead.created_at,
-      email_status: 'pending',
-      sms_status: 'pending',
-      logs: (logs.results || []).map((log) => ({
+      email_status: emailLog ? emailLog.status : 'pending',
+      sms_status: smsLog ? smsLog.status : 'pending',
+      logs: leadLogs.map((log) => ({
         id: log.id,
         lead_id: log.lead_id,
         channel: log.channel as 'email' | 'sms',
@@ -261,6 +286,7 @@ export async function onRequestGet(context: {
         status: 401,
         headers: {
           'WWW-Authenticate': 'Basic realm="Admin Area"',
+          'Access-Control-Allow-Origin': '*',
         },
       });
     }
@@ -297,6 +323,84 @@ export async function onRequestGet(context: {
       error: String(error),
     });
     
+    return createErrorResponse('서버 오류가 발생했습니다.', 500);
+  }
+}
+
+// DELETE 요청 처리 - 리드 삭제
+export async function onRequestDelete(context: {
+  request: Request;
+  env: Env;
+}): Promise<Response> {
+  console.log('[Admin Leads API] DELETE request received');
+  
+  try {
+    // Basic Auth 확인
+    if (!checkBasicAuth(context.request, context.env)) {
+      return new Response('Unauthorized', {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': 'Basic realm="Admin Area"',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
+
+    // DB 바인딩 확인
+    if (!context.env.DB) {
+      console.error('[Admin Leads API] DB binding not found');
+      return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
+    }
+
+    const url = new URL(context.request.url);
+    const leadId = url.searchParams.get('id');
+
+    if (!leadId) {
+      return createErrorResponse('리드 ID가 필요합니다.', 400);
+    }
+
+    const leadIdNum = parseInt(leadId);
+    if (isNaN(leadIdNum)) {
+      return createErrorResponse('유효하지 않은 리드 ID입니다.', 400);
+    }
+
+    // 리드 존재 확인
+    const existingLead = await context.env.DB.prepare('SELECT id FROM leads WHERE id = ?')
+      .bind(leadIdNum)
+      .first<{ id: number }>();
+
+    if (!existingLead) {
+      return createErrorResponse('리드를 찾을 수 없습니다.', 404);
+    }
+
+    // 관련 메시지 로그 삭제 (CASCADE 대신 수동 삭제)
+    try {
+      await context.env.DB.prepare('DELETE FROM message_logs WHERE lead_id = ?')
+        .bind(leadIdNum)
+        .run();
+      console.log('[Admin Leads API] Message logs deleted for lead:', leadIdNum);
+    } catch (logError) {
+      console.warn('[Admin Leads API] Failed to delete message logs:', logError);
+      // 로그 삭제 실패해도 계속 진행
+    }
+
+    // 리드 삭제
+    const result = await context.env.DB.prepare('DELETE FROM leads WHERE id = ?')
+      .bind(leadIdNum)
+      .run();
+
+    if (result.meta.changes === 0) {
+      return createErrorResponse('리드 삭제에 실패했습니다.', 500);
+    }
+
+    console.log('[Admin Leads API] Lead deleted successfully:', leadIdNum);
+    return createSuccessResponse({ deleted: true, id: leadIdNum });
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[Admin Leads API] Delete error:', {
+      message: err.message,
+      stack: err.stack,
+    });
     return createErrorResponse('서버 오류가 발생했습니다.', 500);
   }
 }

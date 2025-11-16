@@ -246,6 +246,49 @@ export default function AdminLeadsPage() {
     setCurrentPage(1);
   };
 
+  // 리드 삭제
+  const handleDeleteLead = useCallback(async (leadId: number, leadName: string) => {
+    if (!confirm(`정말로 "${leadName}" 리드를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/leads?id=${leadId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.status === 401) {
+        alert('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        return;
+      }
+
+      if (!response.ok) {
+        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        try {
+          const errorResult = await response.json();
+          errorMessage = errorResult.error || errorMessage;
+        } catch {
+          // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
+        }
+        alert('리드 삭제에 실패했습니다: ' + errorMessage);
+        return;
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        alert('리드가 성공적으로 삭제되었습니다.');
+        // 리드 목록 새로고침
+        fetchLeads();
+      } else {
+        alert('리드 삭제에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      console.error('Error deleting lead:', error);
+      alert('리드 삭제 중 오류가 발생했습니다: ' + errorMessage);
+    }
+  }, [fetchLeads]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -424,12 +467,15 @@ export default function AdminLeadsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     상세
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    삭제
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedLeads.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="px-6 py-8 text-center text-gray-500" role="status" aria-live="polite">
+                    <td colSpan={11} className="px-6 py-8 text-center text-gray-500" role="status" aria-live="polite">
                       {leads.length === 0 ? '등록된 리드가 없습니다.' : '검색 결과가 없습니다.'}
                     </td>
                   </tr>
@@ -461,6 +507,15 @@ export default function AdminLeadsPage() {
                           className="text-primary hover:text-primary-dark font-medium disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                         >
                           {detailLoading ? '로딩...' : '보기'}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => handleDeleteLead(lead.id, lead.name)}
+                          aria-label={`리드 ${lead.id} 삭제`}
+                          className="text-red-600 hover:text-red-800 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
+                        >
+                          삭제
                         </button>
                       </td>
                     </tr>
