@@ -3,10 +3,10 @@
  * /api/admin/leads 엔드포인트
  */
 
-import type { D1Database } from '@/types/cloudflare';
-import type { AdminLeadsResponse, LeadListItem, LeadDetail } from '@/types/api';
-import { logError } from '@/lib/utils/error-logger';
-import { createSuccessResponse, createErrorResponse } from '@/lib/utils/api-response';
+import type { D1Database } from '../../../types/cloudflare';
+import type { AdminLeadsResponse, LeadListItem, LeadDetail } from '../../../types/api';
+import { logError } from '../../../lib/utils/error-logger';
+import { createSuccessResponse, createErrorResponse } from '../../../lib/utils/api-response';
 
 interface Env {
   DB: D1Database;

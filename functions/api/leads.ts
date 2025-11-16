@@ -4,14 +4,14 @@
  * Cloudflare Pages Functions는 자동으로 /api/* 경로를 처리합니다.
  */
 
-import type { D1Database } from '@/types/cloudflare';
-import { generateEmailTemplate } from '@/lib/utils/email-template';
-import { checkRateLimit, getClientIdentifier } from '@/lib/utils/rate-limit';
-import { validateLeadForm, normalizeLeadData } from '@/lib/utils/validation';
-import { logError } from '@/lib/utils/error-logger';
-import { sendSMS } from '@/lib/services/sms-service';
-import { createSuccessResponse, createErrorResponse, createCorsResponse } from '@/lib/utils/api-response';
-import type { LeadCreateRequest, LeadCreateResponse } from '@/types/api';
+import type { D1Database } from '../../types/cloudflare';
+import { generateEmailTemplate } from '../../lib/utils/email-template';
+import { checkRateLimit, getClientIdentifier } from '../../lib/utils/rate-limit';
+import { validateLeadForm, normalizeLeadData } from '../../lib/utils/validation';
+import { logError } from '../../lib/utils/error-logger';
+import { sendSMS } from '../../lib/services/sms-service';
+import { createSuccessResponse, createErrorResponse, createCorsResponse } from '../../lib/utils/api-response';
+import type { LeadCreateRequest, LeadCreateResponse } from '../../types/api';
 
 interface Env {
   DB: D1Database;

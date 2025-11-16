@@ -4,9 +4,9 @@
  * 오퍼 정보 조회 API
  */
 
-import type { D1Database } from '@/types/cloudflare';
-import { createSuccessResponse, createErrorResponse, createCorsResponse } from '@/lib/utils/api-response';
-import { logError } from '@/lib/utils/error-logger';
+import type { D1Database } from '../../types/cloudflare';
+import { createSuccessResponse, createErrorResponse, createCorsResponse } from '../../lib/utils/api-response';
+import { logError } from '../../lib/utils/error-logger';
 
 interface Env {
   DB: D1Database;
