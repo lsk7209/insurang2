@@ -15,6 +15,12 @@ interface Env {
 }
 
 function checkBasicAuth(request: Request, env: Env): boolean {
+  // 개발 단계: ADMIN_PASSWORD가 설정되지 않았으면 인증 건너뛰기
+  if (!env.ADMIN_PASSWORD) {
+    console.warn('[Admin API] ADMIN_PASSWORD not set, skipping authentication (development mode)');
+    return true;
+  }
+
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Basic ')) {
     return false;
@@ -27,10 +33,6 @@ function checkBasicAuth(request: Request, env: Env): boolean {
   const adminUsername = env.ADMIN_USERNAME || 'admin';
   const adminPassword = env.ADMIN_PASSWORD;
 
-  if (!adminPassword) {
-    return false;
-  }
-
   return username === adminUsername && password === adminPassword;
 }
 
@@ -38,7 +40,7 @@ export async function onRequestGet(context: {
   request: Request;
   env: Env;
 }): Promise<Response> {
-  // Basic Auth 확인
+  // Basic Auth 확인 (개발 단계에서는 ADMIN_PASSWORD가 없으면 자동 통과)
   if (!checkBasicAuth(context.request, context.env)) {
     return new Response('Unauthorized', {
       status: 401,
