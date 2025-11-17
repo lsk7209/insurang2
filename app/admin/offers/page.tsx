@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { toast } from '@/app/components/admin/Toast';
 import ConfirmModal from '@/app/components/admin/ConfirmModal';
@@ -463,9 +463,10 @@ export default function AdminOffersPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <div className="space-y-6">
+    <div>
+      <div className="min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <div className="space-y-6">
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div>
@@ -1184,7 +1185,7 @@ export default function AdminOffersPage() {
             </form>
           </div>
         </div>
-        )}
+      )}
 
       {/* 삭제 확인 모달 */}
       {deleteConfirm && (
