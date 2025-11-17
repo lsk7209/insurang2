@@ -667,32 +667,32 @@ export default function AdminOffersPage() {
 
                 {/* 기본 정보 탭 */}
                 {activeTab === 'basic' && (
-                <div className="space-y-4">
-                  {/* 오퍼 이름 */}
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      오퍼 이름 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      required
-                      value={formData.name || ''}
-                      onChange={(e) => {
-                        const name = e.target.value;
-                        setFormData({
-                          ...formData,
-                          name,
-                          slug: formData.slug || generateSlug(name),
-                        });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="예: AI 상담 워크북"
-                    />
-                  </div>
+                  <div className="space-y-4">
+                    {/* 오퍼 이름 */}
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        오퍼 이름 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        required
+                        value={formData.name || ''}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          setFormData({
+                            ...formData,
+                            name,
+                            slug: formData.slug || generateSlug(name),
+                          });
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="예: AI 상담 워크북"
+                      />
+                    </div>
 
-                  {/* 슬러그 */}
-                  <div>
+                    {/* 슬러그 */}
+                    <div>
                     <label htmlFor="slug" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
                       슬러그 (URL) <span className="text-red-500">*</span>
                     </label>
@@ -809,57 +809,57 @@ export default function AdminOffersPage() {
                       </select>
                     </div>
                   </div>
-                </div>
+                  </div>
                 )}
 
                 {/* 페이지 편집 탭 */}
                 {activeTab === 'content' && (
-                <div className="space-y-6">
-                  {/* Hero 섹션 */}
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Hero 섹션</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="hero_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          메인 제목
-                        </label>
-                        <input
-                          id="hero_title"
-                          type="text"
-                          value={formData.hero_title || ''}
-                          onChange={(e) => setFormData({ ...formData, hero_title: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 상담 성공률을 2배로 높이는 AI 워크북"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="hero_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          부제목
-                        </label>
-                        <textarea
-                          id="hero_subtitle"
-                          rows={3}
-                          value={formData.hero_subtitle || ''}
-                          onChange={(e) => setFormData({ ...formData, hero_subtitle: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 매일 같은 상담에 지치셨나요? 고객 유형별 맞춤 전략으로 상담 시간은 절반으로, 계약 성공률은 2배로."
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="hero_badge_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          배지 텍스트
-                        </label>
-                        <input
-                          id="hero_badge_text"
-                          type="text"
-                          value={formData.hero_badge_text || ''}
-                          onChange={(e) => setFormData({ ...formData, hero_badge_text: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 무료 제공 · 즉시 다운로드"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="hero_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                  <div className="space-y-6">
+                    {/* Hero 섹션 */}
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Hero 섹션</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="hero_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            메인 제목
+                          </label>
+                          <input
+                            id="hero_title"
+                            type="text"
+                            value={formData.hero_title || ''}
+                            onChange={(e) => setFormData({ ...formData, hero_title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 상담 성공률을 2배로 높이는 AI 워크북"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="hero_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            부제목
+                          </label>
+                          <textarea
+                            id="hero_subtitle"
+                            rows={3}
+                            value={formData.hero_subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, hero_subtitle: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 매일 같은 상담에 지치셨나요? 고객 유형별 맞춤 전략으로 상담 시간은 절반으로, 계약 성공률은 2배로."
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="hero_badge_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            배지 텍스트
+                          </label>
+                          <input
+                            id="hero_badge_text"
+                            type="text"
+                            value={formData.hero_badge_text || ''}
+                            onChange={(e) => setFormData({ ...formData, hero_badge_text: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 무료 제공 · 즉시 다운로드"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="hero_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
                           CTA 버튼 텍스트
                         </label>
                         <input
@@ -870,22 +870,22 @@ export default function AdminOffersPage() {
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="예: 지금 바로 무료로 받기"
                         />
-                      </div>
-                      <div>
-                        <label htmlFor="hero_background_image" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          배경 이미지 URL
-                        </label>
-                        <input
-                          id="hero_background_image"
-                          type="url"
-                          value={formData.hero_background_image || ''}
-                          onChange={(e) => setFormData({ ...formData, hero_background_image: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="https://example.com/image.jpg"
-                        />
+                        </div>
+                        <div>
+                          <label htmlFor="hero_background_image" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            배경 이미지 URL
+                          </label>
+                          <input
+                            id="hero_background_image"
+                            type="url"
+                            value={formData.hero_background_image || ''}
+                            onChange={(e) => setFormData({ ...formData, hero_background_image: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="https://example.com/image.jpg"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
                   {/* Preview 섹션 */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
@@ -1057,56 +1057,56 @@ export default function AdminOffersPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                  </div>
                 )}
 
                 {/* 감사 페이지 편집 탭 */}
                 {activeTab === 'thanks' && (
-                <div className="space-y-6">
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">감사 페이지 콘텐츠</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="thanks_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          메인 제목
-                        </label>
-                        <input
-                          id="thanks_title"
-                          type="text"
-                          value={formData.thanks_title || ''}
-                          onChange={(e) => setFormData({ ...formData, thanks_title: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 오퍼 신청이 완료되었습니다!"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="thanks_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          부제목
-                        </label>
-                        <textarea
-                          id="thanks_subtitle"
-                          rows={3}
-                          value={formData.thanks_subtitle || ''}
-                          onChange={(e) => setFormData({ ...formData, thanks_subtitle: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다."
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="thanks_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          CTA 버튼 텍스트
-                        </label>
-                        <input
-                          id="thanks_cta_text"
-                          type="text"
-                          value={formData.thanks_cta_text || ''}
-                          onChange={(e) => setFormData({ ...formData, thanks_cta_text: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 홈으로"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="thanks_examples" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                  <div className="space-y-6">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">감사 페이지 콘텐츠</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="thanks_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            메인 제목
+                          </label>
+                          <input
+                            id="thanks_title"
+                            type="text"
+                            value={formData.thanks_title || ''}
+                            onChange={(e) => setFormData({ ...formData, thanks_title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 오퍼 신청이 완료되었습니다!"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="thanks_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            부제목
+                          </label>
+                          <textarea
+                            id="thanks_subtitle"
+                            rows={3}
+                            value={formData.thanks_subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, thanks_subtitle: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다."
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="thanks_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            CTA 버튼 텍스트
+                          </label>
+                          <input
+                            id="thanks_cta_text"
+                            type="text"
+                            value={formData.thanks_cta_text || ''}
+                            onChange={(e) => setFormData({ ...formData, thanks_cta_text: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 홈으로"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="thanks_examples" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
                           예시 문장 (JSON 형식)
                         </label>
                         <textarea
@@ -1118,39 +1118,38 @@ export default function AdminOffersPage() {
                           placeholder='[{"title": "제목", "text": "내용"}]'
                         />
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          JSON 배열 형식으로 입력하세요. 예: [{"title": "제목", "text": "내용"}]
+                          JSON 배열 형식으로 입력하세요. 예: [&#123;&quot;title&quot;: &quot;제목&quot;, &quot;text&quot;: &quot;내용&quot;&#125;]
                         </p>
                       </div>
                     </div>
                   </div>
-                </div>
                 )}
 
                 {/* 통계 분석 탭 */}
                 {activeTab === 'analytics' && editingOffer && (
-                <div className="space-y-6">
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
-                      {editingOffer.name} 퍼널 통계
-                    </h3>
-                    <div className="text-center py-12">
-                      <p className="text-gray-500 dark:text-gray-400 mb-4">
-                        통계 분석 기능은 별도 페이지에서 확인할 수 있습니다.
-                      </p>
-                      <a
-                        href={`/admin/analytics?offer=${editingOffer.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        통계 분석 페이지로 이동
-                      </a>
+                  <div className="space-y-6">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
+                        {editingOffer.name} 퍼널 통계
+                      </h3>
+                      <div className="text-center py-12">
+                        <p className="text-gray-500 dark:text-gray-400 mb-4">
+                          통계 분석 기능은 별도 페이지에서 확인할 수 있습니다.
+                        </p>
+                        <a
+                          href={`/admin/analytics?offer=${editingOffer.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                          통계 분석 페이지로 이동
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </div>
                 )}
 
                 {/* 버튼 */}
