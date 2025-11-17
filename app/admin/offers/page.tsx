@@ -1115,10 +1115,10 @@ export default function AdminOffersPage() {
                           value={formData.thanks_examples || ''}
                           onChange={(e) => setFormData({ ...formData, thanks_examples: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
-                          placeholder='[{"title": "제목", "text": "내용"}]'
+                          placeholder='JSON 배열 형식으로 입력하세요'
                         />
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          JSON 배열 형식으로 입력하세요. 예: [&#123;&quot;title&quot;: &quot;제목&quot;, &quot;text&quot;: &quot;내용&quot;&#125;]
+                          JSON 배열 형식으로 입력하세요.
                         </p>
                       </div>
                     </div>
