@@ -602,7 +602,7 @@ export default function OfferLandingPage() {
                     name: '김민준 설계사',
                     company: 'AIA생명',
                     image:
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuB-6WcE3jby_vcv8z1lUrj8l6n5Or_RD1mfZ8gOIg0qn2EnDq8l0BihWQiG3Qgqw6cxPyQ5ra4HGJTNaYJfZMvdzPkSWBiesS0cNd_5vqGEwm8-XWwDiqeZYAze4CfJroK356AOwbglxpsXrqz2Uj2wW04O6XNbFFQwNsj67h3opzsP2MWUXzFEeInywLdJcVKo7hqEGv0IU9gP8JgJ85oX7aLn7Z7HuqqCIjZYaeiM6v9qUoZOgM2KlqNYYDFYJdOZ26mStU_XIDj6',
+                      'https://randomuser.me/api/portraits/men/32.jpg',
                     review:
                       '"매번 상담 준비에만 몇 시간을 썼는데, 워크북 덕분에 핵심만 짚어 상담할 수 있게 됐어요. 고객 반응부터 달라졌습니다."',
                   },
