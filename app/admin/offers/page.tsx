@@ -61,7 +61,10 @@ export default function AdminOffersPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'content' | 'thanks' | 'analytics'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'content' | 'thanks' | 'funnel'>('basic');
+  const [funnelData, setFunnelData] = useState<any>(null);
+  const [funnelLoading, setFunnelLoading] = useState(false);
+  const [funnelPeriod, setFunnelPeriod] = useState<'7d' | '30d' | 'all'>('30d');
   const [formData, setFormData] = useState<Partial<Offer>>({
     name: '',
     slug: '',
@@ -102,6 +105,44 @@ export default function AdminOffersPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; offerId: number; offerName: string } | null>(null);
+
+  // 퍼널 데이터 가져오기
+  const fetchFunnelData = useCallback(async (offerSlug: string) => {
+    if (!offerSlug) return;
+    
+    setFunnelLoading(true);
+    try {
+      const params = new URLSearchParams({
+        type: 'funnel',
+        period: funnelPeriod,
+        offer_slug: offerSlug,
+      });
+
+      const response = await fetch(`/api/admin/analytics?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('퍼널 데이터를 불러오는데 실패했습니다.');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setFunnelData(result.data);
+      } else {
+        throw new Error(result.error || '퍼널 데이터를 불러오는데 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error fetching funnel data:', error);
+      toast.error('퍼널 데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setFunnelLoading(false);
+    }
+  }, [funnelPeriod]);
+
+  // 탭 변경 시 퍼널 데이터 로드
+  useEffect(() => {
+    if (activeTab === 'funnel' && editingOffer) {
+      fetchFunnelData(editingOffer.slug);
+    }
+  }, [activeTab, editingOffer, fetchFunnelData]);
 
   const fetchOffers = useCallback(async () => {
     try {
@@ -641,14 +682,14 @@ export default function AdminOffersPage() {
                     {editingOffer && (
                       <button
                         type="button"
-                        onClick={() => setActiveTab('analytics')}
+                        onClick={() => setActiveTab('funnel')}
                         className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                          activeTab === 'analytics'
+                          activeTab === 'funnel'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                         }`}
                       >
-                        분석 통계
+                        퍼널 분석
                       </button>
                     )}
                   </nav>
@@ -1121,30 +1162,233 @@ export default function AdminOffersPage() {
                   </div>
                 )}
 
-                {/* 분석 통계 탭 */}
-                {activeTab === 'analytics' && editingOffer && (
+                {/* 퍼널 분석 탭 */}
+                {activeTab === 'funnel' && editingOffer && (
                   <div className="space-y-6">
-                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
-                        {editingOffer.name} 분석 통계
+                    {/* 기간 선택 */}
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark">
+                        {editingOffer.name} 퍼널 분석
                       </h3>
-                      <div className="text-center py-12">
-                        <p className="text-gray-500 dark:text-gray-400 mb-4">
-                          분석 통계 기능은 별도 페이지에서 확인할 수 있습니다.
-                        </p>
-                        <a
-                          href={`/admin/analytics?offer=${editingOffer.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setFunnelPeriod('7d')}
+                          className={`px-3 py-1 rounded text-sm ${
+                            funnelPeriod === '7d'
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                          분석 통계 페이지로 이동
-                        </a>
+                          7일
+                        </button>
+                        <button
+                          onClick={() => setFunnelPeriod('30d')}
+                          className={`px-3 py-1 rounded text-sm ${
+                            funnelPeriod === '30d'
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          30일
+                        </button>
+                        <button
+                          onClick={() => setFunnelPeriod('all')}
+                          className={`px-3 py-1 rounded text-sm ${
+                            funnelPeriod === 'all'
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          전체
+                        </button>
                       </div>
                     </div>
+
+                    {funnelLoading ? (
+                      <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                        <p className="text-gray-500 dark:text-gray-400">퍼널 데이터를 불러오는 중...</p>
+                      </div>
+                    ) : funnelData ? (
+                      <>
+                        {/* 전환율 요약 */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                            <h4 className="text-sm font-medium text-text-light/70 dark:text-text-dark/70 mb-1">
+                              페이지뷰 → 폼 시작
+                            </h4>
+                            <p className="text-2xl font-bold text-primary">
+                              {funnelData.conversionRates?.pageViewToFormStart?.toFixed(1) || 0}%
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {funnelData.counts?.formStarts || 0} / {funnelData.counts?.pageViews || 0}
+                            </p>
+                          </div>
+                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                            <h4 className="text-sm font-medium text-text-light/70 dark:text-text-dark/70 mb-1">
+                              폼 시작 → 제출
+                            </h4>
+                            <p className="text-2xl font-bold text-primary">
+                              {funnelData.conversionRates?.formStartToSubmit?.toFixed(1) || 0}%
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {funnelData.counts?.formSubmits || 0} / {funnelData.counts?.formStarts || 0}
+                            </p>
+                          </div>
+                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                            <h4 className="text-sm font-medium text-text-light/70 dark:text-text-dark/70 mb-1">
+                              제출 → 감사 페이지
+                            </h4>
+                            <p className="text-2xl font-bold text-primary">
+                              {funnelData.conversionRates?.formSubmitToThankYou?.toFixed(1) || 0}%
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {funnelData.counts?.thankYous || 0} / {funnelData.counts?.formSubmits || 0}
+                            </p>
+                          </div>
+                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                            <h4 className="text-sm font-medium text-text-light/70 dark:text-text-dark/70 mb-1">
+                              전체 전환율
+                            </h4>
+                            <p className="text-2xl font-bold text-primary">
+                              {funnelData.conversionRates?.overall?.toFixed(1) || 0}%
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {funnelData.counts?.thankYous || 0} / {funnelData.counts?.pageViews || 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* 퍼널 시각화 */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                          <h4 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
+                            퍼널 단계별 전환
+                          </h4>
+                          <div className="space-y-4">
+                            {[
+                              { label: '페이지뷰', count: funnelData.counts?.pageViews || 0, color: 'bg-blue-500' },
+                              { label: '폼 시작', count: funnelData.counts?.formStarts || 0, color: 'bg-yellow-500' },
+                              { label: '폼 제출', count: funnelData.counts?.formSubmits || 0, color: 'bg-orange-500' },
+                              { label: '감사 페이지', count: funnelData.counts?.thankYous || 0, color: 'bg-green-500' },
+                            ].map((step, index, array) => {
+                              const maxCount = array[0].count || 1;
+                              const percentage = maxCount > 0 ? (step.count / maxCount) * 100 : 0;
+                              const prevStep = index > 0 ? array[index - 1] : null;
+                              const conversionRate = prevStep && prevStep.count > 0 
+                                ? ((step.count / prevStep.count) * 100).toFixed(1)
+                                : null;
+
+                              return (
+                                <div key={step.label} className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-text-light dark:text-text-dark">
+                                      {step.label}
+                                    </span>
+                                    <div className="flex items-center gap-4">
+                                      {conversionRate && (
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                          전환율: {conversionRate}%
+                                        </span>
+                                      )}
+                                      <span className="text-sm font-semibold text-text-light dark:text-text-dark">
+                                        {step.count.toLocaleString()}명
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-8 relative overflow-hidden">
+                                    <div
+                                      className={`h-full ${step.color} rounded-full transition-all flex items-center justify-end pr-2`}
+                                      style={{ width: `${percentage}%` }}
+                                    >
+                                      {percentage > 10 && (
+                                        <span className="text-xs font-medium text-white">
+                                          {percentage.toFixed(1)}%
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 퍼널 최적화 제안 */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                          <h4 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
+                            퍼널 최적화 제안
+                          </h4>
+                          <div className="space-y-3">
+                            {funnelData.conversionRates?.pageViewToFormStart < 20 && (
+                              <div className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <div>
+                                  <p className="font-medium text-yellow-800 dark:text-yellow-200">
+                                    페이지뷰 → 폼 시작 전환율이 낮습니다 ({funnelData.conversionRates?.pageViewToFormStart?.toFixed(1)}%)
+                                  </p>
+                                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                                    CTA 버튼을 더 눈에 띄게 배치하거나, 히어로 섹션의 메시지를 개선해보세요.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            {funnelData.conversionRates?.formStartToSubmit < 50 && (
+                              <div className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                                <svg className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <div>
+                                  <p className="font-medium text-orange-800 dark:text-orange-200">
+                                    폼 시작 → 제출 전환율이 낮습니다 ({funnelData.conversionRates?.formStartToSubmit?.toFixed(1)}%)
+                                  </p>
+                                  <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                                    폼 필드를 줄이거나, 진행 상황 표시를 추가하여 완료율을 높여보세요.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            {funnelData.conversionRates?.overall > 10 && (
+                              <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <svg className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                  <p className="font-medium text-green-800 dark:text-green-200">
+                                    전체 전환율이 양호합니다 ({funnelData.conversionRates?.overall?.toFixed(1)}%)
+                                  </p>
+                                  <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                                    현재 퍼널이 잘 작동하고 있습니다. A/B 테스트를 통해 더 개선할 수 있습니다.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            {(!funnelData.counts?.pageViews || funnelData.counts.pageViews === 0) && (
+                              <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                  <p className="font-medium text-gray-800 dark:text-gray-200">
+                                    아직 데이터가 없습니다
+                                  </p>
+                                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                    퍼널 데이터를 보려면 오퍼 페이지에 방문자가 있어야 합니다.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-gray-500 dark:text-gray-400">
+                          퍼널 데이터를 불러올 수 없습니다.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
