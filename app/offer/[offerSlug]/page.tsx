@@ -401,7 +401,7 @@ export default function OfferLandingPage() {
                               <h3 className="text-lg font-bold text-primary dark:text-white">{feature.title}</h3>
                             )}
                             {feature.description && (
-                              <p className="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">
+                              <p className="mt-1 text-base text-text-light/80 dark:text-text-dark/80">
                                 {feature.description}
                               </p>
                             )}
@@ -423,7 +423,7 @@ export default function OfferLandingPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-primary dark:text-white">고객 유형별 심리 분석 및 접근법</h3>
-                        <p className="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">
+                        <p className="mt-1 text-base text-text-light/80 dark:text-text-dark/80">
                           분석형, 우호형 등 4가지 고객 유형을 파악하고 마음을 여는 대화 전략을 제시합니다.
                         </p>
                       </div>
@@ -436,7 +436,7 @@ export default function OfferLandingPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-primary dark:text-white">상담 단계별 필수 질문 체크리스트</h3>
-                        <p className="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">
+                        <p className="mt-1 text-base text-text-light/80 dark:text-text-dark/80">
                           상담의 흐름을 주도하고 고객의 핵심 니즈를 정확히 파악하는 질문들로 구성되어 있습니다.
                         </p>
                       </div>
@@ -449,7 +449,7 @@ export default function OfferLandingPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-primary dark:text-white">거절에 대응하는 반론 화법 5가지</h3>
-                        <p className="mt-1 text-sm text-text-light/80 dark:text-text-dark/80">
+                        <p className="mt-1 text-base text-text-light/80 dark:text-text-dark/80">
                           고객의 거절을 기회로 바꾸는 데이터 기반의 설득 논리와 클로징 팁을 제공합니다.
                         </p>
                       </div>
