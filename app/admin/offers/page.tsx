@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { toast } from '@/app/components/admin/Toast';
 import ConfirmModal from '@/app/components/admin/ConfirmModal';
