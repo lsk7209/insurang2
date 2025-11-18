@@ -352,6 +352,7 @@ export default function WorkbookOfferPage() {
                     aria-required="true"
                     aria-invalid={!!errors.phone}
                     aria-describedby={errors.phone ? 'phone-error' : undefined}
+                    required
                   />
                   {errors.phone && (
                     <p id="phone-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
