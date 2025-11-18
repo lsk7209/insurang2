@@ -94,21 +94,41 @@ export async function onRequestGet(context: {
     }
 
     if (!context.env.DB) {
+      console.error('[Settings GET] DB not available');
       return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
     }
 
     // D1에서 설정 조회 (없으면 환경 변수에서 가져오기)
-    const solapiApiKey = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
-      .bind('solapi_api_key')
-      .first<{ value: string }>();
-    
-    const solapiApiSecret = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
-      .bind('solapi_api_secret')
-      .first<{ value: string }>();
-    
-    const solapiSenderPhone = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
-      .bind('solapi_sender_phone')
-      .first<{ value: string }>();
+    let solapiApiKey: { value: string } | null = null;
+    let solapiApiSecret: { value: string } | null = null;
+    let solapiSenderPhone: { value: string } | null = null;
+
+    try {
+      solapiApiKey = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+        .bind('solapi_api_key')
+        .first<{ value: string }>();
+    } catch (err) {
+      console.warn('[Settings GET] Failed to fetch solapi_api_key from DB:', err);
+      // 테이블이 없을 수 있으므로 계속 진행
+    }
+
+    try {
+      solapiApiSecret = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+        .bind('solapi_api_secret')
+        .first<{ value: string }>();
+    } catch (err) {
+      console.warn('[Settings GET] Failed to fetch solapi_api_secret from DB:', err);
+      // 테이블이 없을 수 있으므로 계속 진행
+    }
+
+    try {
+      solapiSenderPhone = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+        .bind('solapi_sender_phone')
+        .first<{ value: string }>();
+    } catch (err) {
+      console.warn('[Settings GET] Failed to fetch solapi_sender_phone from DB:', err);
+      // 테이블이 없을 수 있으므로 계속 진행
+    }
 
     const settings = {
       smtp_host: '', // Cloudflare Workers에서는 SMTP 직접 사용 불가
@@ -126,8 +146,10 @@ export async function onRequestGet(context: {
 
     return createSuccessResponse(settings);
   } catch (error) {
-    console.error('Settings fetch error:', error);
-    return createErrorResponse('서버 오류가 발생했습니다.', 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('[Settings GET] Error:', errorMessage, errorStack);
+    return createErrorResponse(`서버 오류가 발생했습니다: ${errorMessage}`, 500);
   }
 }
 
@@ -148,10 +170,17 @@ export async function onRequestPost(context: {
     }
 
     if (!context.env.DB) {
+      console.error('[Settings POST] DB not available');
       return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
     }
 
-    const body = await context.request.json();
+    let body;
+    try {
+      body = await context.request.json();
+    } catch (jsonError) {
+      console.error('[Settings POST] JSON parse error:', jsonError);
+      return createErrorResponse('요청 본문을 파싱할 수 없습니다.', 400);
+    }
     const {
       resend_api_key,
       sendgrid_api_key,
@@ -162,9 +191,15 @@ export async function onRequestPost(context: {
     } = body;
 
     // 기존 설정 조회 (API Secret이 없을 때 기존 값 유지)
-    const existingSolapiApiSecret = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
-      .bind('solapi_api_secret')
-      .first<{ value: string }>();
+    let existingSolapiApiSecret: { value: string } | null = null;
+    try {
+      existingSolapiApiSecret = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+        .bind('solapi_api_secret')
+        .first<{ value: string }>();
+    } catch (err) {
+      console.warn('[Settings POST] Failed to fetch existing solapi_api_secret from DB:', err);
+      // 테이블이 없을 수 있으므로 계속 진행
+    }
 
     // 실제로 저장할 값 결정 (API Secret이 없거나 빈 문자열이면 기존 값 유지)
     const finalSolapiApiSecret = (solapi_api_secret && typeof solapi_api_secret === 'string' && solapi_api_secret.trim() !== '' && solapi_api_secret !== '***') 
