@@ -1,9 +1,8 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { validateLeadForm, normalizePhone } from '@/lib/utils/validation';
-import { trackPageView, trackFunnelEvent } from '@/lib/utils/tracking';
+import { trackPageView } from '@/lib/utils/tracking';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -14,14 +13,6 @@ import Footer from '@/components/layout/Footer';
  */
 export default function MainPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    consent_privacy: false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // 페이지뷰 추적
   useEffect(() => {
@@ -36,149 +27,6 @@ export default function MainPage() {
       router.push('/offer/workbook');
     }
   }, [router]);
-
-  // 전화번호 포맷팅 함수
-  const formatPhoneNumber = useCallback((value: string): string => {
-    const numbers = normalizePhone(value);
-    if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
-  }, []);
-
-  // 폼 검증 (중앙화된 validation 함수 사용)
-  const validateForm = useCallback((): boolean => {
-    const validation = validateLeadForm({
-      offer_slug: 'workbook',
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      organization: null,
-      consent_privacy: formData.consent_privacy,
-      consent_marketing: false,
-    });
-
-    setErrors(validation.errors);
-    return validation.valid;
-  }, [formData]);
-
-  // 입력 핸들러
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, type, value, checked } = e.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
-
-    // 폼 시작 이벤트 추적 (첫 입력 시)
-    if (!formData.name && !formData.email && !formData.phone && (name === 'name' || name === 'email' || name === 'phone')) {
-      trackFunnelEvent('form_start', '/', 'workbook');
-    }
-
-    if (name === 'phone' && type === 'text') {
-      const formatted = formatPhoneNumber(value);
-      setFormData((prev) => ({ ...prev, [name]: formatted }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: fieldValue }));
-    }
-
-    // 에러 초기화
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  }, [errors, formatPhoneNumber, formData]);
-
-  // 폼 제출 핸들러
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const phoneNumbers = normalizePhone(formData.phone);
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          offer_slug: 'workbook',
-          name: formData.name.trim(),
-          email: formData.email.trim().toLowerCase(),
-          phone: phoneNumbers,
-          organization: null,
-          consent_privacy: formData.consent_privacy,
-          consent_marketing: false,
-        }),
-      });
-
-      // HTTP 상태 코드 확인
-      if (!response.ok) {
-        let errorMessage = '신청 처리 중 오류가 발생했습니다.';
-        try {
-          const errorResult = await response.json();
-          errorMessage = errorResult.error || errorMessage;
-        } catch {
-          // JSON 파싱 실패 시 상태 코드 기반 메시지
-          if (response.status === 400) {
-            errorMessage = '입력 정보를 확인해주세요.';
-          } else if (response.status === 429) {
-            errorMessage = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-          } else if (response.status >= 500) {
-            errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-          }
-        }
-        alert(errorMessage);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // 성공 응답 파싱
-      let result;
-      try {
-        result = await response.json();
-        console.log('[Main Page] API Response:', result);
-      } catch (parseError) {
-        console.error('[Main Page] JSON parse error:', parseError);
-        alert('응답 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (result.success) {
-        console.log('[Main Page] Form submission successful, redirecting to thanks page...');
-        
-        // 퍼널 이벤트 추적
-        const leadId = result.data?.leadId;
-        trackFunnelEvent('form_submit', '/', 'workbook', leadId);
-        
-        // 정적 빌드 환경에서도 안정적으로 작동하도록 window.location.href 직접 사용
-        // router.push는 정적 빌드 환경에서 제대로 작동하지 않을 수 있음
-        window.location.href = '/offer/workbook/thanks';
-      } else {
-        const errorMessage = result.error || '신청 처리 중 오류가 발생했습니다.';
-        console.error('[Main Page] API returned success: false', { error: errorMessage, result });
-        alert(errorMessage);
-        setIsSubmitting(false);
-      }
-    } catch (error) {
-      console.error('Form submission error:', error);
-      let errorMessage = '알 수 없는 오류가 발생했습니다.';
-      
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = '네트워크 연결을 확인해주세요.';
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      alert(`신청 처리 중 오류가 발생했습니다: ${errorMessage}\n\n잠시 후 다시 시도해주세요.`);
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="relative w-full flex flex-col items-center bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans">
@@ -371,145 +219,20 @@ export default function MainPage() {
         {/* Offer Section */}
         <section className="w-full py-16 sm:py-24" id="offer-section" role="region" aria-label="오퍼 섹션">
           <div className="max-w-xl mx-auto p-6 sm:p-10 rounded-xl bg-white dark:bg-background-dark border border-subtle-light dark:border-subtle-dark shadow-2xl">
-            <div className="flex flex-col justify-center">
-              <div className="text-center">
-                <h2 className="text-3xl sm:text-4xl font-bold font-display">지금 바로 시작하세요</h2>
-                <p className="mt-4 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
-                  AI를 활용한 보험 영업, 더 이상 미룰 수 없습니다.
-                  <br />
-                  핵심만 담은 <span className="font-bold text-primary">AI 활용 워크북 & 가이드북</span>을 무료로 받아보세요.
-                </p>
-              </div>
-              {Object.keys(errors).length > 0 && (
-                <div
-                  role="alert"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800"
-                >
-                  <p className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">입력 오류가 있습니다. 아래 항목을 확인해주세요.</p>
-                  <ul className="list-disc list-inside text-sm text-red-700 dark:text-red-300">
-                    {Object.values(errors).map((error, idx) => (
-                      <li key={idx}>{error}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <form className="mt-10 space-y-6" onSubmit={handleSubmit} noValidate>
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">
-                    이름 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    className={`block w-full rounded-md border ${
-                      errors.name ? 'border-red-500' : 'border-subtle-light dark:border-subtle-dark'
-                    } shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4`}
-                    id="name"
-                    name="name"
-                    placeholder="홍길동"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleChange}
-                    aria-label="이름 입력"
-                    aria-required="true"
-                    aria-invalid={!!errors.name}
-                    aria-describedby={errors.name ? 'name-error' : undefined}
-                  />
-                  {errors.name && (
-                    <p id="name-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
-                      {errors.name}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">
-                    이메일 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    className={`block w-full rounded-md border ${
-                      errors.email ? 'border-red-500' : 'border-subtle-light dark:border-subtle-dark'
-                    } shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4`}
-                    id="email"
-                    name="email"
-                    placeholder="your@email.com"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    aria-label="이메일 입력"
-                    aria-required="true"
-                    aria-invalid={!!errors.email}
-                    aria-describedby={errors.email ? 'email-error' : undefined}
-                  />
-                  {errors.email && (
-                    <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1.5">
-                    연락처 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    className={`block w-full rounded-md border ${
-                      errors.phone ? 'border-red-500' : 'border-subtle-light dark:border-subtle-dark'
-                    } shadow-sm focus:border-primary focus:ring-primary sm:text-sm bg-background-light dark:bg-gray-800 py-3 px-4`}
-                    id="phone"
-                    name="phone"
-                    placeholder="010-1234-5678"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    aria-label="연락처 입력"
-                    aria-required="true"
-                    aria-invalid={!!errors.phone}
-                    aria-describedby={errors.phone ? 'phone-error' : undefined}
-                  />
-                  {errors.phone && (
-                    <p id="phone-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
-                      {errors.phone}
-                    </p>
-                  )}
-                </div>
-                <div className="pt-2">
-                  <div className="flex items-start">
-                    <div className="flex h-5 items-center">
-                      <input
-                        className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${
-                          errors.consent_privacy ? 'border-red-500' : ''
-                        }`}
-                        id="consent_privacy"
-                        name="consent_privacy"
-                        type="checkbox"
-                        checked={formData.consent_privacy}
-                        onChange={handleChange}
-                        aria-label="개인정보 수집 및 이용 동의"
-                        aria-required="true"
-                        aria-invalid={!!errors.consent_privacy}
-                        aria-describedby={errors.consent_privacy ? 'consent-error' : undefined}
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label htmlFor="consent_privacy" className="font-medium text-text-light dark:text-text-dark">
-                        개인정보 수집 및 이용에 동의합니다. <span className="text-red-500">*</span>
-                      </label>
-                      {errors.consent_privacy && (
-                        <p id="consent-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
-                          {errors.consent_privacy}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary h-14 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  type="submit"
-                  disabled={isSubmitting}
-                  aria-label={isSubmitting ? '제출 중...' : '무료 혜택 신청하기'}
-                >
-                  {isSubmitting ? '처리 중...' : '무료 혜택 신청하기'}
-                </button>
-              </form>
+            <div className="flex flex-col justify-center items-center text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold font-display">지금 바로 시작하세요</h2>
+              <p className="mt-4 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
+                AI를 활용한 보험 영업, 더 이상 미룰 수 없습니다.
+                <br />
+                핵심만 담은 <span className="font-bold text-primary">AI 활용 워크북 & 가이드북</span>을 무료로 받아보세요.
+              </p>
+              <button
+                onClick={() => router.push('/offer/workbook')}
+                className="mt-10 flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-8 bg-primary text-white text-lg font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="무료 혜택 신청하기"
+              >
+                <span className="truncate">무료 혜택 신청하기</span>
+              </button>
             </div>
           </div>
         </section>
