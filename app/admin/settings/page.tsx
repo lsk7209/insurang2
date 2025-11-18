@@ -164,6 +164,14 @@ export default function AdminSettingsPage() {
       if (result.success) {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
+        // 저장 성공 후 설정 다시 불러오기
+        const loadResponse = await fetch('/api/admin/settings');
+        if (loadResponse.ok) {
+          const loadResult = await loadResponse.json();
+          if (loadResult.success && loadResult.data) {
+            setSettings(loadResult.data);
+          }
+        }
       } else {
         setSaveError(result.error || '설정 저장에 실패했습니다.');
       }
