@@ -618,7 +618,7 @@ export default function OfferLandingPage() {
                     name: '박지훈 팀장',
                     company: 'DB손해보험',
                     image:
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuBJOld1Sg7unFatsojatL12hvygG4dJ4WtFrSOJqNhzdE-WC3ZPcDGO0i9Yc0gDWBSHvUYLJA1aDEZ2yIguHI3AtOYCXJLIAoSw9YsN3QErXKBVjx8ky_gWcVenp1VAjGt1IexkGqi2h9658MSYW8wtrIpn-auftih7tbneEgxTGQzqMzhq7Sa73E8scsSdT5wLNN_-wQsPJtwW5SPEPHWa8b1GlktNtKeDkOKvHrsshuNzTTuN7CEKzWESTUyFZogDAE54grR86FsF',
+                      'https://randomuser.me/api/portraits/men/28.jpg',
                     review:
                       '"팀원 교육 자료로 활용하고 있습니다. 체계적인 내용 덕분에 팀 전체의 상담 능력이 상향 평준화되었습니다."',
                   },
