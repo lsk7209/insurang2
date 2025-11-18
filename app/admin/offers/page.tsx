@@ -9,8 +9,8 @@ import EmptyState from '@/app/components/admin/EmptyState';
 
 /**
  * Admin Offers Page
- * 관리� ��� 관리 ��지
- * Tailwind CSS 기�
+ * 관리자 오퍼 관리 페이지
+ * Tailwind CSS 기반
  */
 
 interface Offer {
@@ -24,7 +24,7 @@ interface Offer {
   download_link: string | null;
   json_ld: string | null;
   ab_test_variant: 'A' | 'B';
-  // ��지 ��츠 ��
+  // 랜딩 페이지 컨텐츠 필드
   hero_title: string | null;
   hero_subtitle: string | null;
   hero_badge_text: string | null;
@@ -45,7 +45,7 @@ interface Offer {
   form_subtitle: string | null;
   form_badge_text: string | null;
   form_description: string | null;
-  // �� ��지 ��츠 ��
+  // 감사 페이지 컨텐츠 필드
   thanks_title: string | null;
   thanks_subtitle: string | null;
   thanks_description: string | null;
@@ -71,13 +71,13 @@ export default function AdminOffersPage() {
     status: 'draft',
     download_link: '',
     ab_test_variant: 'A',
-    // ��지 ��츠 기본�
+    // 랜딩 페이지 컨텐츠 기본값
     hero_title: '',
     hero_subtitle: '',
-    hero_badge_text: '무료 제공 · �� �운로�',
-    hero_cta_text: '지� �로 무료로 �기',
+    hero_badge_text: '무료 제공 · 즉시 다운로드',
+    hero_cta_text: '지금 바로 무료로 받기',
     hero_background_image: '',
-    hero_stats_text: '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
+    hero_stats_text: '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
     preview_title: '',
     preview_subtitle: '',
     preview_image: '',
@@ -90,14 +90,14 @@ export default function AdminOffersPage() {
     testimonials: '[]',
     form_title: '',
     form_subtitle: '',
-    form_badge_text: '100% 무료 · �� �운로�',
+    form_badge_text: '100% 무료 · 즉시 다운로드',
     form_description: '',
-    // �� ��지 기본�
-    thanks_title: '��� �청� �료��습��!',
-    thanks_subtitle: '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
+    // 감사 페이지 기본값
+    thanks_title: '신청이 완료되었습니다!',
+    thanks_subtitle: '신청해 주셔서 감사합니다. 곧바로 이메일로 발송됩니다. 성공적인 보험을 위한 차트로 가서 차 있으면, 지금 바로 상담 받아보세요!',
     thanks_description: '',
-    thanks_cta_text: '�으로',
-    thanks_examples: '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
+    thanks_cta_text: '다음으로',
+    thanks_examples: '[{"title": "보험 요청을 구체적으로 문의", "text": "보험 제 목적과 무료가를 구매하고 싶은 보험, 고객의 가족의 보험 최적 결제 방법을 제공하는 보험 정보를 제공하는 방법."}, {"title": "우선적으로 거래 대화 문의", "text": "보험에 고민이 있습니다. 그 부분을 확인하고, 보험 고객의 요구를 충족하는지 먼저 확인해 보겠습니다. 그렇지 않으면 가격이 무의미할까요."}, {"title": "긴급하게 스트레스 없게 만든 문의", "text": "보험 보험 정보를 가져오기 가격이 보험 제거합니다. 다음으로 보험 보험으로 지금, 건강하고 가격 저렴한 보험료로 가입하는 보험 방법."}]',
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -109,18 +109,18 @@ export default function AdminOffersPage() {
       const response = await fetch('/api/admin/offers');
 
       if (response.status === 401) {
-        setError('��� ������. ��지를 �로고침�고 로그���주��.');
+        setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
         setLoading(false);
         return;
       }
 
       if (!response.ok) {
-        let errorMessage = `�� ��가 발��습��. (�� ��: ${response.status})`;
+        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
         try {
           const errorResult = await response.json();
           errorMessage = errorResult.error || errorMessage;
         } catch {
-          // JSON 파� �패 � �� �� 기� ��지 �용
+          // JSON 파싱 실패 시 기본 오류 메시지 사용
         }
         setError(errorMessage);
         console.error('Failed to fetch offers:', response.status);
@@ -133,7 +133,7 @@ export default function AdminOffersPage() {
         result = await response.json();
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
-        setError('�� �리 � ��가 발��습��.');
+        setError('응답 처리 중 오류가 발생했습니다.');
         setLoading(false);
         return;
       }
@@ -141,10 +141,10 @@ export default function AdminOffersPage() {
       if (result.success && Array.isArray(result.data)) {
         setOffers(result.data);
       } else {
-        setError(result.error || '���를 ����� �패�습��.');
+        setError(result.error || '오퍼를 불러오는데 실패했습니다.');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '���를 ����� �패�습��.';
+      const errorMessage = error instanceof Error ? error.message : '오퍼를 불러오는데 실패했습니다.';
       setError(errorMessage);
       console.error('Error fetching offers:', error);
     } finally {
@@ -170,35 +170,35 @@ export default function AdminOffersPage() {
       });
 
       if (response.status === 401) {
-        toast.error('��� ������. ��지를 �로고침�고 로그���주��.');
+        toast.error('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
         setDeleteConfirm(null);
         return;
       }
 
       if (!response.ok) {
-        let errorMessage = `�� ��가 발��습��. (�� ��: ${response.status})`;
+        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
         try {
           const errorResult = await response.json();
           errorMessage = errorResult.error || errorMessage;
         } catch {
-          // JSON 파� �패 � �� �� 기� ��지 �용
+          // JSON 파싱 실패 시 기본 오류 메시지 사용
         }
-        toast.error('��� �제� �패�습��: ' + errorMessage);
+        toast.error('오퍼 삭제에 실패했습니다: ' + errorMessage);
         setDeleteConfirm(null);
         return;
       }
 
       const result = await response.json();
       if (result.success) {
-        toast.success('���가 �공�으로 �제��습��.');
+        toast.success('오퍼가 성공적으로 삭제되었습니다.');
         fetchOffers();
       } else {
-        toast.error('��� �제� �패�습��: ' + (result.error || '� � �� ��'));
+        toast.error('오퍼 삭제에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '� � �� ��';
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
       console.error('Error deleting offer:', error);
-      toast.error('��� �제 � ��가 발��습��: ' + errorMessage);
+      toast.error('오퍼 삭제 중 오류가 발생했습니다: ' + errorMessage);
     } finally {
       setDeleteConfirm(null);
     }
@@ -224,7 +224,7 @@ export default function AdminOffersPage() {
     });
   };
 
-  // 슬�그 �� �� (�글 � �문)
+  // 슬러그 자동 생성 (영문 및 숫자)
   const generateSlug = (name: string): string => {
     return name
       .toLowerCase()
@@ -234,7 +234,7 @@ export default function AdminOffersPage() {
       .trim();
   };
 
-  // 모� �기
+  // 모달 닫기
   const handleCloseModal = () => {
     setShowCreateModal(false);
     setEditingOffer(null);
@@ -250,10 +250,10 @@ export default function AdminOffersPage() {
       ab_test_variant: 'A',
       hero_title: '',
       hero_subtitle: '',
-      hero_badge_text: '무료 제공 · �� �운로�',
-      hero_cta_text: '지� �로 무료로 �기',
+      hero_badge_text: '무료 제공 · 즉시 다운로드',
+      hero_cta_text: '지금 바로 무료로 받기',
       hero_background_image: '',
-      hero_stats_text: '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
+      hero_stats_text: '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
       preview_title: '',
       preview_subtitle: '',
       preview_image: '',
@@ -266,18 +266,18 @@ export default function AdminOffersPage() {
       testimonials: '[]',
       form_title: '',
       form_subtitle: '',
-      form_badge_text: '100% 무료 · �� �운로�',
+      form_badge_text: '100% 무료 · 즉시 다운로드',
       form_description: '',
-      thanks_title: '��� �청� �료��습��!',
-      thanks_subtitle: '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
+      thanks_title: '신청이 완료되었습니다!',
+      thanks_subtitle: '신청해 주셔서 감사합니다. 곧바로 이메일로 발송됩니다. 성공적인 보험을 위한 차트로 가서 차 있으면, 지금 바로 상담 받아보세요!',
       thanks_description: '',
-      thanks_cta_text: '�으로',
-      thanks_examples: '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
+      thanks_cta_text: '다음으로',
+      thanks_examples: '[{"title": "보험 요청을 구체적으로 문의", "text": "보험 제 목적과 무료가를 구매하고 싶은 보험, 고객의 가족의 보험 최적 결제 방법을 제공하는 보험 정보를 제공하는 방법."}, {"title": "우선적으로 거래 대화 문의", "text": "보험에 고민이 있습니다. 그 부분을 확인하고, 보험 고객의 요구를 충족하는지 먼저 확인해 보겠습니다. 그렇지 않으면 가격이 무의미할까요."}, {"title": "긴급하게 스트레스 없게 만든 문의", "text": "보험 보험 정보를 가져오기 가격이 보험 제거합니다. 다음으로 보험 보험으로 지금, 건강하고 가격 저렴한 보험료로 가입하는 보험 방법."}]',
     });
     setFormError(null);
   };
 
-  // 모� �기 (��)
+  // 모달 열기 (생성)
   const handleOpenCreateModal = () => {
     setFormData({
       name: '',
@@ -290,10 +290,10 @@ export default function AdminOffersPage() {
       ab_test_variant: 'A',
       hero_title: '',
       hero_subtitle: '',
-      hero_badge_text: '무료 제공 · �� �운로�',
-      hero_cta_text: '지� �로 무료로 �기',
+      hero_badge_text: '무료 제공 · 즉시 다운로드',
+      hero_cta_text: '지금 바로 무료로 받기',
       hero_background_image: '',
-      hero_stats_text: '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
+      hero_stats_text: '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
       preview_title: '',
       preview_subtitle: '',
       preview_image: '',
@@ -306,13 +306,13 @@ export default function AdminOffersPage() {
       testimonials: '[]',
       form_title: '',
       form_subtitle: '',
-      form_badge_text: '100% 무료 · �� �운로�',
+      form_badge_text: '100% 무료 · 즉시 다운로드',
       form_description: '',
-      thanks_title: '��� �청� �료��습��!',
-      thanks_subtitle: '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
+      thanks_title: '신청이 완료되었습니다!',
+      thanks_subtitle: '신청해 주셔서 감사합니다. 곧바로 이메일로 발송됩니다. 성공적인 보험을 위한 차트로 가서 차 있으면, 지금 바로 상담 받아보세요!',
       thanks_description: '',
-      thanks_cta_text: '�으로',
-      thanks_examples: '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
+      thanks_cta_text: '다음으로',
+      thanks_examples: '[{"title": "보험 요청을 구체적으로 문의", "text": "보험 제 목적과 무료가를 구매하고 싶은 보험, 고객의 가족의 보험 최적 결제 방법을 제공하는 보험 정보를 제공하는 방법."}, {"title": "우선적으로 거래 대화 문의", "text": "보험에 고민이 있습니다. 그 부분을 확인하고, 보험 고객의 요구를 충족하는지 먼저 확인해 보겠습니다. 그렇지 않으면 가격이 무의미할까요."}, {"title": "긴급하게 스트레스 없게 만든 문의", "text": "보험 보험 정보를 가져오기 가격이 보험 제거합니다. 다음으로 보험 보험으로 지금, 건강하고 가격 저렴한 보험료로 가입하는 보험 방법."}]',
     });
     setFormError(null);
     setActiveTab('basic');
@@ -320,7 +320,7 @@ export default function AdminOffersPage() {
     setEditingOffer(null);
   };
 
-  // 모� �기 (��)
+  // 모달 열기 (수정)
   const handleOpenEditModal = (offer: Offer) => {
     setFormData({
       name: offer.name,
@@ -333,10 +333,10 @@ export default function AdminOffersPage() {
       ab_test_variant: offer.ab_test_variant,
       hero_title: offer.hero_title || '',
       hero_subtitle: offer.hero_subtitle || '',
-      hero_badge_text: offer.hero_badge_text || '무료 제공 · �� �운로�',
-      hero_cta_text: offer.hero_cta_text || '지� �로 무료로 �기',
+      hero_badge_text: offer.hero_badge_text || '무료 제공 · 즉시 다운로드',
+      hero_cta_text: offer.hero_cta_text || '지금 바로 무료로 받기',
       hero_background_image: offer.hero_background_image || '',
-      hero_stats_text: offer.hero_stats_text || '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
+      hero_stats_text: offer.hero_stats_text || '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
       preview_title: offer.preview_title || '',
       preview_subtitle: offer.preview_subtitle || '',
       preview_image: offer.preview_image || '',
@@ -349,13 +349,13 @@ export default function AdminOffersPage() {
       testimonials: offer.testimonials || '[]',
       form_title: offer.form_title || '',
       form_subtitle: offer.form_subtitle || '',
-      form_badge_text: offer.form_badge_text || '100% 무료 · �� �운로�',
+      form_badge_text: offer.form_badge_text || '100% 무료 · 즉시 다운로드',
       form_description: offer.form_description || '',
-      thanks_title: offer.thanks_title || '��� �청� �료��습��!',
-      thanks_subtitle: offer.thanks_subtitle || '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
+      thanks_title: offer.thanks_title || '신청이 완료되었습니다!',
+      thanks_subtitle: offer.thanks_subtitle || '신청해 주셔서 감사합니다. 곧바로 이메일로 발송됩니다. 성공적인 보험을 위한 차트로 가서 차 있으면, 지금 바로 상담 받아보세요!',
       thanks_description: offer.thanks_description || '',
-      thanks_cta_text: offer.thanks_cta_text || '�으로',
-      thanks_examples: offer.thanks_examples || '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
+      thanks_cta_text: offer.thanks_cta_text || '다음으로',
+      thanks_examples: offer.thanks_examples || '[{"title": "보험 요청을 구체적으로 문의", "text": "보험 제 목적과 무료가를 구매하고 싶은 보험, 고객의 가족의 보험 최적 결제 방법을 제공하는 보험 정보를 제공하는 방법."}, {"title": "우선적으로 거래 대화 문의", "text": "보험에 고민이 있습니다. 그 부분을 확인하고, 보험 고객의 요구를 충족하는지 먼저 확인해 보겠습니다. 그렇지 않으면 가격이 무의미할까요."}, {"title": "긴급하게 스트레스 없게 만든 문의", "text": "보험 보험 정보를 가져오기 가격이 보험 제거합니다. 다음으로 보험 보험으로 지금, 건강하고 가격 저렴한 보험료로 가입하는 보험 방법."}]',
     });
     setFormError(null);
     setActiveTab('basic');
@@ -363,15 +363,15 @@ export default function AdminOffersPage() {
     setShowCreateModal(true);
   };
 
-  // �� 제출
+  // 폼 제출
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
     setFormError(null);
 
-    // �� �� 검�
+    // 필수 필드 검증
     if (!formData.name || !formData.slug) {
-      setFormError('����과 슬�그� �� �력 ��목���.');
+      setFormError('오퍼명과 슬러그는 필수 입력 항목입니다.');
       setFormLoading(false);
       return;
     }
@@ -391,18 +391,18 @@ export default function AdminOffersPage() {
       });
 
       if (response.status === 401) {
-        setFormError('��� ������. ��지를 �로고침�고 로그���주��.');
+        setFormError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
         setFormLoading(false);
         return;
       }
 
       if (!response.ok) {
-        let errorMessage = `�� ��가 발��습��. (�� ��: ${response.status})`;
+        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
         try {
           const errorResult = await response.json();
           errorMessage = errorResult.error || errorMessage;
         } catch {
-          // JSON 파� �패 � �� �� 기� ��지 �용
+          // JSON 파싱 실패 시 기본 오류 메시지 사용
         }
         setFormError(errorMessage);
         setFormLoading(false);
@@ -411,15 +411,15 @@ export default function AdminOffersPage() {
 
       const result = await response.json();
       if (result.success) {
-        toast.success(editingOffer ? '���가 �공�으로 ����습��.' : '���가 �공�으로 ����습��.');
+        toast.success(editingOffer ? '오퍼가 성공적으로 수정되었습니다.' : '오퍼가 성공적으로 생성되었습니다.');
         handleCloseModal();
         fetchOffers();
       } else {
-        setFormError(result.error || '��� 저�� �패�습��.');
+        setFormError(result.error || '오퍼 저장에 실패했습니다.');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '� � �� ��';
-      setFormError('��� 저� � ��가 발��습��: ' + errorMessage);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      setFormError('오퍼 저장 중 오류가 발생했습니다: ' + errorMessage);
       console.error('Error saving offer:', error);
     } finally {
       setFormLoading(false);
@@ -428,12 +428,10 @@ export default function AdminOffersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 animate-pulse"></div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <TableSkeleton rows={5} cols={6} />
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-text-light dark:text-text-dark">오퍼 목록을 불러오는 중...</p>
         </div>
       </div>
     );
@@ -441,22 +439,20 @@ export default function AdminOffersPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-md mx-auto px-4">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">�� 발�</h2>
-            <p className="text-red-700 dark:text-red-300 mb-4" role="alert">{error}</p>
-            <button
-              onClick={() => {
-                setError(null);
-                setLoading(true);
-                fetchOffers();
-              }}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            >
-              �� ��
-            </button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="max-w-md mx-auto p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg shadow-md text-center">
+          <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-4">오류 발생</h2>
+          <p className="text-red-700 dark:text-red-300 mb-6">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              fetchOffers();
+            }}
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            다시 시도
+          </button>
         </div>
       </div>
     );
@@ -465,15 +461,15 @@ export default function AdminOffersPage() {
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <div className="space-y-6">
-          {/* ��� */}
+        <div className="space-y-8">
+          {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-text-light dark:text-text-dark mb-2">
-                ��� 관리
+                오퍼 관리
               </h1>
               <p className="text-text-light/70 dark:text-text-dark/70">
-                ���를 ��, ��, �제�고 ��율� ������.
+                오퍼를 생성, 수정, 삭제하고 전환율을 관리합니다.
               </p>
             </div>
             <button
@@ -483,17 +479,17 @@ export default function AdminOffersPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              � ��� ��
+              새 오퍼 생성
             </button>
           </div>
 
-          {/* ��� 목� */}
+          {/* 오퍼 목록 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
             {offers.length === 0 ? (
               <EmptyState
-                title="���가 �습��"
-                description="� ���를 ���� �����."
-                actionLabel="첫 ��� ��"
+                title="오퍼가 없습니다"
+                description="새 오퍼를 생성해보세요."
+                actionLabel="첫 오퍼 생성"
                 onAction={handleOpenCreateModal}
               />
             ) : (
@@ -505,22 +501,22 @@ export default function AdminOffersPage() {
                         ID
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        ��
+                        이름
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        슬�그
+                        슬러그
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        ��
+                        상태
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        A/B �스트
+                        A/B 테스트
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        ���
+                        생성일
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        ��
+                        작업
                       </th>
                     </tr>
                   </thead>
@@ -540,7 +536,7 @@ export default function AdminOffersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={getStatusBadge(offer.status)}>
-                            {offer.status === 'active' ? '��' : offer.status === 'draft' ? '��' : '���'}
+                            {offer.status === 'active' ? '활성' : offer.status === 'draft' ? '초안' : '비활성'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -555,23 +551,23 @@ export default function AdminOffersPage() {
                               href={`/offer/${offer.slug}`}
                               target="_blank"
                               className="text-primary hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                              aria-label={`${offer.name} �� ��지 보기`}
+                              aria-label={`${offer.name} 랜딩 페이지 보기`}
                             >
                               보기
                             </Link>
                             <button
                               onClick={() => handleOpenEditModal(offer)}
                               className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-                              aria-label={`${offer.name} ��`}
+                              aria-label={`${offer.name} 수정`}
                             >
-                              ��
+                              수정
                             </button>
                             <button
                               onClick={() => handleDeleteClick(offer.id, offer.name)}
                               className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
-                              aria-label={`${offer.name} �제`}
+                              aria-label={`${offer.name} 삭제`}
                             >
-                              �제
+                              삭제
                             </button>
                           </div>
                         </td>
@@ -585,7 +581,7 @@ export default function AdminOffersPage() {
         </div>
       </div>
 
-      {/* ��/�� 모� */}
+      {/* 생성/수정 모달 */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -593,13 +589,13 @@ export default function AdminOffersPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">
-                    {editingOffer ? '��� ��' : '� ��� ��'}
+                    {editingOffer ? '오퍼 수정' : '새 오퍼 생성'}
                   </h2>
                   <button
                     type="button"
                     onClick={handleCloseModal}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
-                    aria-label="�기"
+                    aria-label="닫기"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -607,9 +603,9 @@ export default function AdminOffersPage() {
                   </button>
                 </div>
 
-                {/* �� ��게�� */}
+                {/* 탭 네비게이션 */}
                 <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-                  <nav className="flex gap-4 overflow-x-auto" aria-label="�� ��">
+                  <nav className="flex gap-4 overflow-x-auto" aria-label="탭 메뉴">
                     <button
                       type="button"
                       onClick={() => setActiveTab('basic')}
@@ -619,7 +615,7 @@ export default function AdminOffersPage() {
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      기본 �보
+                      기본 정보
                     </button>
                     <button
                       type="button"
@@ -630,7 +626,7 @@ export default function AdminOffersPage() {
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      �청 ��지
+                      랜딩 페이지
                     </button>
                     <button
                       type="button"
@@ -641,7 +637,7 @@ export default function AdminOffersPage() {
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      �� ��지
+                      감사 페이지
                     </button>
                     {editingOffer && (
                       <button
@@ -653,7 +649,7 @@ export default function AdminOffersPage() {
                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                         }`}
                       >
-                        ��� ��
+                        분석 통계
                       </button>
                     )}
                   </nav>
@@ -665,13 +661,13 @@ export default function AdminOffersPage() {
                   </div>
                 )}
 
-                {/* 기본 �보 �� */}
+                {/* 기본 정보 탭 */}
                 {activeTab === 'basic' && (
                   <div className="space-y-4">
-                    {/* ��� �� */}
+                    {/* 오퍼 이름 */}
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        ��� �� <span className="text-red-500">*</span>
+                        오퍼 이름 <span className="text-red-500">*</span>
                       </label>
                       <input
                         id="name"
@@ -687,141 +683,141 @@ export default function AdminOffersPage() {
                           });
                         }}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="�: AI �� ����"
+                        placeholder="예: AI 상담 워크북"
                       />
                     </div>
 
-                    {/* 슬�그 */}
+                    {/* 슬러그 */}
                     <div>
-                    <label htmlFor="slug" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      슬�그 (URL) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="slug"
-                      type="text"
-                      required
-                      value={formData.slug || ''}
-                      onChange={(e) => {
-                        const slug = e.target.value
-                          .toLowerCase()
-                          .replace(/[^\w-]/g, '-')
-                          .replace(/-+/g, '-')
-                          .trim();
-                        setFormData({ ...formData, slug });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
-                      placeholder="�: ai-consulting-workbook"
-                    />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      URL� �용� 고유 ������. �문, ��, ���만 �용 가능����.
-                    </p>
-                  </div>
-
-                  {/* SEO 제목 */}
-                  <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      SEO 제목
-                    </label>
-                    <input
-                      id="title"
-                      type="text"
-                      value={formData.title || ''}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="SEO� �용� 제목 (�����)"
-                    />
-                  </div>
-
-                  {/* �� */}
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      ��
-                    </label>
-                    <textarea
-                      id="description"
-                      rows={3}
-                      value={formData.description || ''}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="���� 대� ��� �력���"
-                    />
-                  </div>
-
-                  {/* ��� */}
-                  <div>
-                    <label htmlFor="thumbnail" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      ��� �미지 URL
-                    </label>
-                    <input
-                      id="thumbnail"
-                      type="url"
-                      value={formData.thumbnail || ''}
-                      onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="https://example.com/image.jpg"
-                    />
-                  </div>
-
-                  {/* �운로� ��� */}
-                  <div>
-                    <label htmlFor="download_link" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      �운로� ���
-                    </label>
-                    <input
-                      id="download_link"
-                      type="url"
-                      value={formData.download_link || ''}
-                      onChange={(e) => setFormData({ ...formData, download_link: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="https://example.com/workbook.pdf"
-                    />
-                  </div>
-
-                  {/* �� � A/B �스트 */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="status" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        ��
+                      <label htmlFor="slug" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        슬러그 (URL) <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        id="status"
-                        value={formData.status || 'draft'}
-                        onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'active' | 'inactive' })}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      >
-                        <option value="draft">��</option>
-                        <option value="active">��</option>
-                        <option value="inactive">���</option>
-                      </select>
+                      <input
+                        id="slug"
+                        type="text"
+                        required
+                        value={formData.slug || ''}
+                        onChange={(e) => {
+                          const slug = e.target.value
+                            .toLowerCase()
+                            .replace(/[^\w-]/g, '-')
+                            .replace(/-+/g, '-')
+                            .trim();
+                          setFormData({ ...formData, slug });
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+                        placeholder="예: ai-consulting-workbook"
+                      />
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        URL에 사용할 고유 식별자입니다. 영문, 숫자, 하이픈만 사용 가능합니다.
+                      </p>
                     </div>
+
+                    {/* SEO 제목 */}
                     <div>
-                      <label htmlFor="ab_test_variant" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        A/B �스트 변�
+                      <label htmlFor="title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        SEO 제목
                       </label>
-                      <select
-                        id="ab_test_variant"
-                        value={formData.ab_test_variant || 'A'}
-                        onChange={(e) => setFormData({ ...formData, ab_test_variant: e.target.value as 'A' | 'B' })}
+                      <input
+                        id="title"
+                        type="text"
+                        value={formData.title || ''}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      >
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                      </select>
+                        placeholder="SEO에 사용할 제목 (선택사항)"
+                      />
                     </div>
-                  </div>
+
+                    {/* 설명 */}
+                    <div>
+                      <label htmlFor="description" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        설명
+                      </label>
+                      <textarea
+                        id="description"
+                        rows={3}
+                        value={formData.description || ''}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="오퍼에 대한 대략적인 설명을 입력하세요"
+                      />
+                    </div>
+
+                    {/* 썸네일 */}
+                    <div>
+                      <label htmlFor="thumbnail" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        썸네일 이미지 URL
+                      </label>
+                      <input
+                        id="thumbnail"
+                        type="url"
+                        value={formData.thumbnail || ''}
+                        onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+
+                    {/* 다운로드 링크 */}
+                    <div>
+                      <label htmlFor="download_link" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                        다운로드 링크
+                      </label>
+                      <input
+                        id="download_link"
+                        type="url"
+                        value={formData.download_link || ''}
+                        onChange={(e) => setFormData({ ...formData, download_link: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="https://example.com/workbook.pdf"
+                      />
+                    </div>
+
+                    {/* 상태 및 A/B 테스트 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="status" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                          상태
+                        </label>
+                        <select
+                          id="status"
+                          value={formData.status || 'draft'}
+                          onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'active' | 'inactive' })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        >
+                          <option value="draft">초안</option>
+                          <option value="active">활성</option>
+                          <option value="inactive">비활성</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="ab_test_variant" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                          A/B 테스트 변형
+                        </label>
+                        <select
+                          id="ab_test_variant"
+                          value={formData.ab_test_variant || 'A'}
+                          onChange={(e) => setFormData({ ...formData, ab_test_variant: e.target.value as 'A' | 'B' })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        >
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 )}
 
-                {/* ��지 ��� �� */}
+                {/* 랜딩 페이지 컨텐츠 탭 */}
                 {activeTab === 'content' && (
                   <div className="space-y-6">
-                    {/* Hero �� */}
+                    {/* Hero 섹션 */}
                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Hero ��</h3>
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Hero 섹션</h3>
                       <div className="space-y-4">
                         <div>
                           <label htmlFor="hero_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            �� 제목
+                            메인 제목
                           </label>
                           <input
                             id="hero_title"
@@ -829,7 +825,7 @@ export default function AdminOffersPage() {
                             value={formData.hero_title || ''}
                             onChange={(e) => setFormData({ ...formData, hero_title: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="�: �� �공률� 2배로 ��� AI ����"
+                            placeholder="예: 전환률을 2배로 높이는 AI 워크북"
                           />
                         </div>
                         <div>
@@ -842,12 +838,12 @@ export default function AdminOffersPage() {
                             value={formData.hero_subtitle || ''}
                             onChange={(e) => setFormData({ ...formData, hero_subtitle: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="�: 매� �� ��� 지����? 고� 유�� �춤 ��으로 �� ��� ��으로, �� �공률� 2배로."
+                            placeholder="예: 매일 보험 상담 지루하신가요? 고객 유입을 높이는 방법으로 보험 상담으로, 전환률을 2배로."
                           />
                         </div>
                         <div>
                           <label htmlFor="hero_badge_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            배지 �스트
+                            배지 텍스트
                           </label>
                           <input
                             id="hero_badge_text"
@@ -855,25 +851,25 @@ export default function AdminOffersPage() {
                             value={formData.hero_badge_text || ''}
                             onChange={(e) => setFormData({ ...formData, hero_badge_text: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="�: 무료 제공 · �� �운로�"
+                            placeholder="예: 무료 제공 · 즉시 다운로드"
                           />
                         </div>
                         <div>
                           <label htmlFor="hero_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          CTA �튼 �스트
-                        </label>
-                        <input
-                          id="hero_cta_text"
-                          type="text"
-                          value={formData.hero_cta_text || ''}
-                          onChange={(e) => setFormData({ ...formData, hero_cta_text: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: 지� �로 무료로 �기"
-                        />
+                            CTA 버튼 텍스트
+                          </label>
+                          <input
+                            id="hero_cta_text"
+                            type="text"
+                            value={formData.hero_cta_text || ''}
+                            onChange={(e) => setFormData({ ...formData, hero_cta_text: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 지금 바로 무료로 받기"
+                          />
                         </div>
                         <div>
                           <label htmlFor="hero_background_image" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            배경 �미지 URL
+                            배경 이미지 URL
                           </label>
                           <input
                             id="hero_background_image"
@@ -887,187 +883,188 @@ export default function AdminOffersPage() {
                       </div>
                     </div>
 
-                  {/* Preview �� */}
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Preview ��</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="preview_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          제목
-                        </label>
-                        <input
-                          id="preview_title"
-                          type="text"
-                          value={formData.preview_title || ''}
-                          onChange={(e) => setFormData({ ...formData, preview_title: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: AI �� ����, �� �용� ��습��"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="preview_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          부제목
-                        </label>
-                        <textarea
-                          id="preview_subtitle"
-                          rows={2}
-                          value={formData.preview_subtitle || ''}
-                          onChange={(e) => setFormData({ ...formData, preview_subtitle: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: 고�� 첫��부�� ��� ��까지, 모� ��를 체��으로 ���� �� 가�����."
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="preview_image" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          미리보기 �미지 URL
-                        </label>
-                        <input
-                          id="preview_image"
-                          type="url"
-                          value={formData.preview_image || ''}
-                          onChange={(e) => setFormData({ ...formData, preview_image: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="https://example.com/preview.jpg"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Value �� */}
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Value ��</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="value_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          제목
-                        </label>
-                        <input
-                          id="value_title"
-                          type="text"
-                          value={formData.value_title || ''}
-                          onChange={(e) => setFormData({ ...formData, value_title: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: ���� ��로 ��� ��� �����"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="value_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          부제목
-                        </label>
-                        <textarea
-                          id="value_subtitle"
-                          rows={2}
-                          value={formData.value_subtitle || ''}
-                          onChange={(e) => setFormData({ ...formData, value_subtitle: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: ��� 스��립트가 ����. 고�� ��� �고 ��으로 ��� 과��� �� �����."
-                        />
+                    {/* Preview 섹션 */}
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Preview 섹션</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="preview_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            제목
+                          </label>
+                          <input
+                            id="preview_title"
+                            type="text"
+                            value={formData.preview_title || ''}
+                            onChange={(e) => setFormData({ ...formData, preview_title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: AI 상담 워크북, 즉시 사용 가능합니다"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="preview_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            부제목
+                          </label>
+                          <textarea
+                            id="preview_subtitle"
+                            rows={2}
+                            value={formData.preview_subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, preview_subtitle: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 고객의 첫인상부터 보험 상담까지, 모든 단계를 체계적으로 관리하고 가이드합니다."
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="preview_image" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            미리보기 이미지 URL
+                          </label>
+                          <input
+                            id="preview_image"
+                            type="url"
+                            value={formData.preview_image || ''}
+                            onChange={(e) => setFormData({ ...formData, preview_image: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="https://example.com/preview.jpg"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Trust �� */}
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Trust ��</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="trust_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          제목
-                        </label>
-                        <input
-                          id="trust_title"
-                          type="text"
-                          value={formData.trust_title || ''}
-                          onChange={(e) => setFormData({ ...formData, trust_title: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: 먼저 경�� ����� ��� �기"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="trust_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          부제목
-                        </label>
-                        <textarea
-                          id="trust_subtitle"
-                          rows={2}
-                          value={formData.trust_subtitle || ''}
-                          onChange={(e) => setFormData({ ...formData, trust_subtitle: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: �미 �� ��� INSURANG과 ��� 최고� �과를 만�고 �습��."
-                        />
+                    {/* Value 섹션 */}
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Value 섹션</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="value_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            제목
+                          </label>
+                          <input
+                            id="value_title"
+                            type="text"
+                            value={formData.value_title || ''}
+                            onChange={(e) => setFormData({ ...formData, value_title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 워크북으로 얻을 수 있는 가치"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="value_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            부제목
+                          </label>
+                          <textarea
+                            id="value_subtitle"
+                            rows={2}
+                            value={formData.value_subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, value_subtitle: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 워크북 스크립트가 포함되어 있습니다. 고객의 상담을 고객으로 보험 과정을 관리할 수 있습니다."
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Form �� */}
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Form ��</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="form_badge_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          배지 �스트
-                        </label>
-                        <input
-                          id="form_badge_text"
-                          type="text"
-                          value={formData.form_badge_text || ''}
-                          onChange={(e) => setFormData({ ...formData, form_badge_text: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: 100% 무료 · �� �운로�"
-                        />
+                    {/* Trust 섹션 */}
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Trust 섹션</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="trust_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            제목
+                          </label>
+                          <input
+                            id="trust_title"
+                            type="text"
+                            value={formData.trust_title || ''}
+                            onChange={(e) => setFormData({ ...formData, trust_title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 먼저 경험해보고 보험 가입하기"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="trust_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            부제목
+                          </label>
+                          <textarea
+                            id="trust_subtitle"
+                            rows={2}
+                            value={formData.trust_subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, trust_subtitle: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 이미 많은 고객이 INSURANG과 함께 최고의 결과를 만들어왔습니다."
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label htmlFor="form_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          제목
-                        </label>
-                        <input
-                          id="form_title"
-                          type="text"
-                          value={formData.form_title || ''}
-                          onChange={(e) => setFormData({ ...formData, form_title: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: 지� �로 �����"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="form_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          부제목
-                        </label>
-                        <textarea
-                          id="form_subtitle"
-                          rows={2}
-                          value={formData.form_subtitle || ''}
-                          onChange={(e) => setFormData({ ...formData, form_subtitle: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: ��과 ���만 �력�면 ����� �� 보��립��"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="form_description" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          ��
-                        </label>
-                        <textarea
-                          id="form_description"
-                          rows={2}
-                          value={formData.form_description || ''}
-                          onChange={(e) => setFormData({ ...formData, form_description: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="�: �용카� ��� · 개��보 보�� · �제�지 구� 취� 가능"
-                        />
+                    </div>
+
+                    {/* Form 섹션 */}
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Form 섹션</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="form_badge_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            배지 텍스트
+                          </label>
+                          <input
+                            id="form_badge_text"
+                            type="text"
+                            value={formData.form_badge_text || ''}
+                            onChange={(e) => setFormData({ ...formData, form_badge_text: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 100% 무료 · 즉시 다운로드"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="form_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            제목
+                          </label>
+                          <input
+                            id="form_title"
+                            type="text"
+                            value={formData.form_title || ''}
+                            onChange={(e) => setFormData({ ...formData, form_title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 지금 바로 신청하기"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="form_subtitle" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            부제목
+                          </label>
+                          <textarea
+                            id="form_subtitle"
+                            rows={2}
+                            value={formData.form_subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, form_subtitle: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 이름과 전화만 입력하면 워크북을 바로 보내드립니다"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="form_description" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                            설명
+                          </label>
+                          <textarea
+                            id="form_description"
+                            rows={2}
+                            value={formData.form_description || ''}
+                            onChange={(e) => setFormData({ ...formData, form_description: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="예: 신용카드 불필요 · 개인정보 보호 · 언제든지 구독 취소 가능"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* �� ��지 ��� �� */}
+                {/* 감사 페이지 컨텐츠 탭 */}
                 {activeTab === 'thanks' && (
                   <div className="space-y-6">
                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">�� ��지 ��츠</h3>
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">감사 페이지 컨텐츠</h3>
                       <div className="space-y-4">
                         <div>
                           <label htmlFor="thanks_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            �� 제목
+                            메인 제목
                           </label>
                           <input
                             id="thanks_title"
@@ -1075,7 +1072,7 @@ export default function AdminOffersPage() {
                             value={formData.thanks_title || ''}
                             onChange={(e) => setFormData({ ...formData, thanks_title: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="�: ��� �청� �료��습��!"
+                            placeholder="예: 신청이 완료되었습니다!"
                           />
                         </div>
                         <div>
@@ -1088,12 +1085,12 @@ export default function AdminOffersPage() {
                             value={formData.thanks_subtitle || ''}
                             onChange={(e) => setFormData({ ...formData, thanks_subtitle: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="�: �청�� 주�� ������. ����� ���로 발��습��."
+                            placeholder="예: 신청해 주셔서 감사합니다. 곧바로 이메일로 발송됩니다."
                           />
                         </div>
                         <div>
                           <label htmlFor="thanks_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            CTA �튼 �스트
+                            CTA 버튼 텍스트
                           </label>
                           <input
                             id="thanks_cta_text"
@@ -1101,39 +1098,40 @@ export default function AdminOffersPage() {
                             value={formData.thanks_cta_text || ''}
                             onChange={(e) => setFormData({ ...formData, thanks_cta_text: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="�: �으로"
+                            placeholder="예: 다음으로"
                           />
                         </div>
                         <div>
                           <label htmlFor="thanks_examples" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          �� 문� (JSON ��)
-                        </label>
-                        <textarea
-                          id="thanks_examples"
-                          rows={8}
-                          value={formData.thanks_examples || ''}
-                          onChange={(e) => setFormData({ ...formData, thanks_examples: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
-                          placeholder='JSON 배� ��으로 �력���'
-                        />
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          JSON 배� ��으로 �력���.
-                        </p>
+                            예시 문구 (JSON 형식)
+                          </label>
+                          <textarea
+                            id="thanks_examples"
+                            rows={8}
+                            value={formData.thanks_examples || ''}
+                            onChange={(e) => setFormData({ ...formData, thanks_examples: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+                            placeholder='JSON 배열 형식으로 입력하세요'
+                          />
+                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            JSON 배열 형식으로 입력하세요.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* ��� �� �� */}
+                {/* 분석 통계 탭 */}
                 {activeTab === 'analytics' && editingOffer && (
                   <div className="space-y-6">
                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
                       <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
-                        {editingOffer.name} ��� ���
+                        {editingOffer.name} 분석 통계
                       </h3>
                       <div className="text-center py-12">
                         <p className="text-gray-500 dark:text-gray-400 mb-4">
-                          ��� �� 기능� �� ��지�� ���� � �습��.
+                          분석 통계 기능은 별도 페이지에서 확인할 수 있습니다.
                         </p>
                         <a
                           href={`/admin/analytics?offer=${editingOffer.slug}`}
@@ -1144,14 +1142,14 @@ export default function AdminOffersPage() {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
-                          ��� �� ��지로 ��
+                          분석 통계 페이지로 이동
                         </a>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* �튼 */}
+                {/* 버튼 */}
                 <div className="flex justify-end gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <button
                     type="button"
@@ -1159,7 +1157,7 @@ export default function AdminOffersPage() {
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
                     disabled={formLoading}
                   >
-                    취�
+                    취소
                   </button>
                   <button
                     type="submit"
@@ -1172,10 +1170,10 @@ export default function AdminOffersPage() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        저� �...
+                        저장 중...
                       </span>
                     ) : (
-                      editingOffer ? '��' : '��'
+                      editingOffer ? '수정' : '생성'
                     )}
                   </button>
                 </div>
@@ -1185,21 +1183,19 @@ export default function AdminOffersPage() {
         </div>
       )}
 
-      {/* �제 �� 모� */}
+      {/* 삭제 확인 모달 */}
       {deleteConfirm && (
         <ConfirmModal
           isOpen={deleteConfirm.isOpen}
-          title="��� �제 ��"
-          message={`��로 "${deleteConfirm.offerName}" ���를 �제��겠습�까? � ��� ��릴 � �습��.`}
-          confirmText="�제"
-          cancelText="취�"
+          title="오퍼 삭제 확인"
+          message={`정말 "${deleteConfirm.offerName}" 오퍼를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`}
+          confirmText="삭제"
+          cancelText="취소"
           type="danger"
           onConfirm={handleDeleteConfirm}
           onCancel={() => setDeleteConfirm(null)}
         />
       )}
-        </div>
-      </div>
     </div>
   );
 }
