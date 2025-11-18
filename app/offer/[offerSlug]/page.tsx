@@ -347,7 +347,7 @@ export default function OfferLandingPage() {
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
                   </button>
-                  <p className="text-sm text-text-light/60 dark:text-text-dark/60">
+                  <p className="text-base text-text-light/60 dark:text-text-dark/60">
                     <span className="hidden sm:inline">신용카드 불필요 · </span>30초면 완료
                   </p>
                 </div>
@@ -491,7 +491,7 @@ export default function OfferLandingPage() {
                           <h3 className="text-lg font-bold text-primary dark:text-white">{card.title}</h3>
                         )}
                         {card.description && (
-                          <p className="text-sm text-text-light/80 dark:text-text-dark/80">{card.description}</p>
+                          <p className="text-base text-text-light/80 dark:text-text-dark/80">{card.description}</p>
                         )}
                       </div>
                     ));
@@ -538,7 +538,7 @@ export default function OfferLandingPage() {
                       {item.icon}
                     </div>
                     <h3 className="text-lg font-bold text-primary dark:text-white">{item.title}</h3>
-                    <p className="text-sm text-text-light/80 dark:text-text-dark/80">{item.desc}</p>
+                    <p className="text-base text-text-light/80 dark:text-text-dark/80">{item.desc}</p>
                   </div>
                 ))
               )}
@@ -587,7 +587,7 @@ export default function OfferLandingPage() {
                           </div>
                         </div>
                         {testimonial.review && (
-                          <p className="mt-4 text-sm text-text-light/80 dark:text-text-dark/80 italic">{testimonial.review}</p>
+                          <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80 italic">{testimonial.review}</p>
                         )}
                       </div>
                     ));
@@ -638,7 +638,7 @@ export default function OfferLandingPage() {
                       <p className="text-xs text-text-light/60 dark:text-text-dark/60">{testimonial.company}</p>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm text-text-light/90 dark:text-text-dark/90">{testimonial.review}</p>
+                  <p className="mt-4 text-base text-text-light/90 dark:text-text-dark/90">{testimonial.review}</p>
                 </div>
               ))
               )}
