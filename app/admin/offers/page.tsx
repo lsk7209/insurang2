@@ -1057,7 +1057,6 @@ export default function AdminOffersPage() {
                       </div>
                     </div>
                   </div>
-                  </div>
                 )}
 
                 {/* �� ��지 ��� �� */}
