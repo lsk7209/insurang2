@@ -522,7 +522,7 @@ export default function AdminSettingsPage() {
                     SMS 서비스 설정 (솔라피)
                   </h2>
                   <p className="text-sm text-text-light/70 dark:text-text-dark/70">
-                    SMS 발송을 위한 솔라피 API 키 설정 (Cloudflare Dashboard에서 환경 변수로 관리)
+                    SMS 발송을 위한 솔라피 API 키 설정 (환경설정에서 직접 입력)
                   </p>
                 </div>
               </div>
@@ -537,9 +537,9 @@ export default function AdminSettingsPage() {
                     name="solapi_api_key"
                     type="text"
                     value={settings.solapi_api_key || ''}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed font-mono text-sm"
-                    placeholder="설정되지 않음"
+                    onChange={handleChange('solapi_api_key')}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+                    placeholder="솔라피 API Key를 입력하세요"
                   />
                   <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
                     솔라피 콘솔에서 발급받은 API Key
@@ -553,10 +553,10 @@ export default function AdminSettingsPage() {
                     id="solapi_api_secret"
                     name="solapi_api_secret"
                     type="password"
-                    value={settings.solapi_api_secret || ''}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed font-mono text-sm"
-                    placeholder={settings.solapi_api_secret ? '***' : '설정되지 않음'}
+                    value={settings.solapi_api_secret === '***' ? '' : (settings.solapi_api_secret || '')}
+                    onChange={handleChange('solapi_api_secret')}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+                    placeholder="솔라피 API Secret을 입력하세요"
                   />
                   <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">
                     솔라피 콘솔에서 발급받은 API Secret (보안상 마스킹됨)
@@ -571,8 +571,8 @@ export default function AdminSettingsPage() {
                     name="solapi_sender_phone"
                     type="tel"
                     value={settings.solapi_sender_phone || ''}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none cursor-not-allowed"
+                    onChange={handleChange('solapi_sender_phone')}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="01012345678"
                   />
                   <p className="mt-1 text-xs text-text-light/60 dark:text-text-dark/60">

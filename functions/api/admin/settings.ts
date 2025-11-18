@@ -93,6 +93,23 @@ export async function onRequestGet(context: {
       });
     }
 
+    if (!context.env.DB) {
+      return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
+    }
+
+    // D1에서 설정 조회 (없으면 환경 변수에서 가져오기)
+    const solapiApiKey = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+      .bind('solapi_api_key')
+      .first<{ value: string }>();
+    
+    const solapiApiSecret = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+      .bind('solapi_api_secret')
+      .first<{ value: string }>();
+    
+    const solapiSenderPhone = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+      .bind('solapi_sender_phone')
+      .first<{ value: string }>();
+
     const settings = {
       smtp_host: '', // Cloudflare Workers에서는 SMTP 직접 사용 불가
       smtp_port: '587',
@@ -102,9 +119,9 @@ export async function onRequestGet(context: {
       smtp_from: context.env.SMTP_FROM || '',
       resend_api_key: context.env.RESEND_API_KEY || '',
       sendgrid_api_key: context.env.SENDGRID_API_KEY || '',
-      solapi_api_key: context.env.SOLAPI_API_KEY || '',
-      solapi_api_secret: context.env.SOLAPI_API_SECRET ? '***' : '', // 보안을 위해 마스킹
-      solapi_sender_phone: context.env.SOLAPI_SENDER_PHONE || '',
+      solapi_api_key: solapiApiKey?.value || context.env.SOLAPI_API_KEY || '',
+      solapi_api_secret: solapiApiSecret?.value ? '***' : (context.env.SOLAPI_API_SECRET ? '***' : ''), // 보안을 위해 마스킹
+      solapi_sender_phone: solapiSenderPhone?.value || context.env.SOLAPI_SENDER_PHONE || '',
     };
 
     return createSuccessResponse(settings);
@@ -130,6 +147,10 @@ export async function onRequestPost(context: {
       });
     }
 
+    if (!context.env.DB) {
+      return createErrorResponse('데이터베이스 연결 오류가 발생했습니다.', 500);
+    }
+
     const body = await context.request.json();
     const {
       resend_api_key,
@@ -145,13 +166,43 @@ export async function onRequestPost(context: {
       return createErrorResponse('솔라피 API 필수 필드가 누락되었습니다.', 400);
     }
 
-    // Cloudflare Workers에서는 환경 변수를 런타임에 변경할 수 없음
-    // 설정은 Cloudflare KV 또는 D1에 저장해야 함
-    // 현재는 Cloudflare Dashboard에서 환경 변수로 관리하는 것을 권장
-    return createErrorResponse(
-      '설정 저장은 Cloudflare Dashboard에서 환경 변수로 관리하거나, Cloudflare KV/D1에 저장해야 합니다. 현재는 읽기 전용입니다.',
-      501
-    );
+    // 발신자 번호 형식 검증 (숫자만)
+    const phoneRegex = /^[0-9]+$/;
+    if (!phoneRegex.test(solapi_sender_phone)) {
+      return createErrorResponse('발신자 번호는 숫자만 입력해주세요.', 400);
+    }
+
+    // D1에 설정 저장 (UPSERT)
+    const now = new Date().toISOString();
+
+    // solapi_api_key 저장
+    await context.env.DB.prepare(
+      `INSERT INTO settings (key, value, description, updated_at) 
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
+    )
+      .bind('solapi_api_key', solapi_api_key, '솔라피 API Key', now, solapi_api_key, now)
+      .run();
+
+    // solapi_api_secret 저장
+    await context.env.DB.prepare(
+      `INSERT INTO settings (key, value, description, updated_at) 
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
+    )
+      .bind('solapi_api_secret', solapi_api_secret, '솔라피 API Secret', now, solapi_api_secret, now)
+      .run();
+
+    // solapi_sender_phone 저장
+    await context.env.DB.prepare(
+      `INSERT INTO settings (key, value, description, updated_at) 
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
+    )
+      .bind('solapi_sender_phone', solapi_sender_phone, '솔라피 발신자 번호', now, solapi_sender_phone, now)
+      .run();
+
+    return createSuccessResponse({ message: '설정이 저장되었습니다.' });
   } catch (error) {
     console.error('Settings save error:', error);
     return createErrorResponse('서버 오류가 발생했습니다.', 500);

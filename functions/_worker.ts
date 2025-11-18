@@ -341,9 +341,32 @@ async function sendSMS(
   sequence: { message: string }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const apiKey = env.SOLAPI_API_KEY;
-    const apiSecret = env.SOLAPI_API_SECRET;
-    const senderPhone = env.SOLAPI_SENDER_PHONE;
+    // D1에서 설정 조회 (없으면 환경 변수에서 가져오기)
+    let apiKey: string | undefined;
+    let apiSecret: string | undefined;
+    let senderPhone: string | undefined;
+
+    if (env.DB) {
+      const solapiApiKey = await env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+        .bind('solapi_api_key')
+        .first<{ value: string }>();
+      apiKey = solapiApiKey?.value;
+
+      const solapiApiSecret = await env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+        .bind('solapi_api_secret')
+        .first<{ value: string }>();
+      apiSecret = solapiApiSecret?.value;
+
+      const solapiSenderPhone = await env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+        .bind('solapi_sender_phone')
+        .first<{ value: string }>();
+      senderPhone = solapiSenderPhone?.value;
+    }
+
+    // D1에 없으면 환경 변수에서 가져오기
+    apiKey = apiKey || env.SOLAPI_API_KEY;
+    apiSecret = apiSecret || env.SOLAPI_API_SECRET;
+    senderPhone = senderPhone || env.SOLAPI_SENDER_PHONE;
 
     if (!apiKey || !apiSecret || !senderPhone) {
       return { success: false, error: 'Solapi configuration missing' };

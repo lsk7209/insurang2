@@ -216,9 +216,32 @@ export async function onRequestPost(context: {
         return createErrorResponse('전화번호가 필요합니다.', 400);
       }
 
-      const apiKey = context.env.SOLAPI_API_KEY;
-      const apiSecret = context.env.SOLAPI_API_SECRET;
-      const senderPhone = context.env.SOLAPI_SENDER_PHONE;
+      // D1에서 설정 조회 (없으면 환경 변수에서 가져오기)
+      let apiKey: string | undefined;
+      let apiSecret: string | undefined;
+      let senderPhone: string | undefined;
+
+      if (context.env.DB) {
+        const solapiApiKey = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+          .bind('solapi_api_key')
+          .first<{ value: string }>();
+        apiKey = solapiApiKey?.value;
+
+        const solapiApiSecret = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+          .bind('solapi_api_secret')
+          .first<{ value: string }>();
+        apiSecret = solapiApiSecret?.value;
+
+        const solapiSenderPhone = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+          .bind('solapi_sender_phone')
+          .first<{ value: string }>();
+        senderPhone = solapiSenderPhone?.value;
+      }
+
+      // D1에 없으면 환경 변수에서 가져오기
+      apiKey = apiKey || context.env.SOLAPI_API_KEY;
+      apiSecret = apiSecret || context.env.SOLAPI_API_SECRET;
+      senderPhone = senderPhone || context.env.SOLAPI_SENDER_PHONE;
 
       if (!apiKey || !apiSecret || !senderPhone) {
         return createErrorResponse('솔라피 API 설정이 완료되지 않았습니다.', 400);
