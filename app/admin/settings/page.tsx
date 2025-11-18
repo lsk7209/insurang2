@@ -118,12 +118,18 @@ export default function AdminSettingsPage() {
     setSaveError(null);
 
     try {
+      // API Secret이 빈 문자열이거나 '***'인 경우, null로 전송 (서버에서 기존 값 유지)
+      const saveData = { ...settings };
+      if (!saveData.solapi_api_secret || saveData.solapi_api_secret === '***' || saveData.solapi_api_secret.trim() === '') {
+        saveData.solapi_api_secret = null; // 서버에서 기존 값 유지하도록 null 전송
+      }
+
       const response = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(saveData),
       });
 
       if (response.status === 401) {

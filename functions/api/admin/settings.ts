@@ -161,8 +161,18 @@ export async function onRequestPost(context: {
       solapi_sender_phone,
     } = body;
 
+    // 기존 설정 조회 (API Secret이 없을 때 기존 값 유지)
+    const existingSolapiApiSecret = await context.env.DB.prepare('SELECT value FROM settings WHERE key = ?')
+      .bind('solapi_api_secret')
+      .first<{ value: string }>();
+
+    // 실제로 저장할 값 결정 (API Secret이 null, 없거나 빈 문자열이면 기존 값 유지)
+    const finalSolapiApiSecret = (solapi_api_secret && solapi_api_secret !== null && solapi_api_secret.trim() !== '' && solapi_api_secret !== '***') 
+      ? solapi_api_secret 
+      : (existingSolapiApiSecret?.value || '');
+
     // 유효성 검증
-    if (!solapi_api_key || !solapi_api_secret || !solapi_sender_phone) {
+    if (!solapi_api_key || !finalSolapiApiSecret || !solapi_sender_phone) {
       return createErrorResponse('솔라피 API 필수 필드가 누락되었습니다.', 400);
     }
 
@@ -184,13 +194,13 @@ export async function onRequestPost(context: {
       .bind('solapi_api_key', solapi_api_key, '솔라피 API Key', now, solapi_api_key, now)
       .run();
 
-    // solapi_api_secret 저장
+    // solapi_api_secret 저장 (기존 값 유지 또는 새 값 저장)
     await context.env.DB.prepare(
       `INSERT INTO settings (key, value, description, updated_at) 
        VALUES (?, ?, ?, ?)
        ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
     )
-      .bind('solapi_api_secret', solapi_api_secret, '솔라피 API Secret', now, solapi_api_secret, now)
+      .bind('solapi_api_secret', finalSolapiApiSecret, '솔라피 API Secret', now, finalSolapiApiSecret, now)
       .run();
 
     // solapi_sender_phone 저장
