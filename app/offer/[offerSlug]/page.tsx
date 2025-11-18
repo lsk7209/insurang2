@@ -610,7 +610,7 @@ export default function OfferLandingPage() {
                     name: '이서연 설계사',
                     company: '메리츠화재',
                     image:
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuDiL18lIzd5wJ1a3G8XR1ZW0myX_kvX3dBpUbTq4jJzYsoc5Eln6mmr_HQ7sbA2ieyN1ZrIilqfDBhVBgt_BlU34q8Xk88FzBInwhfhzTlbHGYAYktlZzfRjbmCBQtl6E0Jp487rUIqorLrknlmh3As_u5ZoPsFQX1FuQFn0cNMpYlexyBFIOlljkzNXq-AV0M2xTNyTrDn7heAq6ffSp3yFYgMm4nIAv-_ZugpGfXUEn_N4RDU9w2yXE3QBTp9x5AICDwT3mxOJePL',
+                      'https://randomuser.me/api/portraits/women/44.jpg',
                     review:
                       '"신입이라 상담이 막막했는데, 워크북이 훌륭한 멘토가 되어주었습니다. 특히 거절 대응 파트가 정말 큰 도움이 됐어요."',
                   },
