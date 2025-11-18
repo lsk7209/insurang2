@@ -664,18 +664,44 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
+          {/* 저장 버튼 */}
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  저장 중...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  설정 저장
+                </>
+              )}
+            </button>
+          </div>
+
           {/* 안내 메시지 */}
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-6">
             <div className="flex items-start gap-3">
-              <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">설정 변경 방법</h3>
-                <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                  이메일/SMS 발송 설정은 Cloudflare Dashboard의 환경 변수에서 관리됩니다.
+                <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-1">설정 저장 안내</h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  솔라피 API 설정은 위의 "설정 저장" 버튼을 클릭하여 데이터베이스에 저장됩니다.
                   <br />
-                  <strong>Cloudflare Dashboard</strong> → <strong>Pages</strong> → <strong>프로젝트 선택</strong> → <strong>Settings</strong> → <strong>Environment Variables</strong>에서 설정하세요.
+                  이메일 서비스(Resend/SendGrid) 설정은 Cloudflare Dashboard의 환경 변수에서 관리됩니다.
                 </p>
               </div>
             </div>
