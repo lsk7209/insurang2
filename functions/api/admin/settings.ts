@@ -166,8 +166,8 @@ export async function onRequestPost(context: {
       .bind('solapi_api_secret')
       .first<{ value: string }>();
 
-    // 실제로 저장할 값 결정 (API Secret이 null, 없거나 빈 문자열이면 기존 값 유지)
-    const finalSolapiApiSecret = (solapi_api_secret && solapi_api_secret !== null && solapi_api_secret.trim() !== '' && solapi_api_secret !== '***') 
+    // 실제로 저장할 값 결정 (API Secret이 없거나 빈 문자열이면 기존 값 유지)
+    const finalSolapiApiSecret = (solapi_api_secret && typeof solapi_api_secret === 'string' && solapi_api_secret.trim() !== '' && solapi_api_secret !== '***') 
       ? solapi_api_secret 
       : (existingSolapiApiSecret?.value || '');
 

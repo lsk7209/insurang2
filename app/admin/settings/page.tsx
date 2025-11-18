@@ -118,10 +118,10 @@ export default function AdminSettingsPage() {
     setSaveError(null);
 
     try {
-      // API Secret이 빈 문자열이거나 '***'인 경우, null로 전송 (서버에서 기존 값 유지)
-      const saveData: Partial<Settings> & { solapi_api_secret?: string | null } = { ...settings };
-      if (!saveData.solapi_api_secret || saveData.solapi_api_secret === '***' || saveData.solapi_api_secret.trim() === '') {
-        saveData.solapi_api_secret = null; // 서버에서 기존 값 유지하도록 null 전송
+      // API Secret이 빈 문자열이거나 '***'인 경우, undefined로 전송 (서버에서 기존 값 유지)
+      const saveData: Record<string, any> = { ...settings };
+      if (!saveData.solapi_api_secret || saveData.solapi_api_secret === '***' || (typeof saveData.solapi_api_secret === 'string' && saveData.solapi_api_secret.trim() === '')) {
+        delete saveData.solapi_api_secret; // 서버에서 기존 값 유지하도록 필드 제거
       }
 
       const response = await fetch('/api/admin/settings', {
