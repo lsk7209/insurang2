@@ -368,9 +368,11 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 {offerData?.preview_title || 'AI 상담 워크북, 이런 내용을 담았습니다'}
               </h2>
-              <p className="mt-4 max-w-2xl mx-auto text-base text-text-light/80 dark:text-text-dark/80">
-                {offerData?.preview_subtitle || '고객의 심리부터 설득까지, 모든 과정을 체계적으로 정리한 실전 가이드입니다.'}
-              </p>
+              {offerData?.preview_subtitle && (
+                <p className="mt-4 max-w-2xl mx-auto text-base text-text-light/80 dark:text-text-dark/80">
+                  {offerData.preview_subtitle}
+                </p>
+              )}
             </div>
             <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-center">
               <div className="w-full h-auto aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
@@ -466,9 +468,11 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 {offerData?.value_title || '워크북 하나로 당신의 상담이 달라집니다'}
               </h2>
-              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
-                {offerData?.value_subtitle || '단순한 체크리스트가 아닙니다. 고객의 마음을 열고 계약으로 이끄는 실전 상담 노하우입니다.'}
-              </p>
+              {offerData?.value_subtitle && (
+                <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
+                  {offerData.value_subtitle}
+                </p>
+              )}
             </div>
             <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {offerData?.value_cards ? (() => {
@@ -549,9 +553,11 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 {offerData?.trust_title || '먼저 경험한 설계사들의 생생한 후기'}
               </h2>
-              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
-                {offerData?.trust_subtitle || '이미 많은 설계사들이 INSURANG와 함께 성공의 길을 걸어가고 있습니다.'}
-              </p>
+              {offerData?.trust_subtitle && (
+                <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
+                  {offerData.trust_subtitle}
+                </p>
+              )}
             </div>
             <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {offerData?.testimonials ? (() => {
@@ -596,7 +602,7 @@ export default function OfferLandingPage() {
                     name: '김민준 설계사',
                     company: 'AIA생명',
                     image:
-                      'https://randomuser.me/api/portraits/men/32.jpg',
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuB-6WcE3jby_vcv8z1lUrj8l6n5Or_RD1mfZ8gOIg0qn2EnDq8l0BihWQiG3Qgqw6cxPyQ5ra4HGJTNaYJfZMvdzPkSWBiesS0cNd_5vqGEwm8-XWwDiqeZYAze4CfJroK356AOwbglxpsXrqz2Uj2wW04O6XNbFFQwNsj67h3opzsP2MWUXzFEeInywLdJcVKo7hqEGv0IU9gP8JgJ85oX7aLn7Z7HuqqCIjZYaeiM6v9qUoZOgM2KlqNYYDFYJdOZ26mStU_XIDj6',
                     review:
                       '"매번 상담 준비에만 몇 시간을 썼는데, 워크북 덕분에 핵심만 짚어 상담할 수 있게 됐어요. 고객 반응부터 달라졌습니다."',
                   },
@@ -604,7 +610,7 @@ export default function OfferLandingPage() {
                     name: '이서연 설계사',
                     company: '메리츠화재',
                     image:
-                      'https://randomuser.me/api/portraits/women/44.jpg',
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuDiL18lIzd5wJ1a3G8XR1ZW0myX_kvX3dBpUbTq4jJzYsoc5Eln6mmr_HQ7sbA2ieyN1ZrIilqfDBhVBgt_BlU34q8Xk88FzBInwhfhzTlbHGYAYktlZzfRjbmCBQtl6E0Jp487rUIqorLrknlmh3As_u5ZoPsFQX1FuQFn0cNMpYlexyBFIOlljkzNXq-AV0M2xTNyTrDn7heAq6ffSp3yFYgMm4nIAv-_ZugpGfXUEn_N4RDU9w2yXE3QBTp9x5AICDwT3mxOJePL',
                     review:
                       '"신입이라 상담이 막막했는데, 워크북이 훌륭한 멘토가 되어주었습니다. 특히 거절 대응 파트가 정말 큰 도움이 됐어요."',
                   },
@@ -612,7 +618,7 @@ export default function OfferLandingPage() {
                     name: '박지훈 팀장',
                     company: 'DB손해보험',
                     image:
-                      'https://randomuser.me/api/portraits/men/28.jpg',
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuBJOld1Sg7unFatsojatL12hvygG4dJ4WtFrSOJqNhzdE-WC3ZPcDGO0i9Yc0gDWBSHvUYLJA1aDEZ2yIguHI3AtOYCXJLIAoSw9YsN3QErXKBVjx8ky_gWcVenp1VAjGt1IexkGqi2h9658MSYW8wtrIpn-auftih7tbneEgxTGQzqMzhq7Sa73E8scsSdT5wLNN_-wQsPJtwW5SPEPHWa8b1GlktNtKeDkOKvHrsshuNzTTuN7CEKzWESTUyFZogDAE54grR86FsF',
                     review:
                       '"팀원 교육 자료로 활용하고 있습니다. 체계적인 내용 덕분에 팀 전체의 상담 능력이 상향 평준화되었습니다."',
                   },
