@@ -988,7 +988,7 @@ export default function AdminOffersPage() {
                             value={formData.trust_subtitle || ''}
                             onChange={(e) => setFormData({ ...formData, trust_subtitle: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="예: 이미 많은 고객이 INSURANG과 함께 최고의 결과를 만들어왔습니다."
+                            placeholder="예: 이미 많은 고객이 인슈랑과 함께 최고의 결과를 만들어왔습니다."
                           />
                         </div>
                       </div>

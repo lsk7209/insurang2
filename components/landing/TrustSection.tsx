@@ -74,7 +74,7 @@ export default memo(function TrustSection() {
         <div className="flex flex-col items-center space-y-10 md:space-y-12 lg:space-y-16">
           {/* 제목 */}
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center leading-tight max-w-5xl px-2 md:px-0 mb-4 md:mb-6 tracking-tight">
-            왜 INSURANG을 선택해야 할까요?
+            왜 인슈랑을 선택해야 할까요?
           </h2>
 
           {/* 신뢰 포인트 카드 그리드 */}

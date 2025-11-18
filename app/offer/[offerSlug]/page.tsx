@@ -895,11 +895,11 @@ export default function OfferLandingPage() {
                   </defs>
                 </svg>
               </div>
-              <span className="text-xl font-black tracking-tighter font-display">INSURANG</span>
+              <span className="text-xl font-black tracking-tighter font-display">인슈랑</span>
             </div>
             <div className="text-xs opacity-70">
               <p>(주)인슈랑 | 대표: 홍길동 | 사업자등록번호: 123-45-67890</p>
-              <p>© 2024 INSURANG Inc. All rights reserved.</p>
+              <p>© 2024 인슈랑 Inc. All rights reserved.</p>
             </div>
           </div>
         </div>

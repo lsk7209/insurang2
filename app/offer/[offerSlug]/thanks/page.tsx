@@ -226,11 +226,11 @@ export default function ThankYouPage() {
                   <img
                     className="h-14 w-14 rounded-full object-cover"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCulAqYhExfux59O2bSxBh0PBurA-6WS9flX1XVEAY_sIKvUo2Hc8-Ywsks4IKavjdPZLHqyU_xphLn6tJQ5e_e0Jb65Q1wt8mCZjwgiwWQ2xgYkYTimcEizxFb0bBg42Yox1YfsvFg2zoq4QlFFi5-U5bf7oWwn5RYhhVTlrhs0uMDgy1iKOxR4nQNciKdHxzxTqDCsUbggt7waMFNemWxAiYpgp_ZWkpOBpV2sy3ZbVoyv8mDhTotubM9y-qT4xwEQGCiaEzvGLF"
-                    alt="INSURANG 대표 프로필 사진"
+                    alt="인슈랑 대표 프로필 사진"
                   />
                   <div>
                     <p className="text-primary dark:text-white font-bold">김지훈</p>
-                    <p className="text-accent dark:text-gray-300 text-sm">INSURANG 대표</p>
+                    <p className="text-accent dark:text-gray-300 text-sm">인슈랑 대표</p>
                   </div>
                 </div>
               </div>
@@ -273,7 +273,7 @@ export default function ThankYouPage() {
                 <Link href="#" className="hover:underline">
                   문의하기
                 </Link>
-                <span>© 2024 INSURANG</span>
+                <span>© 2024 인슈랑</span>
               </div>
             </footer>
           </div>

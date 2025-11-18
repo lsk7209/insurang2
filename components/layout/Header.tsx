@@ -48,7 +48,7 @@ export default memo(function Header({ onCtaClick, ctaText = 'AI 상담 워크북
             </defs>
           </svg>
         </div>
-        <h2 className="text-xl font-bold tracking-[-0.015em] font-display text-primary">INSURANG</h2>
+        <h2 className="text-xl font-bold tracking-[-0.015em] font-display text-primary">인슈랑</h2>
       </Link>
       <button
         onClick={handleCtaClick}

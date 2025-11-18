@@ -151,7 +151,7 @@ export default function MainPage() {
         <section className="w-full py-16 sm:py-24" id="solution-section" role="region" aria-label="해결책 섹션">
           <div className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold !leading-tight tracking-tight font-display">
-              INSURANG이 제안하는 AI 기반 해결책
+              인슈랑이 제안하는 AI 기반 해결책
             </h2>
             <p className="mt-4 text-base sm:text-lg text-text-light/70 dark:text-text-dark/70 leading-relaxed">
               AI를 당신의 가장 강력한 비서로 만드세요.
