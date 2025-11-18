@@ -185,36 +185,70 @@ export async function onRequestPost(context: {
     // D1에 설정 저장 (UPSERT)
     const now = new Date().toISOString();
 
-    // solapi_api_key 저장
-    await context.env.DB.prepare(
-      `INSERT INTO settings (key, value, description, updated_at) 
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
-    )
-      .bind('solapi_api_key', solapi_api_key, '솔라피 API Key', now, solapi_api_key, now)
-      .run();
+    try {
+      // solapi_api_key 저장
+      const keyResult = await context.env.DB.prepare(
+        `INSERT INTO settings (key, value, description, updated_at) 
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
+      )
+        .bind('solapi_api_key', solapi_api_key, '솔라피 API Key', now, solapi_api_key, now)
+        .run();
+      
+      if (!keyResult.success) {
+        throw new Error(`solapi_api_key 저장 실패: ${keyResult.error || 'Unknown error'}`);
+      }
 
-    // solapi_api_secret 저장 (기존 값 유지 또는 새 값 저장)
-    await context.env.DB.prepare(
-      `INSERT INTO settings (key, value, description, updated_at) 
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
-    )
-      .bind('solapi_api_secret', finalSolapiApiSecret, '솔라피 API Secret', now, finalSolapiApiSecret, now)
-      .run();
+      // solapi_api_secret 저장 (기존 값 유지 또는 새 값 저장)
+      const secretResult = await context.env.DB.prepare(
+        `INSERT INTO settings (key, value, description, updated_at) 
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
+      )
+        .bind('solapi_api_secret', finalSolapiApiSecret, '솔라피 API Secret', now, finalSolapiApiSecret, now)
+        .run();
+      
+      if (!secretResult.success) {
+        throw new Error(`solapi_api_secret 저장 실패: ${secretResult.error || 'Unknown error'}`);
+      }
 
-    // solapi_sender_phone 저장
-    await context.env.DB.prepare(
-      `INSERT INTO settings (key, value, description, updated_at) 
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
-    )
-      .bind('solapi_sender_phone', solapi_sender_phone, '솔라피 발신자 번호', now, solapi_sender_phone, now)
-      .run();
+      // solapi_sender_phone 저장
+      const phoneResult = await context.env.DB.prepare(
+        `INSERT INTO settings (key, value, description, updated_at) 
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`
+      )
+        .bind('solapi_sender_phone', solapi_sender_phone, '솔라피 발신자 번호', now, solapi_sender_phone, now)
+        .run();
+      
+      if (!phoneResult.success) {
+        throw new Error(`solapi_sender_phone 저장 실패: ${phoneResult.error || 'Unknown error'}`);
+      }
+    } catch (dbError) {
+      const dbErrorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+      console.error('Database operation error:', dbErrorMessage);
+      
+      // settings 테이블이 없을 수 있음
+      if (dbErrorMessage.includes('no such table: settings')) {
+        return createErrorResponse(
+          'settings 테이블이 존재하지 않습니다. 데이터베이스 마이그레이션을 실행해주세요.',
+          500
+        );
+      }
+      
+      throw dbError;
+    }
 
     return createSuccessResponse({ message: '설정이 저장되었습니다.' });
   } catch (error) {
-    console.error('Settings save error:', error);
-    return createErrorResponse('서버 오류가 발생했습니다.', 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Settings save error:', errorMessage, errorStack);
+    
+    // 더 자세한 에러 정보 반환 (개발 환경에서만)
+    return createErrorResponse(
+      `서버 오류가 발생했습니다: ${errorMessage}`,
+      500
+    );
   }
 }
