@@ -759,7 +759,7 @@ export default function OfferLandingPage() {
                 {/* Phone */}
                 <div>
                   <label htmlFor="phone" className="block text-sm font-bold text-text-light dark:text-text-dark/90 mb-2">
-                    연락처 <span className="text-text-light/50 dark:text-text-dark/50 font-normal">(선택)</span>
+                    연락처 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -769,17 +769,17 @@ export default function OfferLandingPage() {
                     onChange={handleChange('phone')}
                     placeholder="010-1234-5678"
                     aria-invalid={errors.phone ? 'true' : 'false'}
-                    aria-describedby={errors.phone ? 'phone-error' : 'phone-hint'}
+                    aria-required="true"
+                    aria-describedby={errors.phone ? 'phone-error' : undefined}
                     className={`mt-1 block w-full h-12 rounded-xl border-2 px-4 bg-white dark:bg-slate-800 dark:border-slate-700 shadow-sm transition-all focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none ${
                       errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200'
                     }`}
+                    required
                   />
-                  {errors.phone ? (
+                  {errors.phone && (
                     <p id="phone-error" className="mt-2 text-sm text-red-500 font-medium" role="alert">
                       {errors.phone}
                     </p>
-                  ) : (
-                    <p id="phone-hint" className="mt-2 text-sm text-text-light/50 dark:text-text-dark/50">선택 사항입니다. 더 빠른 안내를 위해 입력해주세요.</p>
                   )}
                 </div>
 
