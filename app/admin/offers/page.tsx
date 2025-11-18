@@ -9,8 +9,8 @@ import EmptyState from '@/app/components/admin/EmptyState';
 
 /**
  * Admin Offers Page
- * 관리자 오퍼 관리 페이지
- * Tailwind CSS 기반
+ * 관리� ��� 관리 ��지
+ * Tailwind CSS 기�
  */
 
 interface Offer {
@@ -24,7 +24,7 @@ interface Offer {
   download_link: string | null;
   json_ld: string | null;
   ab_test_variant: 'A' | 'B';
-  // 페이지 콘텐츠 필드
+  // ��지 ��츠 ��
   hero_title: string | null;
   hero_subtitle: string | null;
   hero_badge_text: string | null;
@@ -45,7 +45,7 @@ interface Offer {
   form_subtitle: string | null;
   form_badge_text: string | null;
   form_description: string | null;
-  // 감사 페이지 콘텐츠 필드
+  // �� ��지 ��츠 ��
   thanks_title: string | null;
   thanks_subtitle: string | null;
   thanks_description: string | null;
@@ -71,13 +71,13 @@ export default function AdminOffersPage() {
     status: 'draft',
     download_link: '',
     ab_test_variant: 'A',
-    // 페이지 콘텐츠 기본값
+    // ��지 ��츠 기본�
     hero_title: '',
     hero_subtitle: '',
-    hero_badge_text: '무료 제공 · 즉시 다운로드',
-    hero_cta_text: '지금 바로 무료로 받기',
+    hero_badge_text: '무료 제공 · �� �운로�',
+    hero_cta_text: '지� �로 무료로 �기',
     hero_background_image: '',
-    hero_stats_text: '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
+    hero_stats_text: '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
     preview_title: '',
     preview_subtitle: '',
     preview_image: '',
@@ -90,14 +90,14 @@ export default function AdminOffersPage() {
     testimonials: '[]',
     form_title: '',
     form_subtitle: '',
-    form_badge_text: '100% 무료 · 즉시 다운로드',
+    form_badge_text: '100% 무료 · �� �운로�',
     form_description: '',
-    // 감사 페이지 기본값
-    thanks_title: '오퍼 신청이 완료되었습니다!',
-    thanks_subtitle: '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+    // �� ��지 기본�
+    thanks_title: '��� �청� �료��습��!',
+    thanks_subtitle: '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
     thanks_description: '',
-    thanks_cta_text: '홈으로',
-    thanks_examples: '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
+    thanks_cta_text: '�으로',
+    thanks_examples: '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -109,18 +109,18 @@ export default function AdminOffersPage() {
       const response = await fetch('/api/admin/offers');
 
       if (response.status === 401) {
-        setError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setError('��� ������. ��지를 �로고침�고 로그���주��.');
         setLoading(false);
         return;
       }
 
       if (!response.ok) {
-        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        let errorMessage = `�� ��가 발��습��. (�� ��: ${response.status})`;
         try {
           const errorResult = await response.json();
           errorMessage = errorResult.error || errorMessage;
         } catch {
-          // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
+          // JSON 파� �패 � �� �� 기� ��지 �용
         }
         setError(errorMessage);
         console.error('Failed to fetch offers:', response.status);
@@ -133,7 +133,7 @@ export default function AdminOffersPage() {
         result = await response.json();
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
-        setError('응답 처리 중 오류가 발생했습니다.');
+        setError('�� �리 � ��가 발��습��.');
         setLoading(false);
         return;
       }
@@ -141,10 +141,10 @@ export default function AdminOffersPage() {
       if (result.success && Array.isArray(result.data)) {
         setOffers(result.data);
       } else {
-        setError(result.error || '오퍼를 불러오는데 실패했습니다.');
+        setError(result.error || '���를 ����� �패�습��.');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '오퍼를 불러오는데 실패했습니다.';
+      const errorMessage = error instanceof Error ? error.message : '���를 ����� �패�습��.';
       setError(errorMessage);
       console.error('Error fetching offers:', error);
     } finally {
@@ -170,35 +170,35 @@ export default function AdminOffersPage() {
       });
 
       if (response.status === 401) {
-        toast.error('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        toast.error('��� ������. ��지를 �로고침�고 로그���주��.');
         setDeleteConfirm(null);
         return;
       }
 
       if (!response.ok) {
-        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        let errorMessage = `�� ��가 발��습��. (�� ��: ${response.status})`;
         try {
           const errorResult = await response.json();
           errorMessage = errorResult.error || errorMessage;
         } catch {
-          // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
+          // JSON 파� �패 � �� �� 기� ��지 �용
         }
-        toast.error('오퍼 삭제에 실패했습니다: ' + errorMessage);
+        toast.error('��� �제� �패�습��: ' + errorMessage);
         setDeleteConfirm(null);
         return;
       }
 
       const result = await response.json();
       if (result.success) {
-        toast.success('오퍼가 성공적으로 삭제되었습니다.');
+        toast.success('���가 �공�으로 �제��습��.');
         fetchOffers();
       } else {
-        toast.error('오퍼 삭제에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
+        toast.error('��� �제� �패�습��: ' + (result.error || '� � �� ��'));
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      const errorMessage = error instanceof Error ? error.message : '� � �� ��';
       console.error('Error deleting offer:', error);
-      toast.error('오퍼 삭제 중 오류가 발생했습니다: ' + errorMessage);
+      toast.error('��� �제 � ��가 발��습��: ' + errorMessage);
     } finally {
       setDeleteConfirm(null);
     }
@@ -224,7 +224,7 @@ export default function AdminOffersPage() {
     });
   };
 
-  // 슬러그 자동 생성 (한글 → 영문)
+  // 슬�그 �� �� (�글 � �문)
   const generateSlug = (name: string): string => {
     return name
       .toLowerCase()
@@ -234,7 +234,7 @@ export default function AdminOffersPage() {
       .trim();
   };
 
-  // 모달 닫기
+  // 모� �기
   const handleCloseModal = () => {
     setShowCreateModal(false);
     setEditingOffer(null);
@@ -250,10 +250,10 @@ export default function AdminOffersPage() {
       ab_test_variant: 'A',
       hero_title: '',
       hero_subtitle: '',
-      hero_badge_text: '무료 제공 · 즉시 다운로드',
-      hero_cta_text: '지금 바로 무료로 받기',
+      hero_badge_text: '무료 제공 · �� �운로�',
+      hero_cta_text: '지� �로 무료로 �기',
       hero_background_image: '',
-      hero_stats_text: '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
+      hero_stats_text: '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
       preview_title: '',
       preview_subtitle: '',
       preview_image: '',
@@ -266,18 +266,18 @@ export default function AdminOffersPage() {
       testimonials: '[]',
       form_title: '',
       form_subtitle: '',
-      form_badge_text: '100% 무료 · 즉시 다운로드',
+      form_badge_text: '100% 무료 · �� �운로�',
       form_description: '',
-      thanks_title: '오퍼 신청이 완료되었습니다!',
-      thanks_subtitle: '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+      thanks_title: '��� �청� �료��습��!',
+      thanks_subtitle: '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
       thanks_description: '',
-      thanks_cta_text: '홈으로',
-      thanks_examples: '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
+      thanks_cta_text: '�으로',
+      thanks_examples: '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
     });
     setFormError(null);
   };
 
-  // 모달 열기 (생성)
+  // 모� �기 (��)
   const handleOpenCreateModal = () => {
     setFormData({
       name: '',
@@ -290,10 +290,10 @@ export default function AdminOffersPage() {
       ab_test_variant: 'A',
       hero_title: '',
       hero_subtitle: '',
-      hero_badge_text: '무료 제공 · 즉시 다운로드',
-      hero_cta_text: '지금 바로 무료로 받기',
+      hero_badge_text: '무료 제공 · �� �운로�',
+      hero_cta_text: '지� �로 무료로 �기',
       hero_background_image: '',
-      hero_stats_text: '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
+      hero_stats_text: '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
       preview_title: '',
       preview_subtitle: '',
       preview_image: '',
@@ -306,13 +306,13 @@ export default function AdminOffersPage() {
       testimonials: '[]',
       form_title: '',
       form_subtitle: '',
-      form_badge_text: '100% 무료 · 즉시 다운로드',
+      form_badge_text: '100% 무료 · �� �운로�',
       form_description: '',
-      thanks_title: '오퍼 신청이 완료되었습니다!',
-      thanks_subtitle: '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+      thanks_title: '��� �청� �료��습��!',
+      thanks_subtitle: '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
       thanks_description: '',
-      thanks_cta_text: '홈으로',
-      thanks_examples: '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
+      thanks_cta_text: '�으로',
+      thanks_examples: '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
     });
     setFormError(null);
     setActiveTab('basic');
@@ -320,7 +320,7 @@ export default function AdminOffersPage() {
     setEditingOffer(null);
   };
 
-  // 모달 열기 (수정)
+  // 모� �기 (��)
   const handleOpenEditModal = (offer: Offer) => {
     setFormData({
       name: offer.name,
@@ -333,10 +333,10 @@ export default function AdminOffersPage() {
       ab_test_variant: offer.ab_test_variant,
       hero_title: offer.hero_title || '',
       hero_subtitle: offer.hero_subtitle || '',
-      hero_badge_text: offer.hero_badge_text || '무료 제공 · 즉시 다운로드',
-      hero_cta_text: offer.hero_cta_text || '지금 바로 무료로 받기',
+      hero_badge_text: offer.hero_badge_text || '무료 제공 · �� �운로�',
+      hero_cta_text: offer.hero_cta_text || '지� �로 무료로 �기',
       hero_background_image: offer.hero_background_image || '',
-      hero_stats_text: offer.hero_stats_text || '{"downloads": "1,247명 다운로드", "rating": "4.9/5.0 만족도"}',
+      hero_stats_text: offer.hero_stats_text || '{"downloads": "1,247� �운로�", "rating": "4.9/5.0 만족�"}',
       preview_title: offer.preview_title || '',
       preview_subtitle: offer.preview_subtitle || '',
       preview_image: offer.preview_image || '',
@@ -349,13 +349,13 @@ export default function AdminOffersPage() {
       testimonials: offer.testimonials || '[]',
       form_title: offer.form_title || '',
       form_subtitle: offer.form_subtitle || '',
-      form_badge_text: offer.form_badge_text || '100% 무료 · 즉시 다운로드',
+      form_badge_text: offer.form_badge_text || '100% 무료 · �� �운로�',
       form_description: offer.form_description || '',
-      thanks_title: offer.thanks_title || '오퍼 신청이 완료되었습니다!',
-      thanks_subtitle: offer.thanks_subtitle || '신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다. 성공에 도움이 될 인사이트로 가득 차 있으니, 지금 바로 확인해 보세요!',
+      thanks_title: offer.thanks_title || '��� �청� �료��습��!',
+      thanks_subtitle: offer.thanks_subtitle || '�청�� 주�� ������. ����� ���로 발��습��. �공� ��� � ���트로 가� 차 �으�, 지� �로 ���� 보��!',
       thanks_description: offer.thanks_description || '',
-      thanks_cta_text: offer.thanks_cta_text || '홈으로',
-      thanks_examples: offer.thanks_examples || '[{"title": "즉시 신뢰를 구축하는 문장", "text": "오늘 제 목표는 무언가를 판매하는 것이 아니라, 고객님께서 가족을 위한 최선의 결정을 내리실 수 있도록 명확한 정보를 제공하는 것입니다."}, {"title": "우아하게 거절에 대처하는 문장", "text": "정말 타당한 고민이십니다. 그 부분은 잠시 접어두고, 이 플랜이 고객님의 필요를 충족하는지 먼저 확인해 보시죠. 그렇지 않다면 가격은 무의미하니까요."}, {"title": "긴급성을 자연스럽게 만드는 문장", "text": "이 보장을 확보하기 가장 좋은 때는 어제였습니다. 다음으로 좋은 때는 바로 지금, 건강하시고 가장 저렴한 보험료로 가입할 수 있는 순간입니다."}]',
+      thanks_cta_text: offer.thanks_cta_text || '�으로',
+      thanks_examples: offer.thanks_examples || '[{"title": "�� �뢰를 구��� 문�", "text": "�� 제 목�� 무�가를 �매�� �� ���, 고���� 가족� �� 최�� 결�� �리� � ��� ��� �보를 제공�� ����."}, {"title": "우��게 거�� 대��� 문�", "text": "�� ��� 고민����. 그 부�� �� ���고, � ��� 고��� ��를 충족��지 먼저 ���� 보�죠. 그�지 ��면 가격� 무�미��까�."}, {"title": "긴��� ��스�게 만�� 문�", "text": "� 보�� �보�기 가� �� �� �제�습��. ��으로 �� �� �로 지�, 건���고 가� 저렴� 보�료로 가��� � �� �����."}]',
     });
     setFormError(null);
     setActiveTab('basic');
@@ -363,15 +363,15 @@ export default function AdminOffersPage() {
     setShowCreateModal(true);
   };
 
-  // 폼 제출
+  // �� 제출
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
     setFormError(null);
 
-    // 필수 필드 검증
+    // �� �� 검�
     if (!formData.name || !formData.slug) {
-      setFormError('오퍼명과 슬러그는 필수 입력 항목입니다.');
+      setFormError('����과 슬�그� �� �력 ��목���.');
       setFormLoading(false);
       return;
     }
@@ -391,18 +391,18 @@ export default function AdminOffersPage() {
       });
 
       if (response.status === 401) {
-        setFormError('인증이 필요합니다. 페이지를 새로고침하고 로그인해주세요.');
+        setFormError('��� ������. ��지를 �로고침�고 로그���주��.');
         setFormLoading(false);
         return;
       }
 
       if (!response.ok) {
-        let errorMessage = `서버 오류가 발생했습니다. (상태 코드: ${response.status})`;
+        let errorMessage = `�� ��가 발��습��. (�� ��: ${response.status})`;
         try {
           const errorResult = await response.json();
           errorMessage = errorResult.error || errorMessage;
         } catch {
-          // JSON 파싱 실패 시 상태 코드 기반 메시지 사용
+          // JSON 파� �패 � �� �� 기� ��지 �용
         }
         setFormError(errorMessage);
         setFormLoading(false);
@@ -411,15 +411,15 @@ export default function AdminOffersPage() {
 
       const result = await response.json();
       if (result.success) {
-        toast.success(editingOffer ? '오퍼가 성공적으로 수정되었습니다.' : '오퍼가 성공적으로 생성되었습니다.');
+        toast.success(editingOffer ? '���가 �공�으로 ����습��.' : '���가 �공�으로 ����습��.');
         handleCloseModal();
         fetchOffers();
       } else {
-        setFormError(result.error || '오퍼 저장에 실패했습니다.');
+        setFormError(result.error || '��� 저�� �패�습��.');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
-      setFormError('오퍼 저장 중 오류가 발생했습니다: ' + errorMessage);
+      const errorMessage = error instanceof Error ? error.message : '� � �� ��';
+      setFormError('��� 저� � ��가 발��습��: ' + errorMessage);
       console.error('Error saving offer:', error);
     } finally {
       setFormLoading(false);
@@ -427,7 +427,7 @@ export default function AdminOffersPage() {
   };
 
   if (loading) {
-    return (
+  return (
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 animate-pulse"></div>
@@ -444,7 +444,7 @@ export default function AdminOffersPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="max-w-md mx-auto px-4">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">오류 발생</h2>
+            <h2 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">�� 발�</h2>
             <p className="text-red-700 dark:text-red-300 mb-4" role="alert">{error}</p>
             <button
               onClick={() => {
@@ -454,7 +454,7 @@ export default function AdminOffersPage() {
               }}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              다시 시도
+              �� ��
             </button>
           </div>
         </div>
@@ -466,14 +466,14 @@ export default function AdminOffersPage() {
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
-          {/* 헤더 */}
+          {/* ��� */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-text-light dark:text-text-dark mb-2">
-                오퍼 관리
+                ��� 관리
               </h1>
               <p className="text-text-light/70 dark:text-text-dark/70">
-                오퍼를 생성, 수정, 삭제하고 전환율을 추적합니다.
+                ���를 ��, ��, �제�고 ��율� ������.
               </p>
             </div>
             <button
@@ -483,17 +483,17 @@ export default function AdminOffersPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              새 오퍼 생성
+              � ��� ��
             </button>
           </div>
 
-          {/* 오퍼 목록 */}
+          {/* ��� 목� */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
             {offers.length === 0 ? (
               <EmptyState
-                title="오퍼가 없습니다"
-                description="새 오퍼를 생성하여 시작하세요."
-                actionLabel="첫 오퍼 생성"
+                title="���가 �습��"
+                description="� ���를 ���� �����."
+                actionLabel="첫 ��� ��"
                 onAction={handleOpenCreateModal}
               />
             ) : (
@@ -505,22 +505,22 @@ export default function AdminOffersPage() {
                         ID
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        이름
+                        ��
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        슬러그
+                        슬�그
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        상태
+                        ��
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        A/B 테스트
+                        A/B �스트
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        생성일
+                        ���
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        작업
+                        ��
                       </th>
                     </tr>
                   </thead>
@@ -540,7 +540,7 @@ export default function AdminOffersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={getStatusBadge(offer.status)}>
-                            {offer.status === 'active' ? '활성' : offer.status === 'draft' ? '초안' : '비활성'}
+                            {offer.status === 'active' ? '��' : offer.status === 'draft' ? '��' : '���'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -555,23 +555,23 @@ export default function AdminOffersPage() {
                               href={`/offer/${offer.slug}`}
                               target="_blank"
                               className="text-primary hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                              aria-label={`${offer.name} 랜딩 페이지 보기`}
+                              aria-label={`${offer.name} �� ��지 보기`}
                             >
                               보기
                             </Link>
                             <button
                               onClick={() => handleOpenEditModal(offer)}
                               className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-                              aria-label={`${offer.name} 수정`}
+                              aria-label={`${offer.name} ��`}
                             >
-                              수정
+                              ��
                             </button>
                             <button
                               onClick={() => handleDeleteClick(offer.id, offer.name)}
                               className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
-                              aria-label={`${offer.name} 삭제`}
+                              aria-label={`${offer.name} �제`}
                             >
-                              삭제
+                              �제
                             </button>
                           </div>
                         </td>
@@ -585,7 +585,7 @@ export default function AdminOffersPage() {
         </div>
       </div>
 
-      {/* 생성/수정 모달 */}
+      {/* ��/�� 모� */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -593,13 +593,13 @@ export default function AdminOffersPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">
-                    {editingOffer ? '오퍼 수정' : '새 오퍼 생성'}
+                    {editingOffer ? '��� ��' : '� ��� ��'}
                   </h2>
                   <button
                     type="button"
                     onClick={handleCloseModal}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
-                    aria-label="닫기"
+                    aria-label="�기"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -607,9 +607,9 @@ export default function AdminOffersPage() {
                   </button>
                 </div>
 
-                {/* 탭 네비게이션 */}
+                {/* �� ��게�� */}
                 <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-                  <nav className="flex gap-4 overflow-x-auto" aria-label="탭 메뉴">
+                  <nav className="flex gap-4 overflow-x-auto" aria-label="�� ��">
                     <button
                       type="button"
                       onClick={() => setActiveTab('basic')}
@@ -619,7 +619,7 @@ export default function AdminOffersPage() {
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      기본 정보
+                      기본 �보
                     </button>
                     <button
                       type="button"
@@ -630,7 +630,7 @@ export default function AdminOffersPage() {
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      신청 페이지
+                      �청 ��지
                     </button>
                     <button
                       type="button"
@@ -641,7 +641,7 @@ export default function AdminOffersPage() {
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                     >
-                      감사 페이지
+                      �� ��지
                     </button>
                     {editingOffer && (
                       <button
@@ -653,7 +653,7 @@ export default function AdminOffersPage() {
                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                         }`}
                       >
-                        통계 분석
+                        ��� ��
                       </button>
                     )}
                   </nav>
@@ -665,13 +665,13 @@ export default function AdminOffersPage() {
                   </div>
                 )}
 
-                {/* 기본 정보 탭 */}
+                {/* 기본 �보 �� */}
                 {activeTab === 'basic' && (
                   <div className="space-y-4">
-                    {/* 오퍼 이름 */}
+                    {/* ��� �� */}
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        오퍼 이름 <span className="text-red-500">*</span>
+                        ��� �� <span className="text-red-500">*</span>
                       </label>
                       <input
                         id="name"
@@ -687,14 +687,14 @@ export default function AdminOffersPage() {
                           });
                         }}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="예: AI 상담 워크북"
+                        placeholder="�: AI �� ����"
                       />
                     </div>
 
-                    {/* 슬러그 */}
+                    {/* 슬�그 */}
                     <div>
                     <label htmlFor="slug" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      슬러그 (URL) <span className="text-red-500">*</span>
+                      슬�그 (URL) <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="slug"
@@ -710,10 +710,10 @@ export default function AdminOffersPage() {
                         setFormData({ ...formData, slug });
                       }}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
-                      placeholder="예: ai-consulting-workbook"
+                      placeholder="�: ai-consulting-workbook"
                     />
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      URL에 사용될 고유 식별자입니다. 영문, 숫자, 하이픈만 사용 가능합니다.
+                      URL� �용� 고유 ������. �문, ��, ���만 �용 가능����.
                     </p>
                   </div>
 
@@ -728,14 +728,14 @@ export default function AdminOffersPage() {
                       value={formData.title || ''}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="SEO에 사용될 제목 (선택사항)"
+                      placeholder="SEO� �용� 제목 (�����)"
                     />
                   </div>
 
-                  {/* 설명 */}
+                  {/* �� */}
                   <div>
                     <label htmlFor="description" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      설명
+                      ��
                     </label>
                     <textarea
                       id="description"
@@ -743,14 +743,14 @@ export default function AdminOffersPage() {
                       value={formData.description || ''}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="오퍼에 대한 설명을 입력하세요"
+                      placeholder="���� 대� ��� �력���"
                     />
                   </div>
 
-                  {/* 썸네일 */}
+                  {/* ��� */}
                   <div>
                     <label htmlFor="thumbnail" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      썸네일 이미지 URL
+                      ��� �미지 URL
                     </label>
                     <input
                       id="thumbnail"
@@ -762,10 +762,10 @@ export default function AdminOffersPage() {
                     />
                   </div>
 
-                  {/* 다운로드 링크 */}
+                  {/* �운로� ��� */}
                   <div>
                     <label htmlFor="download_link" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                      다운로드 링크
+                      �운로� ���
                     </label>
                     <input
                       id="download_link"
@@ -777,11 +777,11 @@ export default function AdminOffersPage() {
                     />
                   </div>
 
-                  {/* 상태 및 A/B 테스트 */}
+                  {/* �� � A/B �스트 */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="status" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        상태
+                        ��
                       </label>
                       <select
                         id="status"
@@ -789,14 +789,14 @@ export default function AdminOffersPage() {
                         onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'active' | 'inactive' })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                       >
-                        <option value="draft">초안</option>
-                        <option value="active">활성</option>
-                        <option value="inactive">비활성</option>
+                        <option value="draft">��</option>
+                        <option value="active">��</option>
+                        <option value="inactive">���</option>
                       </select>
                     </div>
                     <div>
                       <label htmlFor="ab_test_variant" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                        A/B 테스트 변형
+                        A/B �스트 변�
                       </label>
                       <select
                         id="ab_test_variant"
@@ -812,16 +812,16 @@ export default function AdminOffersPage() {
                   </div>
                 )}
 
-                {/* 페이지 편집 탭 */}
+                {/* ��지 ��� �� */}
                 {activeTab === 'content' && (
                   <div className="space-y-6">
-                    {/* Hero 섹션 */}
+                    {/* Hero �� */}
                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Hero 섹션</h3>
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Hero ��</h3>
                       <div className="space-y-4">
                         <div>
                           <label htmlFor="hero_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            메인 제목
+                            �� 제목
                           </label>
                           <input
                             id="hero_title"
@@ -829,7 +829,7 @@ export default function AdminOffersPage() {
                             value={formData.hero_title || ''}
                             onChange={(e) => setFormData({ ...formData, hero_title: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="예: 상담 성공률을 2배로 높이는 AI 워크북"
+                            placeholder="�: �� �공률� 2배로 ��� AI ����"
                           />
                         </div>
                         <div>
@@ -842,12 +842,12 @@ export default function AdminOffersPage() {
                             value={formData.hero_subtitle || ''}
                             onChange={(e) => setFormData({ ...formData, hero_subtitle: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="예: 매일 같은 상담에 지치셨나요? 고객 유형별 맞춤 전략으로 상담 시간은 절반으로, 계약 성공률은 2배로."
+                            placeholder="�: 매� �� ��� 지����? 고� 유�� �춤 ��으로 �� ��� ��으로, �� �공률� 2배로."
                           />
                         </div>
                         <div>
                           <label htmlFor="hero_badge_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            배지 텍스트
+                            배지 �스트
                           </label>
                           <input
                             id="hero_badge_text"
@@ -855,12 +855,12 @@ export default function AdminOffersPage() {
                             value={formData.hero_badge_text || ''}
                             onChange={(e) => setFormData({ ...formData, hero_badge_text: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="예: 무료 제공 · 즉시 다운로드"
+                            placeholder="�: 무료 제공 · �� �운로�"
                           />
                         </div>
                         <div>
                           <label htmlFor="hero_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          CTA 버튼 텍스트
+                          CTA �튼 �스트
                         </label>
                         <input
                           id="hero_cta_text"
@@ -868,12 +868,12 @@ export default function AdminOffersPage() {
                           value={formData.hero_cta_text || ''}
                           onChange={(e) => setFormData({ ...formData, hero_cta_text: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 지금 바로 무료로 받기"
+                          placeholder="�: 지� �로 무료로 �기"
                         />
                         </div>
                         <div>
                           <label htmlFor="hero_background_image" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            배경 이미지 URL
+                            배경 �미지 URL
                           </label>
                           <input
                             id="hero_background_image"
@@ -887,9 +887,9 @@ export default function AdminOffersPage() {
                       </div>
                     </div>
 
-                  {/* Preview 섹션 */}
+                  {/* Preview �� */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Preview 섹션</h3>
+                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Preview ��</h3>
                     <div className="space-y-4">
                       <div>
                         <label htmlFor="preview_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -901,7 +901,7 @@ export default function AdminOffersPage() {
                           value={formData.preview_title || ''}
                           onChange={(e) => setFormData({ ...formData, preview_title: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: AI 상담 워크북, 이런 내용을 담았습니다"
+                          placeholder="�: AI �� ����, �� �용� ��습��"
                         />
                       </div>
                       <div>
@@ -914,12 +914,12 @@ export default function AdminOffersPage() {
                           value={formData.preview_subtitle || ''}
                           onChange={(e) => setFormData({ ...formData, preview_subtitle: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 고객의 첫마디부터 계약서 사인까지, 모든 단계를 체계적으로 안내하는 실전 가이드입니다."
+                          placeholder="�: 고�� 첫��부�� ��� ��까지, 모� ��를 체��으로 ���� �� 가�����."
                         />
                       </div>
                       <div>
                         <label htmlFor="preview_image" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          미리보기 이미지 URL
+                          미리보기 �미지 URL
                         </label>
                         <input
                           id="preview_image"
@@ -933,9 +933,9 @@ export default function AdminOffersPage() {
                     </div>
                   </div>
 
-                  {/* Value 섹션 */}
+                  {/* Value �� */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Value 섹션</h3>
+                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Value ��</h3>
                     <div className="space-y-4">
                       <div>
                         <label htmlFor="value_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -947,7 +947,7 @@ export default function AdminOffersPage() {
                           value={formData.value_title || ''}
                           onChange={(e) => setFormData({ ...formData, value_title: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 워크북 하나로 당신의 상담이 달라집니다"
+                          placeholder="�: ���� ��로 ��� ��� �����"
                         />
                       </div>
                       <div>
@@ -960,15 +960,15 @@ export default function AdminOffersPage() {
                           value={formData.value_subtitle || ''}
                           onChange={(e) => setFormData({ ...formData, value_subtitle: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 단순한 스크립트가 아닙니다. 고객의 마음을 열고 계약으로 이끄는 과학적인 상담 전략입니다."
+                          placeholder="�: ��� 스��립트가 ����. 고�� ��� �고 ��으로 ��� 과��� �� �����."
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Trust 섹션 */}
+                  {/* Trust �� */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Trust 섹션</h3>
+                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Trust ��</h3>
                     <div className="space-y-4">
                       <div>
                         <label htmlFor="trust_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
@@ -980,7 +980,7 @@ export default function AdminOffersPage() {
                           value={formData.trust_title || ''}
                           onChange={(e) => setFormData({ ...formData, trust_title: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 먼저 경험한 설계사들의 생생한 후기"
+                          placeholder="�: 먼저 경�� ����� ��� �기"
                         />
                       </div>
                       <div>
@@ -993,19 +993,19 @@ export default function AdminOffersPage() {
                           value={formData.trust_subtitle || ''}
                           onChange={(e) => setFormData({ ...formData, trust_subtitle: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 이미 많은 분들이 INSURANG과 함께 최고의 성과를 만들고 있습니다."
+                          placeholder="�: �미 �� ��� INSURANG과 ��� 최고� �과를 만�고 �습��."
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Form 섹션 */}
+                  {/* Form �� */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Form 섹션</h3>
+                    <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">Form ��</h3>
                     <div className="space-y-4">
                       <div>
                         <label htmlFor="form_badge_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          배지 텍스트
+                          배지 �스트
                         </label>
                         <input
                           id="form_badge_text"
@@ -1013,7 +1013,7 @@ export default function AdminOffersPage() {
                           value={formData.form_badge_text || ''}
                           onChange={(e) => setFormData({ ...formData, form_badge_text: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 100% 무료 · 즉시 다운로드"
+                          placeholder="�: 100% 무료 · �� �운로�"
                         />
                       </div>
                       <div>
@@ -1026,7 +1026,7 @@ export default function AdminOffersPage() {
                           value={formData.form_title || ''}
                           onChange={(e) => setFormData({ ...formData, form_title: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 지금 바로 시작하세요"
+                          placeholder="�: 지� �로 �����"
                         />
                       </div>
                       <div>
@@ -1039,12 +1039,12 @@ export default function AdminOffersPage() {
                           value={formData.form_subtitle || ''}
                           onChange={(e) => setFormData({ ...formData, form_subtitle: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 이름과 이메일만 입력하면 워크북을 즉시 보내드립니다"
+                          placeholder="�: ��과 ���만 �력�면 ����� �� 보��립��"
                         />
                       </div>
                       <div>
                         <label htmlFor="form_description" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          설명
+                          ��
                         </label>
                         <textarea
                           id="form_description"
@@ -1052,7 +1052,7 @@ export default function AdminOffersPage() {
                           value={formData.form_description || ''}
                           onChange={(e) => setFormData({ ...formData, form_description: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder="예: 신용카드 불필요 · 개인정보 보호 · 언제든지 구독 취소 가능"
+                          placeholder="�: �용카� ��� · 개��보 보�� · �제�지 구� 취� 가능"
                         />
                       </div>
                     </div>
@@ -1060,15 +1060,15 @@ export default function AdminOffersPage() {
                   </div>
                 )}
 
-                {/* 감사 페이지 편집 탭 */}
+                {/* �� ��지 ��� �� */}
                 {activeTab === 'thanks' && (
                   <div className="space-y-6">
                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">감사 페이지 콘텐츠</h3>
+                      <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">�� ��지 ��츠</h3>
                       <div className="space-y-4">
                         <div>
                           <label htmlFor="thanks_title" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            메인 제목
+                            �� 제목
                           </label>
                           <input
                             id="thanks_title"
@@ -1076,7 +1076,7 @@ export default function AdminOffersPage() {
                             value={formData.thanks_title || ''}
                             onChange={(e) => setFormData({ ...formData, thanks_title: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="예: 오퍼 신청이 완료되었습니다!"
+                            placeholder="�: ��� �청� �료��습��!"
                           />
                         </div>
                         <div>
@@ -1089,12 +1089,12 @@ export default function AdminOffersPage() {
                             value={formData.thanks_subtitle || ''}
                             onChange={(e) => setFormData({ ...formData, thanks_subtitle: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="예: 신청해 주셔서 감사합니다. 워크북을 이메일로 발송했습니다."
+                            placeholder="�: �청�� 주�� ������. ����� ���로 발��습��."
                           />
                         </div>
                         <div>
                           <label htmlFor="thanks_cta_text" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                            CTA 버튼 텍스트
+                            CTA �튼 �스트
                           </label>
                           <input
                             id="thanks_cta_text"
@@ -1102,12 +1102,12 @@ export default function AdminOffersPage() {
                             value={formData.thanks_cta_text || ''}
                             onChange={(e) => setFormData({ ...formData, thanks_cta_text: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="예: 홈으로"
+                            placeholder="�: �으로"
                           />
                         </div>
                         <div>
                           <label htmlFor="thanks_examples" className="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
-                          예시 문장 (JSON 형식)
+                          �� 문� (JSON ��)
                         </label>
                         <textarea
                           id="thanks_examples"
@@ -1115,26 +1115,26 @@ export default function AdminOffersPage() {
                           value={formData.thanks_examples || ''}
                           onChange={(e) => setFormData({ ...formData, thanks_examples: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
-                          placeholder='JSON 배열 형식으로 입력하세요'
+                          placeholder='JSON 배� ��으로 �력���'
                         />
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          JSON 배열 형식으로 입력하세요.
+                          JSON 배� ��으로 �력���.
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 통계 분석 탭 */}
+                {/* ��� �� �� */}
                 {activeTab === 'analytics' && editingOffer && (
                   <div className="space-y-6">
                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
                       <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-4">
-                        {editingOffer.name} 퍼널 통계
+                        {editingOffer.name} ��� ���
                       </h3>
                       <div className="text-center py-12">
                         <p className="text-gray-500 dark:text-gray-400 mb-4">
-                          통계 분석 기능은 별도 페이지에서 확인할 수 있습니다.
+                          ��� �� 기능� �� ��지�� ���� � �습��.
                         </p>
                         <a
                           href={`/admin/analytics?offer=${editingOffer.slug}`}
@@ -1145,14 +1145,14 @@ export default function AdminOffersPage() {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
-                          통계 분석 페이지로 이동
+                          ��� �� ��지로 ��
                         </a>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 버튼 */}
+                {/* �튼 */}
                 <div className="flex justify-end gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <button
                     type="button"
@@ -1160,7 +1160,7 @@ export default function AdminOffersPage() {
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
                     disabled={formLoading}
                   >
-                    취소
+                    취�
                   </button>
                   <button
                     type="submit"
@@ -1173,10 +1173,10 @@ export default function AdminOffersPage() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        저장 중...
+                        저� �...
                       </span>
                     ) : (
-                      editingOffer ? '수정' : '생성'
+                      editingOffer ? '��' : '��'
                     )}
                   </button>
                 </div>
@@ -1186,14 +1186,14 @@ export default function AdminOffersPage() {
         </div>
       )}
 
-      {/* 삭제 확인 모달 */}
+      {/* �제 �� 모� */}
       {deleteConfirm && (
         <ConfirmModal
           isOpen={deleteConfirm.isOpen}
-          title="오퍼 삭제 확인"
-          message={`정말로 "${deleteConfirm.offerName}" 오퍼를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`}
-          confirmText="삭제"
-          cancelText="취소"
+          title="��� �제 ��"
+          message={`��로 "${deleteConfirm.offerName}" ���를 �제��겠습�까? � ��� ��릴 � �습��.`}
+          confirmText="�제"
+          cancelText="취�"
           type="danger"
           onConfirm={handleDeleteConfirm}
           onCancel={() => setDeleteConfirm(null)}
@@ -1202,4 +1202,3 @@ export default function AdminOffersPage() {
     </div>
   );
 }
-
