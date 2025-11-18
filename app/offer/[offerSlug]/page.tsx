@@ -602,7 +602,7 @@ export default function OfferLandingPage() {
                     name: '김민준 설계사',
                     company: 'AIA생명',
                     image:
-                      'https://randomuser.me/api/portraits/men/32.jpg',
+                      'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&h=200&fit=crop&crop=faces&auto=format',
                     review:
                       '"매번 상담 준비에만 몇 시간을 썼는데, 워크북 덕분에 핵심만 짚어 상담할 수 있게 됐어요. 고객 반응부터 달라졌습니다."',
                   },
@@ -610,7 +610,7 @@ export default function OfferLandingPage() {
                     name: '이서연 설계사',
                     company: '메리츠화재',
                     image:
-                      'https://randomuser.me/api/portraits/women/44.jpg',
+                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=faces&auto=format',
                     review:
                       '"신입이라 상담이 막막했는데, 워크북이 훌륭한 멘토가 되어주었습니다. 특히 거절 대응 파트가 정말 큰 도움이 됐어요."',
                   },
@@ -618,7 +618,7 @@ export default function OfferLandingPage() {
                     name: '박지훈 팀장',
                     company: 'DB손해보험',
                     image:
-                      'https://randomuser.me/api/portraits/men/28.jpg',
+                      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=faces&auto=format',
                     review:
                       '"팀원 교육 자료로 활용하고 있습니다. 체계적인 내용 덕분에 팀 전체의 상담 능력이 상향 평준화되었습니다."',
                   },
