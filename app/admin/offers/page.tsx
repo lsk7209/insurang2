@@ -1198,6 +1198,8 @@ export default function AdminOffersPage() {
           onCancel={() => setDeleteConfirm(null)}
         />
       )}
+        </div>
+      </div>
     </div>
   );
 }
