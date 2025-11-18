@@ -427,7 +427,7 @@ export default function AdminOffersPage() {
   };
 
   if (loading) {
-  return (
+    return (
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 animate-pulse"></div>
