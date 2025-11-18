@@ -596,7 +596,7 @@ export default function OfferLandingPage() {
                     name: '김민준 설계사',
                     company: 'AIA생명',
                     image:
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuB-6WcE3jby_vcv8z1lUrj8l6n5Or_RD1mfZ8gOIg0qn2EnDq8l0BihWQiG3Qgqw6cxPyQ5ra4HGJTNaYJfZMvdzPkSWBiesS0cNd_5vqGEwm8-XWwDiqeZYAze4CfJroK356AOwbglxpsXrqz2Uj2wW04O6XNbFFQwNsj67h3opzsP2MWUXzFEeInywLdJcVKo7hqEGv0IU9gP8JgJ85oX7aLn7Z7HuqqCIjZYaeiM6v9qUoZOgM2KlqNYYDFYJdOZ26mStU_XIDj6',
+                      'https://randomuser.me/api/portraits/men/32.jpg',
                     review:
                       '"매번 상담 준비에만 몇 시간을 썼는데, 워크북 덕분에 핵심만 짚어 상담할 수 있게 됐어요. 고객 반응부터 달라졌습니다."',
                   },
@@ -604,7 +604,7 @@ export default function OfferLandingPage() {
                     name: '이서연 설계사',
                     company: '메리츠화재',
                     image:
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuDiL18lIzd5wJ1a3G8XR1ZW0myX_kvX3dBpUbTq4jJzYsoc5Eln6mmr_HQ7sbA2ieyN1ZrIilqfDBhVBgt_BlU34q8Xk88FzBInwhfhzTlbHGYAYktlZzfRjbmCBQtl6E0Jp487rUIqorLrknlmh3As_u5ZoPsFQX1FuQFn0cNMpYlexyBFIOlljkzNXq-AV0M2xTNyTrDn7heAq6ffSp3yFYgMm4nIAv-_ZugpGfXUEn_N4RDU9w2yXE3QBTp9x5AICDwT3mxOJePL',
+                      'https://randomuser.me/api/portraits/women/44.jpg',
                     review:
                       '"신입이라 상담이 막막했는데, 워크북이 훌륭한 멘토가 되어주었습니다. 특히 거절 대응 파트가 정말 큰 도움이 됐어요."',
                   },
@@ -612,7 +612,7 @@ export default function OfferLandingPage() {
                     name: '박지훈 팀장',
                     company: 'DB손해보험',
                     image:
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuBJOld1Sg7unFatsojatL12hvygG4dJ4WtFrSOJqNhzdE-WC3ZPcDGO0i9Yc0gDWBSHvUYLJA1aDEZ2yIguHI3AtOYCXJLIAoSw9YsN3QErXKBVjx8ky_gWcVenp1VAjGt1IexkGqi2h9658MSYW8wtrIpn-auftih7tbneEgxTGQzqMzhq7Sa73E8scsSdT5wLNN_-wQsPJtwW5SPEPHWa8b1GlktNtKeDkOKvHrsshuNzTTuN7CEKzWESTUyFZogDAE54grR86FsF',
+                      'https://randomuser.me/api/portraits/men/28.jpg',
                     review:
                       '"팀원 교육 자료로 활용하고 있습니다. 체계적인 내용 덕분에 팀 전체의 상담 능력이 상향 평준화되었습니다."',
                   },
