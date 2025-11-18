@@ -579,7 +579,6 @@ export default function AdminOffersPage() {
             )}
           </div>
         </div>
-      </div>
 
       {/* 생성/수정 모달 */}
       {showCreateModal && (
