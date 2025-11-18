@@ -368,11 +368,9 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 {offerData?.preview_title || 'AI 상담 워크북, 이런 내용을 담았습니다'}
               </h2>
-              {offerData?.preview_subtitle && (
-                <p className="mt-4 max-w-2xl mx-auto text-base text-text-light/80 dark:text-text-dark/80">
-                  {offerData.preview_subtitle}
-                </p>
-              )}
+              <p className="mt-4 max-w-2xl mx-auto text-base text-text-light/80 dark:text-text-dark/80">
+                {offerData?.preview_subtitle || '고객의 심리부터 설득까지, 모든 과정을 체계적으로 정리한 실전 가이드입니다.'}
+              </p>
             </div>
             <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-center">
               <div className="w-full h-auto aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
@@ -468,11 +466,9 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 {offerData?.value_title || '워크북 하나로 당신의 상담이 달라집니다'}
               </h2>
-              {offerData?.value_subtitle && (
-                <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
-                  {offerData.value_subtitle}
-                </p>
-              )}
+              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
+                {offerData?.value_subtitle || '단순한 체크리스트가 아닙니다. 고객의 마음을 열고 계약으로 이끄는 실전 상담 노하우입니다.'}
+              </p>
             </div>
             <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {offerData?.value_cards ? (() => {
@@ -553,11 +549,9 @@ export default function OfferLandingPage() {
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
                 {offerData?.trust_title || '먼저 경험한 설계사들의 생생한 후기'}
               </h2>
-              {offerData?.trust_subtitle && (
-                <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
-                  {offerData.trust_subtitle}
-                </p>
-              )}
+              <p className="mt-4 text-base text-text-light/80 dark:text-text-dark/80">
+                {offerData?.trust_subtitle || '이미 많은 설계사들이 INSURANG와 함께 성공의 길을 걸어가고 있습니다.'}
+              </p>
             </div>
             <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {offerData?.testimonials ? (() => {
