@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { validateLeadForm, normalizePhone } from '@/lib/utils/validation';
 import { trackPageView, trackFunnelEvent } from '@/lib/utils/tracking';
@@ -60,6 +60,55 @@ export default function OfferLandingPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+
+  // 스크롤 애니메이션을 위한 refs와 상태
+  const previewRef = useRef<HTMLElement>(null);
+  const valueRef = useRef<HTMLElement>(null);
+  const trustRef = useRef<HTMLElement>(null);
+  const formRef = useRef<HTMLElement>(null);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [isValueVisible, setIsValueVisible] = useState(false);
+  const [isTrustVisible, setIsTrustVisible] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  // IntersectionObserver를 사용한 스크롤 애니메이션
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    const createObserver = (ref: React.RefObject<HTMLElement>, setVisible: (visible: boolean) => void) => {
+      if (!ref.current) return null;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.unobserve(entry.target);
+          }
+        },
+        {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px',
+        }
+      );
+
+      observer.observe(ref.current);
+      return observer;
+    };
+
+    const previewObserver = createObserver(previewRef, setIsPreviewVisible);
+    const valueObserver = createObserver(valueRef, setIsValueVisible);
+    const trustObserver = createObserver(trustRef, setIsTrustVisible);
+    const formObserver = createObserver(formRef, setIsFormVisible);
+
+    if (previewObserver) observers.push(previewObserver);
+    if (valueObserver) observers.push(valueObserver);
+    if (trustObserver) observers.push(trustObserver);
+    if (formObserver) observers.push(formObserver);
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, []);
 
   const handleCtaClick = useCallback(() => {
     const formSection = document.getElementById('application-form-section');
@@ -362,7 +411,14 @@ export default function OfferLandingPage() {
         </section>
 
         {/* Section 2: Offer Preview */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-background-dark/50" role="region" aria-label="오퍼 미리보기 섹션">
+        <section
+          ref={previewRef}
+          className={`py-16 sm:py-20 lg:py-24 bg-white dark:bg-background-dark/50 transition-all duration-700 ease-out ${
+            isPreviewVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+          role="region"
+          aria-label="오퍼 미리보기 섹션"
+        >
           <div className="container mx-auto max-w-5xl px-4">
             <div className="text-center">
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
@@ -462,7 +518,14 @@ export default function OfferLandingPage() {
         </section>
 
         {/* Section 3: Value Section */}
-        <section className="py-16 sm:py-20 lg:py-24" role="region" aria-label="가치 섹션">
+        <section
+          ref={valueRef}
+          className={`py-16 sm:py-20 lg:py-24 transition-all duration-700 ease-out ${
+            isValueVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+          role="region"
+          aria-label="가치 섹션"
+        >
           <div className="container mx-auto max-w-5xl px-4">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
@@ -547,7 +610,14 @@ export default function OfferLandingPage() {
         </section>
 
         {/* Section 4: Trust Section */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-background-dark/50" role="region" aria-label="신뢰 섹션">
+        <section
+          ref={trustRef}
+          className={`py-16 sm:py-20 lg:py-24 bg-white dark:bg-background-dark/50 transition-all duration-700 ease-out ${
+            isTrustVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+          role="region"
+          aria-label="신뢰 섹션"
+        >
           <div className="container mx-auto max-w-5xl px-4">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-3xl font-bold leading-tight tracking-tight text-primary dark:text-white sm:text-4xl">
@@ -648,8 +718,11 @@ export default function OfferLandingPage() {
 
         {/* Section 5: Form Section */}
         <section
+          ref={formRef}
           id="application-form-section"
-          className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white via-primary/5 to-white dark:from-background-dark dark:via-primary/10 dark:to-background-dark"
+          className={`relative py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white via-primary/5 to-white dark:from-background-dark dark:via-primary/10 dark:to-background-dark transition-all duration-700 ease-out ${
+            isFormVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
           role="region"
           aria-label="신청 폼 섹션"
         >
